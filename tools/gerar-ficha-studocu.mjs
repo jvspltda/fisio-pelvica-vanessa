@@ -36,6 +36,8 @@ const CORRECOES = [
   'Diarréia -> Diarreia',
   '"Apresenta IU::" -> "Apresenta IU:"',
   '"Inicio" -> "Início"; "episodio" -> "episódio"',
+  'hemorróideas -> hemorroidas (inspeção do ânus)',
+  '"Simetria direta-esquerda" -> "Simetria direita-esquerda"',
   'Wexner: acrescentado campo de somatório (o original não tinha)',
   'Acrescentados timbre, rodapé legal com CREFITO, numeração e assinaturas'
 ];
