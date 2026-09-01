@@ -592,6 +592,29 @@
     if (alvo.name === 'ef_autorizou' || alvo.name === 'ef_esclarecida') aplicarGateConsentimento();
     if (alvo.name.indexOf('wexner_') === 0) calcularWexner();
 
+    /* Instrumentos masculinos recalculam a cada resposta. */
+    if (alvo.name.indexOf('ipss_q') === 0)  recalcularInstrumento('ipss',  S.IPSS_ITENS,  S.calcularIPSS);
+    if (alvo.name.indexOf('iief5_q') === 0) recalcularInstrumento('iief5', S.IIEF5_ITENS, S.calcularIIEF5);
+
+    /* Prescrição: repouso sugerido, descrição da postura e cartão. */
+    if (alvo.name.indexOf('presc_') === 0) {
+      if (alvo.name === 'presc_sustentacao') sugerirRepouso();
+      if (alvo.name === 'presc_postura') {
+        var d = document.getElementById('presc_postura_desc');
+        var p = window.Adherence.POSTURAS.filter(function (x) { return x.rotulo === alvo.value; })[0];
+        if (d) d.textContent = p ? p.descricao : '';
+      }
+      renderCartaoTreino();
+    }
+
+    /* Âncora de hábito, kit de orientações e condutas do laudo.
+       Centralizado aqui para que o valor já esteja gravado no documento
+       antes de qualquer re-render — evita corrida com listeners inline. */
+    if (alvo.name === 'orient_sel')     renderOrientacoes();
+    if (alvo.name === 'laudo_condutas') renderLaudo();
+    if (alvo.name === 'anc_gatilho' || alvo.name === 'anc_acao') montarAncoraNaTela();
+    if (alvo.name === 'orient_obs') { var k = document.querySelector('.vf-kit-obs'); if (k) k.textContent = alvo.value; }
+
     agendarSalvamento();
   }
 
@@ -682,6 +705,763 @@
     leitor.onerror = function () { alert('Não foi possível ler o arquivo.'); };
     leitor.readAsText(arquivo);
   }
+
+  /* ══════════════════════════════════════════════════════════════
+     MÓDULO 2 · PRESCRIÇÃO TMFAP — construtor FITT
+     ══════════════════════════════════════════════════════════════ */
+  function campoPrescricao(id, label, min, max, extra) {
+    baldeDoCampo[id] = 'prescricao';
+    var v = ler(id);
+    var wrap = el('div', { class: 'vf-campo-wrap' });
+    wrap.appendChild(el('label', { class: 'vf-rotulo', for: id, texto: label }));
+    var inp = el('input', { class: 'vf-campo', id: id, name: id, type: 'number',
+                            min: min, max: max, step: 1, value: v === undefined ? '' : v });
+    inp.addEventListener('blur', function () {
+      if (this.value === '') return;
+      this.value = S.limitar(this.value, min, max);
+      escrever(id, this.value);
+      if (id === 'presc_sustentacao') sugerirRepouso();
+    });
+    wrap.appendChild(inp);
+    if (extra) wrap.appendChild(el('div', { texto: extra,
+      style: 'font-size:var(--t-xs);color:var(--cafe-tenue);margin-top:3px' }));
+    return wrap;
+  }
+
+  /* Repouso na relação 1:2 sobre o tempo de sustentação — sugerido e editável. */
+  function sugerirRepouso() {
+    var campo = document.getElementById('presc_repouso');
+    if (!campo) return;
+    var sust = ler('presc_sustentacao');
+    if (sust === undefined || sust === '') return;
+    if (doc.prescricao.presc_repouso_editado === 'sim') return;
+    try {
+      var r = S.repousoSugerido(Number(sust));
+      campo.value = r;
+      escrever('presc_repouso', String(r));
+    } catch (e) { /* fora de faixa: mantém o que está */ }
+  }
+
+  function renderPrescricao() {
+    var alvo = document.getElementById('render-prescricao');
+    if (!alvo) return;
+    alvo.innerHTML = '';
+    var A = window.Adherence;
+
+    /* --- FITT --- */
+    var c1 = el('div', { class: 'vf-card quebra-evitar' });
+    var cab1 = el('div', { class: 'vf-card-cab' });
+    cab1.appendChild(el('div', { class: 'vf-card-num', texto: 'F' }));
+    cab1.appendChild(el('h2', { texto: 'Parâmetros FITT' }));
+    c1.appendChild(cab1);
+
+    var corpo1 = el('div', { class: 'vf-card-corpo' });
+    var g1 = el('div', { class: 'vf-grade vf-grade-3' });
+    g1.appendChild(campoPrescricao('presc_series', 'Séries', 1, 10));
+    g1.appendChild(campoPrescricao('presc_sustentacao', 'Sustentação — fibras I (s)', 0, 60,
+      'Contração lenta, mantida.'));
+    g1.appendChild(campoPrescricao('presc_repeticoes', 'Repetições lentas', 1, 30));
+    g1.appendChild(campoPrescricao('presc_rapidas', 'Contrações rápidas — fibras II', 0, 30,
+      'Contração e soltura, sem sustentar.'));
+
+    /* Repouso sugerido 1:2, sobrescrevível */
+    baldeDoCampo['presc_repouso'] = 'prescricao';
+    var wr = el('div', { class: 'vf-campo-wrap' });
+    wr.appendChild(el('label', { class: 'vf-rotulo', for: 'presc_repouso', texto: 'Repouso entre contrações (s)' }));
+    var inpR = el('input', { class: 'vf-campo', id: 'presc_repouso', name: 'presc_repouso',
+                             type: 'number', min: 0, max: 120, step: 1,
+                             value: ler('presc_repouso') === undefined ? '' : ler('presc_repouso') });
+    inpR.addEventListener('input', function () {
+      escrever('presc_repouso_editado', 'sim');
+    });
+    wr.appendChild(inpR);
+    wr.appendChild(el('div', { texto: 'Sugerido na relação 1:2 sobre a sustentação. Editável.',
+      style: 'font-size:var(--t-xs);color:var(--cafe-tenue);margin-top:3px' }));
+    g1.appendChild(wr);
+
+    g1.appendChild(campoPrescricao('presc_frequencia', 'Frequência diária (×/dia)', 1, 10));
+    corpo1.appendChild(g1);
+    c1.appendChild(corpo1);
+    alvo.appendChild(c1);
+
+    /* --- Postura da semana --- */
+    var c2 = el('div', { class: 'vf-card quebra-evitar' });
+    var cab2 = el('div', { class: 'vf-card-cab' });
+    cab2.appendChild(el('div', { class: 'vf-card-num', texto: 'P' }));
+    cab2.appendChild(el('h2', { texto: 'Postura da semana' }));
+    c2.appendChild(cab2);
+
+    var corpo2 = el('div', { class: 'vf-card-corpo' });
+    corpo2.appendChild(el('p', { class: 'no-print',
+      style: 'font-size:var(--t-sm);color:var(--cafe-suave);margin:0 0 var(--e-3)',
+      texto: 'Progressão postural: ' + S.PROGRESSAO_POSTURAL.join(' → ') + '.' }));
+
+    baldeDoCampo['presc_postura'] = 'prescricao';
+    var gp = el('div', { class: 'vf-opcoes' });
+    A.POSTURAS.forEach(function (p) {
+      var lb = el('label', { title: p.descricao, style: 'padding:8px 14px' });
+      var ip = el('input', { type: 'radio', name: 'presc_postura', value: p.rotulo });
+      if (ler('presc_postura') === p.rotulo) ip.checked = true;
+      lb.appendChild(ip);
+      lb.appendChild(el('span', { html: '<span style="font-size:16px;margin-right:5px">' + p.icone + '</span>' + escapar(p.rotulo) }));
+      gp.appendChild(lb);
+    });
+    corpo2.appendChild(gp);
+
+    var descPostura = el('p', { id: 'presc_postura_desc',
+      style: 'font-size:var(--t-sm);color:var(--cafe-suave);margin:var(--e-3) 0 0' });
+    var sel = A.POSTURAS.filter(function (p) { return p.rotulo === ler('presc_postura'); })[0];
+    descPostura.textContent = sel ? sel.descricao : '';
+    corpo2.appendChild(descPostura);
+    c2.appendChild(corpo2);
+    alvo.appendChild(c2);
+
+    /* --- Instruções selecionáveis --- */
+    var c3 = el('div', { class: 'vf-card quebra-evitar' });
+    var cab3 = el('div', { class: 'vf-card-cab' });
+    cab3.appendChild(el('div', { class: 'vf-card-num', texto: 'I' }));
+    cab3.appendChild(el('h2', { texto: 'Instruções para o cartão' }));
+    c3.appendChild(cab3);
+
+    var corpo3 = el('div', { class: 'vf-card-corpo' });
+    corpo3.appendChild(blocoInstrucoes('presc_instr_resp', 'Respiratórias', A.INSTRUCOES_RESPIRATORIAS));
+    corpo3.appendChild(blocoInstrucoes('presc_instr_prop', 'Proprioceptivas', A.INSTRUCOES_PROPRIOCEPTIVAS));
+
+    baldeDoCampo['presc_knack'] = 'prescricao';
+    var lbK = el('label', { class: 'vf-opcoes', style: 'display:block;margin-top:var(--e-4)' });
+    var wrapK = el('label', { style: 'display:inline-flex;align-items:flex-start;gap:8px;cursor:pointer;font-size:var(--t-sm);line-height:1.5' });
+    var ipK = el('input', { type: 'checkbox', name: 'presc_knack', value: 'sim',
+                            style: 'accent-color:var(--terracota);margin-top:3px' });
+    if (ler('presc_knack') === 'sim' || (Array.isArray(ler('presc_knack')) && ler('presc_knack').length)) ipK.checked = true;
+    wrapK.appendChild(ipK);
+    wrapK.appendChild(el('span', { texto: 'Incluir The Knack no cartão' }));
+    lbK.appendChild(wrapK);
+    corpo3.appendChild(lbK);
+
+    baldeDoCampo['presc_obs'] = 'prescricao';
+    var wo = el('div', { style: 'margin-top:var(--e-4)' });
+    wo.appendChild(el('label', { class: 'vf-rotulo', for: 'presc_obs', texto: 'Observação personalizada' }));
+    var tao = el('textarea', { class: 'vf-campo', id: 'presc_obs', name: 'presc_obs', rows: 2 });
+    tao.value = ler('presc_obs') || '';
+    wo.appendChild(tao);
+    corpo3.appendChild(wo);
+    c3.appendChild(corpo3);
+    alvo.appendChild(c3);
+
+    /* --- Cartão VIP de Treino --- */
+    alvo.appendChild(el('div', { id: 'cartao-treino' }));
+    renderCartaoTreino();
+  }
+
+  function blocoInstrucoes(id, titulo, lista) {
+    baldeDoCampo[id] = 'prescricao';
+    var marcadas = Array.isArray(ler(id)) ? ler(id) : [];
+    var box = el('div', { style: 'margin-bottom:var(--e-4)' });
+    box.appendChild(el('label', { class: 'vf-rotulo', texto: titulo }));
+    var g = el('div', { class: 'vf-opcoes', style: 'flex-direction:column;align-items:stretch;gap:4px' });
+    lista.forEach(function (txtItem, i) {
+      var lb = el('label', { style: 'align-items:flex-start;line-height:1.45;padding:6px 11px' });
+      var ip = el('input', { type: 'checkbox', name: id, value: txtItem, style: 'margin-top:3px' });
+      if (marcadas.indexOf(txtItem) !== -1) ip.checked = true;
+      lb.appendChild(ip);
+      lb.appendChild(el('span', { texto: txtItem }));
+      g.appendChild(lb);
+    });
+    box.appendChild(g);
+    return box;
+  }
+
+  function renderCartaoTreino() {
+    var alvo = document.getElementById('cartao-treino');
+    if (!alvo) return;
+    var A = window.Adherence;
+    var p = doc.prescricao || {};
+    var nome = ler('ident_nome') || '';
+
+    var linhas = [];
+    if (p.presc_series)      linhas.push(['Séries', p.presc_series]);
+    if (p.presc_sustentacao) linhas.push(['Sustentar', p.presc_sustentacao + ' segundos']);
+    if (p.presc_repeticoes)  linhas.push(['Repetições lentas', p.presc_repeticoes]);
+    if (p.presc_rapidas)     linhas.push(['Contrações rápidas', p.presc_rapidas]);
+    if (p.presc_repouso)     linhas.push(['Repouso entre elas', p.presc_repouso + ' segundos']);
+    if (p.presc_frequencia)  linhas.push(['Vezes por dia', p.presc_frequencia]);
+    if (p.presc_postura)     linhas.push(['Posição desta semana', p.presc_postura]);
+
+    var html = '<div class="vf-cartao-treino">' +
+      '<div class="cartao-cab">' +
+        '<span class="cartao-etiqueta">Seu treino</span>' +
+        '<h2>' + (nome ? escapar(nome) : 'Programa domiciliar') + '</h2>' +
+      '</div>';
+
+    if (!linhas.length) {
+      html += '<p class="no-print" style="color:var(--cafe-suave);margin:0">' +
+              'Preencha os parâmetros acima para gerar o cartão.</p>';
+    } else {
+      html += '<dl class="cartao-lista">';
+      linhas.forEach(function (l) {
+        html += '<div><dt>' + escapar(l[0]) + '</dt><dd>' + escapar(l[1]) + '</dd></div>';
+      });
+      html += '</dl>';
+
+      var instr = [].concat(
+        Array.isArray(p.presc_instr_resp) ? p.presc_instr_resp : [],
+        Array.isArray(p.presc_instr_prop) ? p.presc_instr_prop : []
+      );
+      if (instr.length) {
+        html += '<div class="cartao-bloco"><h3>Como fazer</h3><ul>';
+        instr.forEach(function (i) { html += '<li>' + escapar(i) + '</li>'; });
+        html += '</ul></div>';
+      }
+      if (p.presc_knack === 'sim' || (Array.isArray(p.presc_knack) && p.presc_knack.length)) {
+        html += '<div class="cartao-nota">' + escapar(A.THE_KNACK) + '</div>';
+      }
+      if (p.presc_obs) {
+        html += '<div class="cartao-bloco"><h3>Observação</h3><p>' + escapar(p.presc_obs) + '</p></div>';
+      }
+    }
+
+    html += '<div class="cartao-rodape">' + escapar(F.RODAPE_LEGAL) + '</div></div>';
+    alvo.innerHTML = html;
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     MÓDULO 3 · ADERÊNCIA E VÍNCULO
+     ══════════════════════════════════════════════════════════════ */
+  var DIAS = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+
+  function renderAderencia() {
+    var alvo = document.getElementById('render-aderencia');
+    if (!alvo) return;
+    alvo.innerHTML = '';
+    var A = window.Adherence;
+
+    /* --- Contrato de aliança terapêutica --- */
+    var c1 = el('div', { class: 'vf-card quebra-evitar' });
+    var cab1 = el('div', { class: 'vf-card-cab' });
+    cab1.appendChild(el('div', { class: 'vf-card-num', texto: 'A' }));
+    cab1.appendChild(el('h2', { texto: A.CONTRATO.titulo }));
+    c1.appendChild(cab1);
+
+    var b1 = el('div', { class: 'vf-card-corpo' });
+    b1.appendChild(el('p', { texto: A.CONTRATO.abertura, style: 'margin-bottom:var(--e-4)' }));
+
+    var duas = el('div', { class: 'vf-grade vf-grade-2' });
+    duas.appendChild(listaCompromisso('Compromisso da fisioterapeuta', A.CONTRATO.compromissoProfissional));
+    duas.appendChild(listaCompromisso('Compromisso da paciente', A.CONTRATO.compromissoPaciente));
+    b1.appendChild(duas);
+
+    b1.appendChild(el('h3', { texto: 'Meta SMART desta etapa' }));
+    var gs = el('div', { class: 'vf-grade' });
+    A.CONTRATO.camposSmart.forEach(function (c) {
+      baldeDoCampo[c.id] = 'aderencia';
+      var w = el('div', { class: 'vf-campo-wrap' });
+      w.appendChild(el('label', { class: 'vf-rotulo', for: c.id, texto: c.label }));
+      var inp = el('input', { class: 'vf-campo', id: c.id, name: c.id,
+                              value: ler(c.id) === undefined ? '' : ler(c.id) });
+      w.appendChild(inp);
+      gs.appendChild(w);
+    });
+    b1.appendChild(gs);
+
+    var assin = el('div', { class: 'vf-so-impr bloco-assinaturas' });
+    assin.innerHTML = '<div><div class="linha-assin"></div><span>Paciente</span></div>' +
+                      '<div><div class="linha-assin"></div><span>Vanessa Fernandes — ' + escapar(F.CREFITO) + '</span></div>';
+    b1.appendChild(assin);
+
+    c1.appendChild(b1);
+    alvo.appendChild(c1);
+
+    /* --- Habit tracker 7 × N --- */
+    var c2 = el('div', { class: 'vf-card quebra-evitar' });
+    var cab2 = el('div', { class: 'vf-card-cab' });
+    cab2.appendChild(el('div', { class: 'vf-card-num', texto: 'H' }));
+    cab2.appendChild(el('h2', { texto: 'Registro semanal' }));
+    c2.appendChild(cab2);
+
+    var b2 = el('div', { class: 'vf-card-corpo' });
+    b2.appendChild(el('p', { class: 'no-print',
+      style: 'font-size:var(--t-sm);color:var(--cafe-suave)',
+      texto: 'Nomeie as linhas conforme o combinado com a paciente. A matriz vai impressa para ela marcar à caneta.' }));
+
+    var tw = el('div', { style: 'overflow-x:auto' });
+    var t = el('table', { class: 'vf-tracker' });
+    var th = el('thead'); var trh = el('tr');
+    trh.appendChild(el('th', { texto: 'Hábito', scope: 'col' }));
+    DIAS.forEach(function (d) { trh.appendChild(el('th', { texto: d, scope: 'col' })); });
+    th.appendChild(trh); t.appendChild(th);
+
+    var tb = el('tbody');
+    for (var linha = 1; linha <= 4; linha++) {
+      (function (n) {
+        var idRot = 'hab_rotulo_' + n;
+        baldeDoCampo[idRot] = 'aderencia';
+        var tr = el('tr');
+        var tdR = el('td');
+        var inp = el('input', { class: 'vf-campo vf-tracker-rotulo', id: idRot, name: idRot,
+                                placeholder: 'Ex.: treino da manhã',
+                                value: ler(idRot) === undefined ? '' : ler(idRot) });
+        tdR.appendChild(inp);
+        tr.appendChild(tdR);
+        DIAS.forEach(function (d, di) {
+          var idCel = 'hab_' + n + '_' + di;
+          baldeDoCampo[idCel] = 'aderencia';
+          var td = el('td');
+          var lb = el('label', { class: 'vf-tracker-cel' });
+          var cb = el('input', { type: 'checkbox', name: idCel, value: 'sim' });
+          if (Array.isArray(ler(idCel)) && ler(idCel).length) cb.checked = true;
+          lb.appendChild(cb);
+          td.appendChild(lb);
+          tr.appendChild(td);
+        });
+        tb.appendChild(tr);
+      })(linha);
+    }
+    t.appendChild(tb); tw.appendChild(t); b2.appendChild(tw);
+    c2.appendChild(b2);
+    alvo.appendChild(c2);
+
+    /* --- Gerador de âncoras --- */
+    var c3 = el('div', { class: 'vf-card quebra-evitar' });
+    var cab3 = el('div', { class: 'vf-card-cab' });
+    cab3.appendChild(el('div', { class: 'vf-card-num', texto: 'Â' }));
+    cab3.appendChild(el('h2', { texto: 'Âncora de hábito' }));
+    c3.appendChild(cab3);
+
+    var b3 = el('div', { class: 'vf-card-corpo' });
+    b3.appendChild(el('p', { class: 'no-print',
+      style: 'font-size:var(--t-sm);color:var(--cafe-suave)',
+      texto: 'Ancorar o exercício a algo que já acontece todo dia funciona melhor que marcar horário.' }));
+
+    var gA = el('div', { class: 'vf-grade vf-grade-2' });
+    ['anc_gatilho', 'anc_acao'].forEach(function (id, i) {
+      baldeDoCampo[id] = 'aderencia';
+      var w = el('div', { class: 'vf-campo-wrap' });
+      w.appendChild(el('label', { class: 'vf-rotulo', for: id,
+        texto: i === 0 ? 'Gatilho — algo que já faz todo dia' : 'Ação — o exercício combinado' }));
+      var inp = el('input', { class: 'vf-campo', id: id, name: id,
+                              list: i === 0 ? 'lista-gatilhos' : null,
+                              value: ler(id) === undefined ? '' : ler(id) });
+      inp.addEventListener('input', montarAncoraNaTela);
+      w.appendChild(inp);
+      gA.appendChild(w);
+    });
+    b3.appendChild(gA);
+
+    var dl = el('datalist', { id: 'lista-gatilhos' });
+    A.GATILHOS_SUGERIDOS.forEach(function (g) { dl.appendChild(el('option', { value: g })); });
+    b3.appendChild(dl);
+
+    b3.appendChild(el('div', { class: 'vf-ancora-saida', id: 'ancora-saida' }));
+    c3.appendChild(b3);
+    alvo.appendChild(c3);
+    montarAncoraNaTela();
+
+    /* --- Scripts de WhatsApp --- */
+    var c4 = el('div', { class: 'vf-card no-print' });
+    var cab4 = el('div', { class: 'vf-card-cab' });
+    cab4.appendChild(el('div', { class: 'vf-card-num', texto: 'W' }));
+    cab4.appendChild(el('h2', { texto: 'Mensagens de acompanhamento' }));
+    c4.appendChild(cab4);
+
+    var b4 = el('div', { class: 'vf-card-corpo' });
+    var dados = { nome: primeiroNome(ler('ident_nome')), exercicio: descricaoExercicio() };
+    A.WHATSAPP.forEach(function (m) {
+      var bloco = el('div', { class: 'vf-msg' });
+      var topo = el('div', { class: 'vf-msg-cab' });
+      topo.appendChild(el('span', { class: 'vf-badge', 'data-sev': 'neutro', texto: m.marco }));
+      topo.appendChild(el('strong', { texto: m.titulo }));
+      topo.appendChild(el('span', { class: 'vf-msg-obj', texto: m.objetivo }));
+      var btn = el('button', { class: 'vf-btn', texto: 'Copiar' });
+      var corpoMsg = A.preencher(m.texto, dados);
+      btn.addEventListener('click', function () {
+        copiar(corpoMsg, btn);
+      });
+      topo.appendChild(btn);
+      bloco.appendChild(topo);
+      bloco.appendChild(el('pre', { class: 'vf-msg-texto', texto: corpoMsg }));
+      b4.appendChild(bloco);
+    });
+    c4.appendChild(b4);
+    alvo.appendChild(c4);
+  }
+
+  function listaCompromisso(titulo, itens) {
+    var box = el('div');
+    box.appendChild(el('h4', { texto: titulo, style: 'margin-top:0' }));
+    var ul = el('ul', { style: 'margin:0;padding-left:18px;font-size:var(--t-sm);line-height:1.55' });
+    itens.forEach(function (i) { ul.appendChild(el('li', { texto: i })); });
+    box.appendChild(ul);
+    return box;
+  }
+
+  function montarAncoraNaTela() {
+    var saida = document.getElementById('ancora-saida');
+    if (!saida) return;
+    saida.textContent = window.Adherence.montarAncora(ler('anc_gatilho'), ler('anc_acao'));
+  }
+
+  function primeiroNome(nome) {
+    if (!nome) return '';
+    return String(nome).trim().split(/\s+/)[0];
+  }
+
+  function descricaoExercicio() {
+    var p = doc.prescricao || {};
+    if (p.presc_sustentacao && p.presc_repeticoes) {
+      return p.presc_repeticoes + ' contrações de ' + p.presc_sustentacao + ' segundos' +
+             (p.presc_frequencia ? ', ' + p.presc_frequencia + '× ao dia' : '');
+    }
+    return '';
+  }
+
+  function copiar(texto, botao) {
+    var rotuloOriginal = botao.textContent;
+    var feito = function () {
+      botao.textContent = 'Copiado';
+      setTimeout(function () { botao.textContent = rotuloOriginal; }, 1600);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(texto).then(feito).catch(function () { copiarFallback(texto, feito); });
+    } else { copiarFallback(texto, feito); }
+  }
+
+  function copiarFallback(texto, feito) {
+    try {
+      var ta = document.createElement('textarea');
+      ta.value = texto; ta.setAttribute('readonly', '');
+      ta.style.position = 'absolute'; ta.style.left = '-9999px';
+      document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); document.body.removeChild(ta); feito();
+    } catch (e) { status('Não foi possível copiar automaticamente'); }
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     MÓDULO 4 · ORIENTAÇÕES AO PACIENTE
+     ══════════════════════════════════════════════════════════════ */
+  function renderOrientacoes() {
+    var alvo = document.getElementById('render-orientacoes');
+    if (!alvo) return;
+    alvo.innerHTML = '';
+    var A = window.Adherence;
+
+    /* Seletor */
+    var c1 = el('div', { class: 'vf-card no-print' });
+    var cab1 = el('div', { class: 'vf-card-cab' });
+    cab1.appendChild(el('div', { class: 'vf-card-num', texto: 'K' }));
+    cab1.appendChild(el('h2', { texto: 'Montar o kit' }));
+    c1.appendChild(cab1);
+
+    var b1 = el('div', { class: 'vf-card-corpo' });
+    baldeDoCampo['orient_sel'] = 'aderencia';
+    var marcadas = Array.isArray(ler('orient_sel')) ? ler('orient_sel') : [];
+
+    var grade = el('div', { class: 'vf-grade vf-grade-2' });
+    A.CARTILHAS.forEach(function (c) {
+      var lb = el('label', { class: 'vf-cartilha-op' + (marcadas.indexOf(c.id) !== -1 ? ' sel' : '') });
+      var ip = el('input', { type: 'checkbox', name: 'orient_sel', value: c.id,
+                             style: 'accent-color:var(--terracota);margin-top:3px' });
+      if (marcadas.indexOf(c.id) !== -1) ip.checked = true;
+      var txtBox = el('div');
+      txtBox.appendChild(el('div', { class: 'vf-cartilha-titulo', texto: c.titulo }));
+      txtBox.appendChild(el('div', { class: 'vf-cartilha-resumo', texto: c.resumo }));
+      lb.appendChild(ip); lb.appendChild(txtBox);
+      grade.appendChild(lb);
+    });
+    b1.appendChild(grade);
+
+    baldeDoCampo['orient_obs'] = 'aderencia';
+    var wo = el('div', { style: 'margin-top:var(--e-4)' });
+    wo.appendChild(el('label', { class: 'vf-rotulo', for: 'orient_obs',
+                                 texto: 'Observação personalizada para a paciente' }));
+    var ta = el('textarea', { class: 'vf-campo', id: 'orient_obs', name: 'orient_obs', rows: 2 });
+    ta.value = ler('orient_obs') || '';
+    wo.appendChild(ta);
+    b1.appendChild(wo);
+    c1.appendChild(b1);
+    alvo.appendChild(c1);
+
+    /* Kit renderizado */
+    if (!marcadas.length) {
+      alvo.appendChild(el('div', { class: 'no-print vf-vazio',
+        texto: 'Selecione ao menos uma cartilha para compor o kit.' }));
+      return;
+    }
+
+    var kit = el('div', { class: 'vf-kit' });
+    var cabKit = el('div', { class: 'vf-kit-cab' });
+    var nome = ler('ident_nome');
+    cabKit.innerHTML =
+      '<span class="cartao-etiqueta">Orientações domiciliares</span>' +
+      '<h2>' + (nome ? 'Para ' + escapar(nome) : 'Orientações ao paciente') + '</h2>';
+    kit.appendChild(cabKit);
+
+    var obs = ler('orient_obs');
+    if (obs) kit.appendChild(el('div', { class: 'vf-kit-obs', texto: obs }));
+
+    A.CARTILHAS.filter(function (c) { return marcadas.indexOf(c.id) !== -1; })
+      .forEach(function (c) {
+        var art = el('article', { class: 'vf-cartilha quebra-evitar' });
+        art.appendChild(el('h3', { texto: c.titulo }));
+        c.blocos.forEach(function (b) {
+          var bl = el('div', { class: 'vf-cartilha-bloco' });
+          if (b.h) bl.appendChild(el('h4', { texto: b.h }));
+          if (b.p) bl.appendChild(el('p', { texto: b.p }));
+          if (b.l) {
+            var ul = el('ul');
+            b.l.forEach(function (i) { ul.appendChild(el('li', { texto: i })); });
+            bl.appendChild(ul);
+          }
+          if (b.nota) bl.appendChild(el('p', { class: 'vf-cartilha-nota', texto: b.nota }));
+          art.appendChild(bl);
+        });
+        kit.appendChild(art);
+      });
+
+    kit.appendChild(el('div', { class: 'cartao-rodape', texto: F.RODAPE_LEGAL }));
+    alvo.appendChild(kit);
+  }
+
+  /* ══════════════════════════════════════════════════════════════
+     MÓDULO 5 · LAUDO
+     ══════════════════════════════════════════════════════════════ */
+  function coletarEscores() {
+    var linhas = [];
+
+    /* Wexner */
+    var rw = {};
+    S.WEXNER_ITENS.forEach(function (i) { rw[i.id] = ler(i.id); });
+    if (S.completo(rw, S.WEXNER_ITENS)) {
+      try {
+        var w = S.calcularWexner(rw);
+        linhas.push({ nome: 'Wexner (continência anal)', valor: w.total + ' / 20', classe: w.rotulo, sev: w.severidade });
+      } catch (e) { /* ignora */ }
+    }
+
+    /* IMC */
+    var peso = ler('ef_peso'), alt = ler('ef_estatura');
+    if (peso && alt) {
+      try {
+        var im = S.calcularIMC(peso, alt);
+        linhas.push({ nome: 'IMC', valor: String(im.valor).replace('.', ',') + ' kg/m²', classe: im.rotulo, sev: im.severidade });
+      } catch (e) { /* ignora */ }
+    }
+
+    /* EVA */
+    [['s3_eva_queixa', 'EVA — incômodo da queixa'], ['afa_eva_desconforto', 'EVA — desconforto ao exame']]
+      .forEach(function (par) {
+        var v = ler(par[0]);
+        if (v !== undefined && v !== '') {
+          try {
+            var e = S.classificarEVA(Number(v));
+            linhas.push({ nome: par[1], valor: e.valor + ' / 10', classe: e.rotulo, sev: e.severidade });
+          } catch (er) { /* ignora */ }
+        }
+      });
+
+    /* Oxford e ICS */
+    var ox = ler('afa_oxford');
+    if (ox !== undefined && ox !== '') {
+      try { linhas.push({ nome: 'Oxford Modificada', valor: ox + ' / 5', classe: S.textoOxford(Number(ox)), sev: 'neutro' }); }
+      catch (e) { /* ignora */ }
+    }
+    var ics = ler('afa_ics');
+    if (ics !== undefined && ics !== '') {
+      try { linhas.push({ nome: 'ICS — contração voluntária', valor: ics + ' / 3', classe: S.textoICS(Number(ics)), sev: 'neutro' }); }
+      catch (e) { /* ignora */ }
+    }
+
+    /* Instrumentos masculinos */
+    if (doc.perfil === 'masculino') {
+      var ri = {};
+      S.IPSS_ITENS.forEach(function (i) { ri[i.id] = ler(i.id); });
+      if (S.completo(ri, S.IPSS_ITENS)) {
+        try { var p = S.calcularIPSS(ri); linhas.push({ nome: 'IPSS', valor: p.total + ' / 35', classe: p.rotulo, sev: p.severidade }); }
+        catch (e) { /* ignora */ }
+      }
+      var rf = {};
+      S.IIEF5_ITENS.forEach(function (i) { rf[i.id] = ler(i.id); });
+      if (S.completo(rf, S.IIEF5_ITENS)) {
+        try { var q = S.calcularIIEF5(rf); linhas.push({ nome: 'IIEF-5', valor: q.total + ' / 25', classe: q.rotulo, sev: q.severidade }); }
+        catch (e) { /* ignora */ }
+      }
+    }
+
+    return linhas;
+  }
+
+  var CONDUTAS = [
+    'Cinesioterapia do assoalho pélvico (TMFAP)',
+    'Biofeedback eletromiográfico',
+    'Eletroestimulação',
+    'Terapia manual e liberação miofascial',
+    'Treinamento vesical e reprogramação miccional',
+    'Reeducação evacuatória',
+    'Dessensibilização progressiva',
+    'Treino de pré-contração ao esforço (The Knack)',
+    'Educação em dor',
+    'Orientações domiciliares e cartilhas'
+  ];
+
+  function renderLaudo() {
+    var alvo = document.getElementById('render-laudo');
+    if (!alvo) return;
+    alvo.innerHTML = '';
+
+    /* Cabeçalho do laudo */
+    var c1 = el('div', { class: 'vf-card quebra-evitar' });
+    var cab1 = el('div', { class: 'vf-card-cab' });
+    cab1.appendChild(el('div', { class: 'vf-card-num', texto: 'L' }));
+    cab1.appendChild(el('h2', { texto: 'Identificação e encaminhamento' }));
+    c1.appendChild(cab1);
+
+    var b1 = el('div', { class: 'vf-card-corpo' });
+    var g1 = el('div', { class: 'vf-grade vf-grade-2' });
+    [['laudo_destinatario', 'Encaminhado a (Urologia / Ginecologia)'],
+     ['laudo_data', 'Data de emissão'],
+     ['laudo_sessoes', 'Nº de sessões realizadas']].forEach(function (par) {
+      baldeDoCampo[par[0]] = 'aderencia';
+      var w = el('div', { class: 'vf-campo-wrap' });
+      w.appendChild(el('label', { class: 'vf-rotulo', for: par[0], texto: par[1] }));
+      var inp = el('input', { class: 'vf-campo', id: par[0], name: par[0],
+                              type: par[0] === 'laudo_data' ? 'date' : 'text',
+                              value: ler(par[0]) === undefined ? '' : ler(par[0]) });
+      w.appendChild(inp);
+      g1.appendChild(w);
+    });
+    b1.appendChild(g1);
+
+    var resumo = el('dl', { class: 'vf-laudo-ident' });
+    [['Paciente', ler('ident_nome')], ['Idade', ler('ident_idade')],
+     ['Data do atendimento', ler('ident_data')],
+     ['Perfil', doc.perfil === 'feminino' ? 'Saúde da Mulher' : 'Saúde do Homem'],
+     ['Diagnóstico médico', ler('ident_diagnostico_med')]].forEach(function (par) {
+      if (!par[1]) return;
+      var d = el('div');
+      d.appendChild(el('dt', { texto: par[0] }));
+      d.appendChild(el('dd', { texto: par[1] }));
+      resumo.appendChild(d);
+    });
+    b1.appendChild(resumo);
+    c1.appendChild(b1);
+    alvo.appendChild(c1);
+
+    /* Diagnóstico cinético-funcional */
+    var c2 = el('div', { class: 'vf-card quebra-evitar' });
+    var cab2 = el('div', { class: 'vf-card-cab' });
+    cab2.appendChild(el('div', { class: 'vf-card-num', texto: 'D' }));
+    cab2.appendChild(el('h2', { texto: 'Diagnóstico cinético-funcional' }));
+    c2.appendChild(cab2);
+    var b2 = el('div', { class: 'vf-card-corpo' });
+
+    if (ler('ef_autorizou') === 'Não') {
+      b2.appendChild(el('div', { class: 'vf-aviso', 'data-tom': 'atencao',
+        style: 'margin:0 0 var(--e-3)', texto: F.TEXTO_SEM_CONSENTIMENTO }));
+    }
+
+    baldeDoCampo['laudo_diagnostico'] = 'aderencia';
+    var ta2 = el('textarea', { class: 'vf-campo', id: 'laudo_diagnostico',
+                               name: 'laudo_diagnostico', rows: 5 });
+    ta2.value = ler('laudo_diagnostico') || ler('ef_diagnostico_ap') || '';
+    b2.appendChild(ta2);
+    b2.appendChild(el('p', { class: 'no-print',
+      style: 'font-size:var(--t-xs);color:var(--cafe-tenue);margin:var(--e-2) 0 0',
+      texto: 'Herda o diagnóstico registrado no exame físico. Editável antes da emissão.' }));
+    c2.appendChild(b2);
+    alvo.appendChild(c2);
+
+    /* Tabela de escores */
+    var c3 = el('div', { class: 'vf-card quebra-evitar' });
+    var cab3 = el('div', { class: 'vf-card-cab' });
+    cab3.appendChild(el('div', { class: 'vf-card-num', texto: 'E' }));
+    cab3.appendChild(el('h2', { texto: 'Escores e classificação' }));
+    c3.appendChild(cab3);
+    var b3 = el('div', { class: 'vf-card-corpo' });
+
+    var linhas = coletarEscores();
+    if (!linhas.length) {
+      b3.appendChild(el('p', { style: 'color:var(--cafe-suave);margin:0',
+        texto: 'Nenhum escore completo até o momento. Preencha a avaliação para compor esta tabela.' }));
+    } else {
+      var tw = el('div', { style: 'overflow-x:auto' });
+      var t = el('table', { class: 'vf-tabela-escores' });
+      var th = el('thead');
+      th.innerHTML = '<tr><th scope="col">Instrumento</th><th scope="col">Avaliação inicial</th>' +
+                     '<th scope="col">Classificação</th><th scope="col">Reavaliação</th></tr>';
+      t.appendChild(th);
+      var tb = el('tbody');
+      linhas.forEach(function (l, i) {
+        var idRe = 'laudo_reav_' + i;
+        baldeDoCampo[idRe] = 'aderencia';
+        var tr = el('tr');
+        tr.appendChild(el('th', { scope: 'row', texto: l.nome }));
+        tr.appendChild(el('td', { texto: l.valor }));
+        var tdC = el('td');
+        tdC.appendChild(el('span', { class: 'vf-badge', 'data-sev': l.sev, texto: l.classe }));
+        tr.appendChild(tdC);
+        var tdR = el('td');
+        var inp = el('input', { class: 'vf-campo', id: idRe, name: idRe,
+                                placeholder: '—', value: ler(idRe) === undefined ? '' : ler(idRe) });
+        tdR.appendChild(inp);
+        tr.appendChild(tdR);
+        tb.appendChild(tr);
+      });
+      t.appendChild(tb); tw.appendChild(t); b3.appendChild(tw);
+    }
+    c3.appendChild(b3);
+    alvo.appendChild(c3);
+
+    /* Condutas */
+    var c4 = el('div', { class: 'vf-card quebra-evitar' });
+    var cab4 = el('div', { class: 'vf-card-cab' });
+    cab4.appendChild(el('div', { class: 'vf-card-num', texto: 'C' }));
+    cab4.appendChild(el('h2', { texto: 'Condutas propostas' }));
+    c4.appendChild(cab4);
+    var b4 = el('div', { class: 'vf-card-corpo' });
+
+    baldeDoCampo['laudo_condutas'] = 'aderencia';
+    var marcadas = Array.isArray(ler('laudo_condutas')) ? ler('laudo_condutas') : [];
+    var gc = el('div', { class: 'vf-opcoes no-print', style: 'flex-direction:column;align-items:stretch;gap:4px' });
+    CONDUTAS.forEach(function (cond) {
+      var lb = el('label', { style: 'align-items:flex-start;padding:6px 11px' });
+      var ip = el('input', { type: 'checkbox', name: 'laudo_condutas', value: cond, style: 'margin-top:3px' });
+      if (marcadas.indexOf(cond) !== -1) ip.checked = true;
+      lb.appendChild(ip); lb.appendChild(el('span', { texto: cond }));
+      gc.appendChild(lb);
+    });
+    b4.appendChild(gc);
+
+    if (marcadas.length) {
+      var ulC = el('ul', { class: 'vf-so-impr vf-lista-condutas' });
+      marcadas.forEach(function (m) { ulC.appendChild(el('li', { texto: m })); });
+      b4.appendChild(ulC);
+    }
+
+    [['laudo_plano', 'Plano terapêutico', 4],
+     ['laudo_frequencia', 'Frequência e duração previstas', 1],
+     ['laudo_consideracoes', 'Considerações ao médico solicitante', 3]].forEach(function (par) {
+      baldeDoCampo[par[0]] = 'aderencia';
+      var w = el('div', { style: 'margin-top:var(--e-3)' });
+      w.appendChild(el('label', { class: 'vf-rotulo', for: par[0], texto: par[1] }));
+      var ta = el('textarea', { class: 'vf-campo', id: par[0], name: par[0], rows: par[2] });
+      ta.value = ler(par[0]) || '';
+      w.appendChild(ta);
+      b4.appendChild(w);
+    });
+    c4.appendChild(b4);
+    alvo.appendChild(c4);
+
+    /* Assinatura, só no papel */
+    var assin = el('div', { class: 'vf-so-impr bloco-assinatura-laudo' });
+    assin.innerHTML = '<div class="linha-assin"></div>' +
+      '<div class="assin-nome">Vanessa Fernandes</div>' +
+      '<div class="assin-reg">Fisioterapeuta — ' + escapar(F.CREFITO) + '</div>';
+    alvo.appendChild(assin);
+  }
+
+  window.__renderPrescricao  = renderPrescricao;
+  window.__renderAderencia   = renderAderencia;
+  window.__renderOrientacoes = renderOrientacoes;
+  window.__renderLaudo       = renderLaudo;
 
   /* ──────────────────────────────────────────────────────────────
      INICIALIZAÇÃO

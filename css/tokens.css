@@ -285,3 +285,155 @@ textarea.vf-campo { resize: vertical; min-height: 62px; line-height: 1.55; }
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
 }
+
+/* ---------------------------------------------------------------
+   COMPONENTES DOS MÓDULOS 2 A 5
+   --------------------------------------------------------------- */
+
+/* ---- Matriz do Wexner ---- */
+.vf-wexner { border-collapse: collapse; width: 100%; font-size: var(--t-sm); }
+.vf-wexner th, .vf-wexner td { border: 1px solid var(--linha); padding: 7px 9px; text-align: center; }
+.vf-wexner thead th { background: var(--areia); font-weight: 600; line-height: 1.3; vertical-align: bottom; }
+.vf-wexner tbody th { text-align: left; font-weight: 500; background: #FDFBFA; }
+.vf-wexner-pt { display: inline-block; margin-top: 3px; font-size: var(--t-xs); color: var(--terracota-deep); font-weight: 700; }
+.vf-wexner-cel { display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 3px; }
+.vf-wexner-cel input { accent-color: var(--terracota); width: 16px; height: 16px; cursor: pointer; }
+
+/* ---- Cartão VIP de Treino ---- */
+.vf-cartao-treino {
+  background: var(--branco); border: 1px solid var(--linha); border-radius: var(--raio-lg);
+  box-shadow: var(--sombra-alta); padding: var(--e-5) var(--e-5) var(--e-4);
+  max-width: 460px; margin-top: var(--e-4);
+}
+.cartao-cab { border-bottom: 2px solid var(--terracota); padding-bottom: var(--e-3); margin-bottom: var(--e-4); }
+.cartao-etiqueta {
+  display: block; font-size: 10px; font-weight: 700; letter-spacing: .18em;
+  text-transform: uppercase; color: var(--rosegold); margin-bottom: 3px;
+}
+.cartao-cab h2 { font-size: var(--t-xl); color: var(--terracota-deep); margin: 0; }
+.cartao-lista { margin: 0 0 var(--e-4); display: grid; gap: 0; }
+.cartao-lista > div {
+  display: flex; justify-content: space-between; align-items: baseline; gap: var(--e-3);
+  padding: 7px 0; border-bottom: 1px solid var(--areia-fundo);
+}
+.cartao-lista dt { font-size: var(--t-sm); color: var(--cafe-suave); }
+.cartao-lista dd {
+  margin: 0; font-family: var(--fonte-titulo); font-size: var(--t-lg);
+  font-weight: 600; color: var(--terracota-deep);
+}
+.cartao-bloco { margin-bottom: var(--e-3); }
+.cartao-bloco h3 { font-size: var(--t-base); color: var(--cafe); margin: 0 0 var(--e-2); }
+.cartao-bloco ul { margin: 0; padding-left: 18px; font-size: var(--t-sm); line-height: 1.55; }
+.cartao-bloco li { margin-bottom: 4px; }
+.cartao-bloco li::marker { color: var(--rosegold); }
+.cartao-bloco p { font-size: var(--t-sm); margin: 0; }
+.cartao-nota {
+  background: var(--terracota-leve); border-left: 3px solid var(--terracota);
+  padding: 10px 13px; font-size: var(--t-sm); line-height: 1.5;
+  border-radius: 0 var(--raio-sm) var(--raio-sm) 0; margin-bottom: var(--e-3);
+}
+.cartao-rodape {
+  border-top: 1px solid var(--areia-fundo); padding-top: var(--e-2); margin-top: var(--e-4);
+  font-size: 10.5px; line-height: 1.45; color: var(--cafe-tenue); text-align: center;
+}
+
+/* ---- Habit tracker ---- */
+.vf-tracker { border-collapse: collapse; width: 100%; font-size: var(--t-sm); }
+.vf-tracker th, .vf-tracker td { border: 1px solid var(--linha); padding: 6px; text-align: center; }
+.vf-tracker thead th { background: var(--areia); font-weight: 600; width: 56px; }
+.vf-tracker thead th:first-child { width: auto; text-align: left; padding-left: 10px; }
+.vf-tracker td:first-child { padding: 3px; }
+.vf-tracker-rotulo { border: none !important; box-shadow: none !important; font-size: var(--t-sm); }
+.vf-tracker-cel { display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.vf-tracker-cel input { accent-color: var(--terracota); width: 17px; height: 17px; cursor: pointer; }
+
+/* ---- Âncora de hábito ---- */
+.vf-ancora-saida {
+  margin-top: var(--e-3); padding: var(--e-3) var(--e-4);
+  background: var(--terracota-leve); border-left: 3px solid var(--terracota);
+  border-radius: 0 var(--raio-sm) var(--raio-sm) 0;
+  font-family: var(--fonte-titulo); font-size: var(--t-lg); color: var(--terracota-deep);
+  line-height: 1.4;
+}
+
+/* ---- Mensagens de WhatsApp ---- */
+.vf-msg { border: 1px solid var(--linha); border-radius: var(--raio-sm); margin-bottom: var(--e-3); overflow: hidden; }
+.vf-msg-cab {
+  display: flex; align-items: center; gap: var(--e-2); flex-wrap: wrap;
+  padding: 9px 13px; background: var(--areia); border-bottom: 1px solid var(--linha);
+}
+.vf-msg-obj { font-size: var(--t-xs); color: var(--cafe-tenue); flex: 1 1 auto; }
+.vf-msg-cab .vf-btn { margin-left: auto; }
+.vf-msg-texto {
+  margin: 0; padding: var(--e-3) var(--e-4); white-space: pre-wrap;
+  font-family: var(--fonte-corpo); font-size: var(--t-sm); line-height: 1.6; background: var(--branco);
+}
+
+/* ---- Seleção de cartilhas ---- */
+.vf-cartilha-op {
+  display: flex; align-items: flex-start; gap: 10px; cursor: pointer;
+  border: 1px solid var(--linha); border-radius: var(--raio); padding: 13px 15px;
+  background: var(--branco); transition: border-color .15s, background .15s;
+}
+.vf-cartilha-op:hover { border-color: var(--rosegold); }
+.vf-cartilha-op.sel { border-color: var(--terracota); background: var(--terracota-leve); }
+.vf-cartilha-titulo { font-family: var(--fonte-titulo); font-size: var(--t-md); color: var(--cafe); line-height: 1.25; }
+.vf-cartilha-resumo { font-size: var(--t-sm); color: var(--cafe-suave); margin-top: 3px; }
+
+/* ---- Kit de orientações ---- */
+.vf-kit { margin-top: var(--e-4); }
+.vf-kit-cab {
+  background: var(--branco); border: 1px solid var(--linha); border-radius: var(--raio);
+  padding: var(--e-4) var(--e-5); margin-bottom: var(--e-3); box-shadow: var(--sombra);
+}
+.vf-kit-cab h2 { font-size: var(--t-2xl); color: var(--cafe); margin: 4px 0 0; }
+.vf-kit-obs {
+  background: var(--terracota-leve); border-left: 3px solid var(--terracota);
+  padding: var(--e-3) var(--e-4); border-radius: 0 var(--raio-sm) var(--raio-sm) 0;
+  margin-bottom: var(--e-3); line-height: 1.6;
+}
+.vf-cartilha {
+  background: var(--branco); border: 1px solid var(--linha); border-radius: var(--raio);
+  padding: var(--e-4) var(--e-5); margin-bottom: var(--e-3); box-shadow: var(--sombra);
+}
+.vf-cartilha h3 {
+  font-size: var(--t-xl); color: var(--terracota-deep); margin: 0 0 var(--e-3);
+  padding-bottom: var(--e-2); border-bottom: 1px solid var(--areia-fundo);
+}
+.vf-cartilha-bloco { margin-bottom: var(--e-3); }
+.vf-cartilha-bloco h4 { font-family: var(--fonte-corpo); font-size: var(--t-base); font-weight: 700; margin: 0 0 5px; }
+.vf-cartilha-bloco p { font-size: var(--t-base); line-height: 1.6; margin: 0 0 var(--e-2); }
+.vf-cartilha-bloco ul { list-style: disc; margin: 5px 0 var(--e-2); padding-left: 20px; }
+.vf-cartilha-bloco li { font-size: var(--t-base); line-height: 1.55; margin-bottom: 4px; }
+.vf-cartilha-bloco li::marker { color: var(--rosegold); }
+.vf-cartilha-nota {
+  background: #FAF6F3; border-left: 3px solid var(--rosegold);
+  padding: 10px 14px; font-size: var(--t-sm); font-style: italic;
+  color: var(--cafe-suave); border-radius: 0 var(--raio-sm) var(--raio-sm) 0; margin: var(--e-2) 0 0 !important;
+}
+.vf-vazio {
+  background: var(--branco); border: 1px dashed var(--linha-forte); border-radius: var(--raio);
+  padding: var(--e-6) var(--e-5); text-align: center; color: var(--cafe-suave); margin-top: var(--e-4);
+}
+
+/* ---- Laudo ---- */
+.vf-laudo-ident { margin: var(--e-4) 0 0; display: grid; gap: 0; }
+.vf-laudo-ident > div {
+  display: grid; grid-template-columns: 190px minmax(0, 1fr);
+  padding: 7px 0; border-bottom: 1px solid var(--areia-fundo); gap: var(--e-3);
+}
+.vf-laudo-ident dt { font-size: var(--t-xs); font-weight: 600; letter-spacing: .05em;
+                     text-transform: uppercase; color: var(--cafe-suave); }
+.vf-laudo-ident dd { margin: 0; font-size: var(--t-base); }
+
+.vf-tabela-escores { border-collapse: collapse; width: 100%; font-size: var(--t-sm); }
+.vf-tabela-escores th, .vf-tabela-escores td {
+  border: 1px solid var(--linha); padding: 8px 11px; text-align: left; vertical-align: middle;
+}
+.vf-tabela-escores thead th { background: var(--areia); font-weight: 600; font-size: var(--t-xs);
+                              letter-spacing: .04em; text-transform: uppercase; color: var(--cafe-suave); }
+.vf-tabela-escores tbody th { font-weight: 500; background: #FDFBFA; }
+.vf-tabela-escores td input { border: none; box-shadow: none; padding: 2px 4px; }
+
+.vf-lista-condutas { margin: var(--e-3) 0 0; padding-left: 20px; list-style: disc; }
+.vf-lista-condutas li { margin-bottom: 4px; }
