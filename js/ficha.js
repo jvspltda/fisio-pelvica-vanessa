@@ -434,6 +434,54 @@
   ];
 
   /* ══════════════════════════════════════════════════════════════
+     MODO ESSENCIAL — o subconjunto que se preenche COM a paciente
+
+     A ficha completa tem mais de duzentos campos. Preenchê-la inteira
+     durante a consulta significa olhar para a tela em vez de olhar
+     para a pessoa — e ela costuma estar ansiosa, às vezes já despida.
+
+     Estes são os campos que efetivamente mudam a conduta na primeira
+     sessão. O restante da ficha continua existindo e pode ser
+     completado depois que a paciente sai, ou ao longo do seguimento.
+
+     Não é uma ficha reduzida: é a mesma ficha, com o resto recolhido.
+     ══════════════════════════════════════════════════════════════ */
+  Ficha.ESSENCIAIS = [
+    /* Quem é e por que veio */
+    'ident_data', 'ident_nome', 'ident_idade', 'ident_diagnostico_med',
+    's3_queixa', 's3_inicio', 's3_eva_queixa',
+
+    /* O que muda a conduta pélvica */
+    's1_estado_reprodutivo',
+    's2_g', 's2_p', 's2_a', 's2_c', 's2_forceps',
+
+    /* Sintomas que definem o eixo do tratamento */
+    's5_iu', 's5_urgencia', 's5_desencadeantes', 's5_quantidade', 's5_nocturia',
+    's6_urgencia', 's6_perda_insensivel',
+    's7_percepcao_prolapso',
+    's8_dispareunia',
+    's9_dor_pelvica',
+
+    /* Exame — o consentimento nunca sai do essencial */
+    'ef_esclarecida', 'ef_autorizou',
+    'ef_peso', 'ef_estatura', 'ef_imc',
+    'ef_pop_anterior', 'ef_pop_posterior', 'ef_pop_cupula',
+    'afa_movimento_interno', 'afa_oxford', 'afa_ics',
+    'afa_relaxamento', 'afa_eva_desconforto',
+
+    /* O que fecha a sessão */
+    'ef_diagnostico_ap'
+  ];
+
+  /* Blocos inteiros que permanecem no modo essencial. */
+  Ficha.SECOES_ESSENCIAIS = ['identificacao', 's3', 's2', 's5', 'wexner',
+                             'consentimento', 'ef_geral', 'ef_pop', 'ef_afa', 'ef_diagnostico'];
+
+  Ficha.ehEssencial = function (id) {
+    return Ficha.ESSENCIAIS.indexOf(id) !== -1;
+  };
+
+  /* ══════════════════════════════════════════════════════════════
      TEXTOS INSTITUCIONAIS
      ══════════════════════════════════════════════════════════════ */
 

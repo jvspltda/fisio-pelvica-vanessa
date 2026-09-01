@@ -39,6 +39,40 @@ separados do `index.html`, a aplicação não carrega.
 
 ---
 
+## Usando durante a consulta
+
+A ficha completa tem mais de 180 perguntas. Preenchê-la inteira com a paciente na
+sala significa olhar para a tela em vez de olhar para a pessoa — e ela costuma estar
+ansiosa, às vezes já despida, esperando um exame íntimo.
+
+Por isso a aba de avaliação abre em **modo Essencial**, com todas as seções recolhidas
+menos a identificação.
+
+### Essencial × Ficha completa
+
+| | Perguntas visíveis |
+|---|---|
+| **Essencial** | 36 — o que muda a conduta na primeira sessão |
+| **Ficha completa** | 183 — a ficha integral |
+
+O modo essencial **não é uma ficha reduzida**: é a mesma ficha, com o resto recolhido.
+Nada é apagado, nada deixa de ser salvo, e **a impressão sempre leva a ficha completa** —
+o papel é o registro clínico e não pode omitir campo preenchido.
+
+O fluxo que isso permite: conversar em modo Essencial durante a consulta, e completar
+o restante depois que a paciente sai, ou ao longo do seguimento.
+
+Para ajustar o que é essencial, edite a lista `Ficha.ESSENCIAIS` em `js/ficha.js`.
+
+### Seções recolhidas e indicador de preenchimento
+Cada cabeçalho é um botão. O contador à direita (`2/4`) mostra quanto daquela seção
+já foi preenchido, para você saber o que falta **sem precisar abrir**. Cinza = vazio,
+âmbar = parcial, verde = completo.
+
+Os botões **Abrir todas** / **Fechar todas** ficam na barra de modo.
+
+---
+
 ## As cinco abas
 
 ### 1 · Avaliação Clínica
@@ -214,10 +248,21 @@ orientações e assinatura do laudo — deriva dessa constante.
 ## Personalização
 
 ### Logomarca
-SVG inline, presente em dois lugares do `index.html`: o cabeçalho de tela e o
-`#timbre-impressao`. A asa esquerda é forma sólida preenchida; a direita é traço
-contínuo. A versão monocromática para impressão P&B é controlada em `css/print.css`,
-nas regras `.timbre-logo .asa-solida` / `.asa-traco` / `.corpo`.
+
+**Coloque o arquivo oficial em `assets/logo.svg`.** Ele passa a ser usado
+automaticamente, no cabeçalho de tela e no timbre de impressão.
+
+Sem esse arquivo, a suíte cai num vetor de recuo embutido e nada quebra — mas o vetor
+é apenas uma aproximação genérica, não a marca real. **Use o arquivo oficial.**
+
+SVG é o formato preferido: escala sem perder nitidez e imprime bem em A4. PNG com fundo
+transparente também serve — nesse caso ajuste o `src` nas duas ocorrências do
+`index.html` para `assets/logo.png`.
+
+A versão monocromática do vetor de recuo, para impressão P&B, é controlada em
+`css/print.css` nas regras `.timbre-logo .asa-solida` / `.asa-traco`. Se você usar o
+arquivo oficial e precisar de uma versão P&B específica, forneça também
+`assets/logo-mono.svg` e troque o `src` dentro do bloco `#timbre-impressao`.
 
 ### Cores e tipografia
 Todas as decisões visuais estão no `:root` de `css/tokens.css`:

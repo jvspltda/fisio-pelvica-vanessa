@@ -23,6 +23,14 @@
   /* Mapeia cada campo renderizado ao seu balde no schema. */
   var baldeDoCampo = {};
 
+  /* Modo de exibição da ficha: 'essencial' (o que se preenche com a
+     paciente na sala) ou 'completo' (a ficha inteira). Só afeta a tela —
+     a impressão sempre leva a ficha completa, porque o papel é o registro. */
+  var modoFicha = 'essencial';
+
+  /* Seções recolhidas. Começar tudo fechado evita a parede de campos. */
+  var secoesAbertas = {};
+
   /* ──────────────────────────────────────────────────────────────
      UTILITÁRIOS
      ────────────────────────────────────────────────────────────── */
@@ -75,8 +83,9 @@
      RENDER DE CAMPOS
      ────────────────────────────────────────────────────────────── */
 
-  function envolver(campo, conteudo) {
-    var classe = 'vf-campo-wrap' + (campo.larguraTotal ? ' vf-col-total' : '');
+  function envolver(campo, conteudo, recolhido) {
+    var classe = 'vf-campo-wrap' + (campo.larguraTotal ? ' vf-col-total' : '') +
+                 (recolhido ? ' vf-fora-do-essencial' : '');
     var wrap = el('div', { class: classe });
     if (campo.label) wrap.appendChild(el('label', { class: 'vf-rotulo', for: campo.id, texto: campo.label }));
     wrap.appendChild(conteudo);
@@ -100,6 +109,10 @@
     baldeDoCampo[campo.id] = balde;
     var valor = ler(campo.id);
 
+    /* No modo essencial o campo não é removido — é recolhido.
+       A classe é distinta de .vf-oculto porque a impressão a ignora. */
+    var recolhido = (modoFicha === 'essencial' && !F.ehEssencial(campo.id));
+
     /* --- Texto, data, área --- */
     if (campo.tipo === 'texto' || campo.tipo === 'data') {
       var inp = el('input', {
@@ -107,14 +120,14 @@
         type: campo.tipo === 'data' ? 'date' : 'text',
         value: valor === undefined ? '' : valor
       });
-      return envolver(campo, inp);
+      return envolver(campo, inp, recolhido);
     }
 
     if (campo.tipo === 'area') {
       var ta = el('textarea', { class: 'vf-campo', id: campo.id, name: campo.id,
                                 rows: campo.linhas || 3 });
       ta.value = valor === undefined ? '' : valor;
-      return envolver(campo, ta);
+      return envolver(campo, ta, recolhido);
     }
 
     /* --- Numérico com clamp na faixa clínica --- */
@@ -133,13 +146,13 @@
           status('Valor ajustado para a faixa ' + campo.min + '–' + campo.max);
         }
       });
-      return envolver(campo, n);
+      return envolver(campo, n, recolhido);
     }
 
     if (campo.tipo === 'calculado') {
       var c = el('input', { class: 'vf-campo', id: campo.id, name: campo.id, readonly: 'readonly' });
       c.value = valor === undefined ? '' : valor;
-      return envolver(campo, c);
+      return envolver(campo, c, recolhido);
     }
 
     /* --- Select --- */
@@ -151,7 +164,7 @@
         if (valor === o) op.selected = true;
         sl.appendChild(op);
       });
-      return envolver(campo, sl);
+      return envolver(campo, sl, recolhido);
     }
 
     /* --- Radio --- */
@@ -166,7 +179,7 @@
         lb.appendChild(el('span', { texto: o }));
         gr.appendChild(lb);
       });
-      return envolver(campo, gr);
+      return envolver(campo, gr, recolhido);
     }
 
     /* --- Checkboxes --- */
@@ -182,7 +195,7 @@
         lb.appendChild(el('span', { texto: o }));
         gc.appendChild(lb);
       });
-      return envolver(campo, gc);
+      return envolver(campo, gc, recolhido);
     }
 
     /* --- Régua EVA --- */
@@ -194,7 +207,7 @@
       var out = el('span', { class: 'vf-eva-valor', id: campo.id + '_valor', texto: String(v0) });
       var bd = el('span', { class: 'vf-badge', id: campo.id + '_badge' });
       box.appendChild(rg); box.appendChild(out); box.appendChild(bd);
-      var wrap = envolver(campo, box);
+      var wrap = envolver(campo, box, recolhido);
       atualizarBadgeEVA(campo.id, v0, bd, out);
       rg.addEventListener('input', function () {
         atualizarBadgeEVA(campo.id, this.value, bd, out);
@@ -219,10 +232,54 @@
         }));
         gsel.appendChild(lb);
       });
-      return envolver(campo, gsel);
+      return envolver(campo, gsel, recolhido);
     }
 
     return el('div');
+  }
+
+  /* Abre ou fecha uma seção. */
+  function alternarSecao(id) {
+    secoesAbertas[id] = !secoesAbertas[id];
+    var card = document.getElementById('card-' + id);
+    if (!card) return;
+    card.setAttribute('data-aberto', secoesAbertas[id] ? 'sim' : 'nao');
+    var cab = card.querySelector('.vf-card-cab');
+    if (cab) cab.setAttribute('aria-expanded', String(!!secoesAbertas[id]));
+  }
+
+  /* Conta campos preenchidos na seção, para o indicador do cabeçalho.
+     Serve para saber o que falta sem precisar abrir tudo. */
+  function atualizarProgresso() {
+    document.querySelectorAll('.vf-card').forEach(function (card) {
+      var id = card.id.replace('card-', '');
+      var alvo = document.getElementById('prog-' + id);
+      if (!alvo) return;
+
+      var visiveis = card.querySelectorAll(
+        '.vf-card-corpo [name]:not([type=radio]):not([type=checkbox]), ' +
+        '.vf-card-corpo [name][type=radio], .vf-card-corpo [name][type=checkbox]');
+
+      var nomes = {}, preenchidos = 0, total = 0;
+      visiveis.forEach(function (campo) {
+        var wrap = campo.closest('.vf-campo-wrap, .vf-wexner, td');
+        if (wrap && wrap.classList.contains('vf-fora-do-essencial')) return;
+        if (nomes[campo.name]) return;
+        nomes[campo.name] = true;
+        total++;
+        if (campo.type === 'radio' || campo.type === 'checkbox') {
+          if (card.querySelector('[name="' + campo.name + '"]:checked')) preenchidos++;
+        } else if (campo.type === 'range') {
+          var v = ler(campo.name);
+          if (v !== undefined && v !== '' && Number(v) > 0) preenchidos++;
+        } else if (String(campo.value).trim() !== '') preenchidos++;
+      });
+
+      if (!total) { alvo.textContent = ''; return; }
+      alvo.textContent = preenchidos + '/' + total;
+      alvo.setAttribute('data-estado',
+        preenchidos === 0 ? 'vazio' : (preenchidos === total ? 'completo' : 'parcial'));
+    });
   }
 
   function atualizarBadgeEVA(id, valor, badge, saida) {
@@ -245,12 +302,28 @@
   function renderSecao(secao, balde) {
     var card = el('div', { class: 'vf-card quebra-evitar', id: 'card-' + secao.id });
 
-    var cab = el('div', { class: 'vf-card-cab' });
+    /* No modo essencial, seções sem nada de essencial somem da tela
+       (continuam na impressão e no documento salvo). */
+    if (modoFicha === 'essencial' && F.SECOES_ESSENCIAIS.indexOf(secao.id) === -1) {
+      card.classList.add('vf-fora-do-essencial');
+    }
+
+    /* Cabeçalho clicável: recolher é o que permite olhar para a paciente
+       em vez de rolar uma parede de campos. */
+    var aberto = !!secoesAbertas[secao.id];
+    var cab = el('button', {
+      class: 'vf-card-cab', type: 'button',
+      'aria-expanded': String(aberto), 'aria-controls': 'corpo-' + secao.id
+    });
     if (secao.numero) cab.appendChild(el('div', { class: 'vf-card-num', texto: secao.numero }));
     cab.appendChild(el('h2', { texto: secao.titulo }));
+    cab.appendChild(el('span', { class: 'vf-progresso', id: 'prog-' + secao.id }));
+    cab.appendChild(el('span', { class: 'vf-chevron', 'aria-hidden': 'true', texto: '⌄' }));
+    cab.addEventListener('click', function () { alternarSecao(secao.id); });
     card.appendChild(cab);
+    card.setAttribute('data-aberto', aberto ? 'sim' : 'nao');
 
-    var corpo = el('div', { class: 'vf-card-corpo' });
+    var corpo = el('div', { class: 'vf-card-corpo', id: 'corpo-' + secao.id });
 
     if (secao.tipoEspecial === 'wexner')      corpo.appendChild(renderWexner());
     else if (secao.tipoEspecial === 'ipss')   corpo.appendChild(renderInstrumento('IPSS', S.IPSS_ITENS, 'ipss', S.calcularIPSS, [S.IPSS_QV]));
@@ -547,7 +620,54 @@
     calcularWexner();
     calcularIMC();
     aplicarGateConsentimento();
+    atualizarProgresso();
   }
+
+  /* Barra de modo — fica acima das seções, na aba de avaliação. */
+  function renderBarraModo() {
+    var alvo = document.getElementById('barra-modo');
+    if (!alvo) return;
+    alvo.innerHTML = '';
+
+    var grupo = el('div', { class: 'vf-opcoes', role: 'radiogroup', 'aria-label': 'Modo de exibição da ficha' });
+    [['essencial', 'Essencial', 'O que se preenche com a paciente na sala'],
+     ['completo',  'Ficha completa', 'Todos os campos, para completar depois']
+    ].forEach(function (m) {
+      var lb = el('label', { title: m[2] });
+      var ip = el('input', { type: 'radio', name: 'modo_ficha', value: m[0] });
+      if (modoFicha === m[0]) ip.checked = true;
+      ip.addEventListener('change', function () {
+        modoFicha = m[0];
+        renderAvaliacao();
+        renderBarraModo();
+      });
+      lb.appendChild(ip);
+      lb.appendChild(el('span', { texto: m[1] }));
+      grupo.appendChild(lb);
+    });
+    alvo.appendChild(grupo);
+
+    var botoes = el('div', { style: 'display:flex;gap:var(--e-2);margin-left:auto' });
+    var abrir = el('button', { class: 'vf-btn', type: 'button', texto: 'Abrir todas' });
+    abrir.addEventListener('click', function () {
+      document.querySelectorAll('#painel-avaliacao .vf-card').forEach(function (c) {
+        secoesAbertas[c.id.replace('card-', '')] = true;
+        c.setAttribute('data-aberto', 'sim');
+        var cab = c.querySelector('.vf-card-cab'); if (cab) cab.setAttribute('aria-expanded', 'true');
+      });
+    });
+    var fechar = el('button', { class: 'vf-btn', type: 'button', texto: 'Fechar todas' });
+    fechar.addEventListener('click', function () {
+      document.querySelectorAll('#painel-avaliacao .vf-card').forEach(function (c) {
+        secoesAbertas[c.id.replace('card-', '')] = false;
+        c.setAttribute('data-aberto', 'nao');
+        var cab = c.querySelector('.vf-card-cab'); if (cab) cab.setAttribute('aria-expanded', 'false');
+      });
+    });
+    botoes.appendChild(abrir); botoes.appendChild(fechar);
+    alvo.appendChild(botoes);
+  }
+  window.__renderBarraModo = renderBarraModo;
 
   /* Alterna os blocos sem apagar nenhum dos dois estados. */
   function aplicarPerfil() {
@@ -615,6 +735,7 @@
     if (alvo.name === 'anc_gatilho' || alvo.name === 'anc_acao') montarAncoraNaTela();
     if (alvo.name === 'orient_obs') { var k = document.querySelector('.vf-kit-obs'); if (k) k.textContent = alvo.value; }
 
+    atualizarProgresso();
     agendarSalvamento();
   }
 
@@ -658,6 +779,8 @@
      ────────────────────────────────────────────────────────────── */
   function imprimir() {
     document.getElementById('timbre-doc-titulo').textContent = TITULOS_IMPRESSAO[abaAtual] || '';
+    /* O papel é o registro: imprime sempre a ficha inteira, independente
+       do modo de tela, para não omitir campo preenchido do documento. */
     document.body.className = 'imp-' + abaAtual;
     St.salvar(doc);
     window.print();
@@ -1468,6 +1591,7 @@
      ────────────────────────────────────────────────────────────── */
   function renderTudo() {
     renderAvaliacao();
+    renderBarraModo();
     if (window.__renderPrescricao)  window.__renderPrescricao();
     if (window.__renderAderencia)   window.__renderAderencia();
     if (window.__renderOrientacoes) window.__renderOrientacoes();
@@ -1481,6 +1605,9 @@
     var rodapeImpr = document.getElementById('rodape-texto-impressao');
     if (rodapeTela) rodapeTela.textContent = F.RODAPE_LEGAL;
     if (rodapeImpr) rodapeImpr.textContent = F.RODAPE_LEGAL;
+
+    /* Começa com a identificação aberta e o resto recolhido. */
+    secoesAbertas['identificacao'] = true;
 
     /* Rascunho anterior, se houver */
     var salvo = St.carregar();

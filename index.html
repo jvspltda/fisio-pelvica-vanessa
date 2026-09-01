@@ -25,15 +25,15 @@
      ══════════════════════════════════════════════════════════════ -->
 <div id="timbre-impressao" class="vf-so-impr" aria-hidden="true">
   <div class="timbre-marca">
-    <svg class="timbre-logo" viewBox="0 0 120 120" width="30" height="30" role="img" aria-label="Marca Vanessa Fernandes">
-      <!-- Asa esquerda: forma sólida, dois lóbulos (superior menor, inferior em gota) -->
-      <path class="asa-solida"
-            d="M60,36 C50,20 26,19 20,36 C15,50 33,58 47,55 C36,63 24,80 32,95 C40,108 57,100 60,80 Z"/>
-      <!-- Asa direita: traço contínuo único espelhando a esquerda -->
-      <path class="asa-traco"
-            d="M60,36 C70,20 94,19 100,36 C105,50 87,58 73,55 C84,63 96,80 88,95 C80,108 63,100 60,80"/>
-      <!-- Corpo sugerido pelo encontro das formas -->
-      <path class="corpo" d="M60,34 L60,84"/>
+    <!-- Logomarca oficial. Basta colocar o arquivo em assets/logo.svg (ou .png
+         com fundo transparente) que ele passa a ser usado automaticamente.
+         Sem o arquivo, o vetor de recuo abaixo assume. -->
+    <img class="timbre-logo-img" src="assets/logo.svg" alt="" width="30" height="30"
+         onerror="this.remove(); var f=document.getElementById('timbre-logo-vetor'); if(f) f.style.display='block';">
+    <svg class="timbre-logo" id="timbre-logo-vetor" viewBox="0 0 120 120" width="30" height="30"
+         style="display:none" role="img" aria-label="Marca Vanessa Fernandes">
+      <path class="asa-solida" d="M60,44 C54,28 38,21 29,30 C20,39 30,51 49,53 C31,60 19,78 27,92 C35,106 55,99 60,74 Z"/>
+      <path class="asa-traco" d="M60,44 C54,28 38,21 29,30 C20,39 30,51 49,53 C31,60 19,78 27,92 C35,106 55,99 60,74 Z" transform="translate(120,0) scale(-1,1)"/>
     </svg>
     <div class="timbre-lockup">
       <span class="timbre-nome">Vanessa Fernandes</span>
@@ -55,12 +55,14 @@
   <div class="vf-container">
 
     <div style="display:flex;align-items:center;gap:var(--e-3);padding:var(--e-3) 0">
-      <svg viewBox="0 0 120 120" width="42" height="42" style="flex:none" role="img" aria-label="Marca Vanessa Fernandes">
-        <path d="M60,36 C50,20 26,19 20,36 C15,50 33,58 47,55 C36,63 24,80 32,95 C40,108 57,100 60,80 Z"
-              fill="var(--terracota)"/>
-        <path d="M60,36 C70,20 94,19 100,36 C105,50 87,58 73,55 C84,63 96,80 88,95 C80,108 63,100 60,80"
-              fill="none" stroke="var(--terracota)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M60,34 L60,84" stroke="var(--terracota-deep)" stroke-width="2" stroke-linecap="round"/>
+      <img src="assets/logo.svg" alt="" width="42" height="42" style="flex:none"
+           onerror="this.remove(); var f=document.getElementById('logo-vetor'); if(f) f.style.display='block';">
+      <svg id="logo-vetor" viewBox="0 0 120 120" width="42" height="42"
+           style="flex:none;display:none" role="img" aria-label="Marca Vanessa Fernandes">
+        <path d="M60,44 C54,28 38,21 29,30 C20,39 30,51 49,53 C31,60 19,78 27,92 C35,106 55,99 60,74 Z" fill="var(--terracota)"/>
+        <path d="M60,44 C54,28 38,21 29,30 C20,39 30,51 49,53 C31,60 19,78 27,92 C35,106 55,99 60,74 Z" transform="translate(120,0) scale(-1,1)"
+              fill="none" stroke="var(--terracota)" stroke-width="4.5"
+              stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
 
       <div style="line-height:1.2">
@@ -112,6 +114,9 @@
         <label><input type="radio" name="perfil" value="masculino"><span>Saúde do Homem</span></label>
       </div>
     </div>
+
+    <!-- Modo de exibição e controle de recolhimento -->
+    <div class="vf-barra-modo no-print" id="barra-modo"></div>
     <div id="render-comum"></div>
     <div id="render-feminino"></div>
     <div id="render-masculino" class="vf-oculto"></div>

@@ -437,3 +437,59 @@ textarea.vf-campo { resize: vertical; min-height: 62px; line-height: 1.55; }
 
 .vf-lista-condutas { margin: var(--e-3) 0 0; padding-left: 20px; list-style: disc; }
 .vf-lista-condutas li { margin-bottom: 4px; }
+
+/* ---------------------------------------------------------------
+   ATENDIMENTO NA SALA — recolhimento, progresso e modo essencial
+
+   A ficha completa tem mais de duzentos campos. Deixá-los todos
+   abertos obriga a olhar para a tela em vez de olhar para a pessoa.
+   Estas regras existem para reduzir o que está à vista.
+   --------------------------------------------------------------- */
+
+/* ---- Barra de modo ---- */
+.vf-barra-modo {
+  display: flex; align-items: center; gap: var(--e-3); flex-wrap: wrap;
+  background: var(--branco); border: 1px solid var(--linha);
+  border-radius: var(--raio); padding: var(--e-3) var(--e-4);
+  margin-bottom: var(--e-4); box-shadow: var(--sombra);
+}
+
+/* ---- Cabeçalho de seção como botão ---- */
+button.vf-card-cab {
+  width: 100%; text-align: left; cursor: pointer;
+  font-family: inherit; font-size: inherit; color: inherit;
+  border: none; border-bottom: 1px solid var(--areia-fundo);
+}
+button.vf-card-cab:hover { background: var(--areia); }
+button.vf-card-cab:focus-visible { outline: 2px solid var(--terracota); outline-offset: -2px; }
+
+.vf-chevron {
+  margin-left: var(--e-2); font-size: 17px; line-height: 1;
+  color: var(--cafe-tenue); transition: transform .16s; flex: none;
+}
+.vf-card[data-aberto="sim"] .vf-chevron { transform: rotate(180deg); }
+
+/* Corpo recolhido — só na tela. */
+.vf-card[data-aberto="nao"] .vf-card-corpo { display: none; }
+
+/* ---- Indicador de preenchimento ---- */
+.vf-progresso {
+  margin-left: auto; font-size: var(--t-xs); font-weight: 600;
+  padding: 3px 9px; border-radius: 999px;
+  font-variant-numeric: tabular-nums; flex: none;
+  background: var(--areia-fundo); color: var(--cafe-tenue);
+}
+.vf-progresso[data-estado="parcial"]  { background: var(--sev-atencao-bg); color: var(--sev-atencao); }
+.vf-progresso[data-estado="completo"] { background: var(--sev-ok-bg);      color: var(--sev-ok); }
+
+/* ---- Modo essencial ----
+   Recolhido na tela, presente no papel: o registro impresso é o
+   documento clínico e não pode omitir campo preenchido. */
+.vf-fora-do-essencial { display: none; }
+
+@media print {
+  .vf-fora-do-essencial { display: block !important; }
+  .vf-card[data-aberto="nao"] .vf-card-corpo { display: block !important; }
+  button.vf-card-cab { border-bottom: 0.5pt solid #EFE7E1 !important; }
+  .vf-chevron, .vf-progresso, .vf-barra-modo { display: none !important; }
+}

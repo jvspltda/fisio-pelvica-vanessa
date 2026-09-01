@@ -1,0 +1,10 @@
+Coloque aqui a logomarca oficial com o nome exato:
+
+    logo.svg
+
+SVG e o formato preferido: escala sem perder nitidez e imprime bem em A4.
+PNG com fundo transparente tambem funciona - renomeie para logo.svg nao,
+use logo.png e ajuste o src nas duas ocorrencias do index.html.
+
+Sem este arquivo, a suite usa um vetor de recuo automaticamente.
+Nada quebra.
