@@ -1,0 +1,287 @@
+/* ════════════════════════════════════════════════════════════════
+   tokens.css — Design tokens da marca Vanessa Fernandes
+   Fisioterapia Pélvica · Suíte Clínica offline-first
+
+   Este arquivo é a única fonte de verdade visual da aplicação.
+   Tudo que é crítico para leitura e impressão vive aqui, para que
+   a suíte continue utilizável se os CDNs estiverem indisponíveis.
+   ════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ---- Paleta institucional ---- */
+  --terracota:      #B86657;
+  --terracota-deep: #9E4F42;
+  --cafe:           #3D2E28;
+  --areia:          #F7F4F0;
+  --rosegold:       #D49A8D;
+  --branco:         #FFFFFF;
+
+  /* ---- Derivados de apoio (tons de trabalho da interface) ---- */
+  --cafe-suave:     #6B564D;
+  --cafe-tenue:     #8A7268;
+  --linha:          #E3D9D2;
+  --linha-forte:    #CBBDB3;
+  --areia-fundo:    #EDE6DF;
+  --terracota-leve: #FBF3F1;
+
+  /* ---- Cores semânticas de severidade (convenção interna de UI) ---- */
+  --sev-ok:      #2F6B4F;  --sev-ok-bg:      #E6F1EB;
+  --sev-atencao: #8A6A1F;  --sev-atencao-bg: #F6EEDC;
+  --sev-alerta:  #A8541F;  --sev-alerta-bg:  #F8EADC;
+  --sev-grave:   #8C2F26;  --sev-grave-bg:   #F6E0DC;
+
+  /* ---- Tipografia ---- */
+  --fonte-titulo: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --fonte-corpo:  'Plus Jakarta Sans', 'Segoe UI', system-ui, -apple-system, Arial, sans-serif;
+
+  /* ---- Escala tipográfica ---- */
+  --t-xs:   11px;
+  --t-sm:   13px;
+  --t-base: 14.5px;
+  --t-md:   16px;
+  --t-lg:   19px;
+  --t-xl:   23px;
+  --t-2xl:  30px;
+
+  /* ---- Espaçamento ---- */
+  --e-1: 4px;
+  --e-2: 8px;
+  --e-3: 12px;
+  --e-4: 16px;
+  --e-5: 22px;
+  --e-6: 30px;
+  --e-7: 42px;
+
+  /* ---- Formas e profundidade ---- */
+  --raio-sm: 5px;
+  --raio:    9px;
+  --raio-lg: 14px;
+  --sombra:      0 1px 2px rgba(61,46,40,.05), 0 10px 28px -18px rgba(61,46,40,.22);
+  --sombra-alta: 0 2px 6px rgba(61,46,40,.07), 0 18px 40px -20px rgba(61,46,40,.28);
+
+  /* ---- Medidas de impressão A4 ---- */
+  --a4-largura-util: 182mm;   /* 210mm - 2 x 14mm de margem */
+  --timbre-altura:   18mm;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   Base — independente de Tailwind.
+   Se o CDN não carregar, a aplicação continua legível.
+   ════════════════════════════════════════════════════════════════ */
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--areia);
+  color: var(--cafe);
+  font-family: var(--fonte-corpo);
+  font-size: var(--t-base);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, .titulo { font-family: var(--fonte-titulo); font-weight: 600; }
+h1 { font-size: var(--t-2xl); line-height: 1.15; margin: 0 0 var(--e-3); letter-spacing: -.015em; }
+h2 { font-size: var(--t-xl); line-height: 1.2;  margin: 0; letter-spacing: -.012em; }
+h3 { font-size: var(--t-lg); line-height: 1.28; margin: var(--e-5) 0 var(--e-2); }
+h4 { font-size: var(--t-md); line-height: 1.3;  margin: var(--e-4) 0 var(--e-2); }
+p  { margin: 0 0 var(--e-3); }
+a  { color: var(--terracota-deep); }
+
+/* ---- Utilitários próprios (não dependem do Tailwind) ---- */
+.vf-oculto   { display: none !important; }
+.vf-so-impr  { display: none; }          /* só aparece no papel */
+.no-print    { }                          /* alvo das regras de print.css */
+
+.vf-container { max-width: 1180px; margin: 0 auto; padding: 0 var(--e-5); }
+
+/* ---- Cartão de seção ---- */
+.vf-card {
+  background: var(--branco);
+  border: 1px solid var(--linha);
+  border-radius: var(--raio);
+  box-shadow: var(--sombra);
+  margin-bottom: var(--e-4);
+  overflow: hidden;
+}
+.vf-card-cab {
+  display: flex; align-items: center; gap: var(--e-3);
+  padding: var(--e-3) var(--e-5);
+  border-bottom: 1px solid var(--areia-fundo);
+  background: linear-gradient(to bottom, #FDFBFA, var(--branco));
+}
+.vf-card-num {
+  flex: none; width: 28px; height: 28px; border-radius: 50%;
+  background: var(--terracota-leve); color: var(--terracota-deep);
+  display: flex; align-items: center; justify-content: center;
+  font-size: var(--t-xs); font-weight: 700; font-family: var(--fonte-corpo);
+}
+.vf-card-corpo { padding: var(--e-4) var(--e-5) var(--e-5); }
+
+/* ---- Campos ---- */
+.vf-rotulo {
+  display: block;
+  font-size: var(--t-xs);
+  font-weight: 600;
+  letter-spacing: .055em;
+  text-transform: uppercase;
+  color: var(--cafe-suave);
+  margin-bottom: var(--e-1);
+}
+.vf-campo {
+  width: 100%;
+  background: var(--branco);
+  border: 1px solid var(--linha);
+  border-radius: var(--raio-sm);
+  padding: 7px 10px;
+  font-family: var(--fonte-corpo);
+  font-size: var(--t-base);
+  color: var(--cafe);
+  transition: border-color .15s, box-shadow .15s;
+}
+.vf-campo:focus {
+  outline: none;
+  border-color: var(--terracota);
+  box-shadow: 0 0 0 3px rgba(184,102,87,.13);
+}
+.vf-campo:disabled { background: var(--areia-fundo); color: var(--cafe-tenue); cursor: not-allowed; }
+textarea.vf-campo { resize: vertical; min-height: 62px; line-height: 1.55; }
+
+/* ---- Grupos de opção ---- */
+.vf-opcoes { display: flex; flex-wrap: wrap; gap: 6px; }
+.vf-opcoes label {
+  display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+  background: var(--branco); border: 1px solid var(--linha);
+  border-radius: 999px; padding: 5px 11px;
+  font-size: var(--t-sm); color: var(--cafe);
+  transition: border-color .13s, background .13s;
+}
+.vf-opcoes label:hover { border-color: var(--rosegold); }
+.vf-opcoes input { accent-color: var(--terracota); width: 14px; height: 14px; flex: none; }
+.vf-opcoes label:has(input:checked) { background: var(--terracota-leve); border-color: var(--terracota); }
+.vf-opcoes label:has(input:checked) span { font-weight: 600; color: var(--terracota-deep); }
+.vf-opcoes input:disabled { cursor: not-allowed; }
+.vf-opcoes label:has(input:disabled) { opacity: .45; cursor: not-allowed; }
+
+/* ---- Badge de severidade ---- */
+.vf-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: var(--t-xs); font-weight: 700;
+  padding: 4px 11px; border-radius: 999px;
+  letter-spacing: .02em; white-space: nowrap;
+}
+.vf-badge[data-sev="ok"]      { background: var(--sev-ok-bg);      color: var(--sev-ok); }
+.vf-badge[data-sev="atencao"] { background: var(--sev-atencao-bg); color: var(--sev-atencao); }
+.vf-badge[data-sev="alerta"]  { background: var(--sev-alerta-bg);  color: var(--sev-alerta); }
+.vf-badge[data-sev="grave"]   { background: var(--sev-grave-bg);   color: var(--sev-grave); }
+.vf-badge[data-sev="neutro"]  { background: var(--areia-fundo);    color: var(--cafe-suave); }
+
+/* ---- Painel de escore ---- */
+.vf-escore {
+  display: flex; align-items: baseline; gap: var(--e-2);
+  background: var(--terracota-leve);
+  border: 1px solid #F0DDD7;
+  border-radius: var(--raio-sm);
+  padding: 10px 15px;
+}
+.vf-escore-valor { font-family: var(--fonte-titulo); font-size: 26px; font-weight: 600; color: var(--terracota-deep); line-height: 1; }
+.vf-escore-max   { font-size: var(--t-sm); color: var(--cafe-suave); }
+.vf-escore .vf-badge { margin-left: auto; }
+
+/* ---- Régua EVA ---- */
+.vf-eva { display: flex; align-items: center; gap: var(--e-4); }
+.vf-eva input[type=range] {
+  -webkit-appearance: none; appearance: none;
+  flex: 1; height: 6px; border-radius: 99px; background: transparent;
+}
+.vf-eva input[type=range]::-webkit-slider-runnable-track {
+  height: 6px; border-radius: 99px;
+  background: linear-gradient(90deg, #6FAE8C 0%, #E3C567 35%, #D98A4A 70%, #C4554A 100%);
+}
+.vf-eva input[type=range]::-moz-range-track {
+  height: 6px; border-radius: 99px;
+  background: linear-gradient(90deg, #6FAE8C 0%, #E3C567 35%, #D98A4A 70%, #C4554A 100%);
+}
+.vf-eva input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; appearance: none;
+  width: 20px; height: 20px; margin-top: -7px; border-radius: 50%;
+  background: var(--branco); border: 3px solid var(--terracota);
+  cursor: pointer; box-shadow: 0 1px 4px rgba(61,46,40,.25);
+}
+.vf-eva input[type=range]::-moz-range-thumb {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--branco); border: 3px solid var(--terracota); cursor: pointer;
+}
+.vf-eva-valor {
+  font-family: var(--fonte-titulo); font-size: var(--t-xl);
+  color: var(--terracota-deep); width: 34px; text-align: center; flex: none;
+}
+
+/* ---- Abas ---- */
+.vf-abas { display: flex; gap: var(--e-6); border-top: 1px solid var(--areia-fundo); overflow-x: auto; }
+.vf-aba {
+  position: relative; padding: 11px 2px; white-space: nowrap;
+  font-family: var(--fonte-corpo); font-size: var(--t-base); font-weight: 500;
+  color: var(--cafe-suave); background: none; border: none; cursor: pointer;
+  transition: color .15s;
+}
+.vf-aba:hover { color: var(--cafe); }
+.vf-aba[aria-selected="true"] { color: var(--terracota-deep); font-weight: 600; }
+.vf-aba[aria-selected="true"]::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -1px;
+  height: 2px; background: var(--terracota); border-radius: 2px 2px 0 0;
+}
+.vf-aba:focus-visible { outline: 2px solid var(--terracota); outline-offset: 3px; border-radius: 3px; }
+
+/* ---- Botões ---- */
+.vf-btn {
+  font-family: var(--fonte-corpo); font-size: var(--t-sm); font-weight: 500;
+  padding: 8px 14px; border-radius: var(--raio-sm); cursor: pointer;
+  border: 1px solid var(--linha); background: var(--branco); color: var(--cafe);
+  transition: background .15s, border-color .15s, color .15s;
+}
+.vf-btn:hover { background: var(--areia); }
+.vf-btn:focus-visible { outline: 2px solid var(--terracota); outline-offset: 2px; }
+.vf-btn-primario {
+  background: var(--terracota); border-color: var(--terracota);
+  color: var(--branco); font-weight: 600;
+}
+.vf-btn-primario:hover { background: var(--terracota-deep); border-color: var(--terracota-deep); }
+
+/* ---- Avisos ---- */
+.vf-aviso {
+  border-left: 3px solid var(--terracota);
+  background: var(--branco);
+  padding: var(--e-3) var(--e-4);
+  border-radius: 0 var(--raio-sm) var(--raio-sm) 0;
+  font-size: var(--t-sm); line-height: 1.55;
+  box-shadow: var(--sombra);
+}
+.vf-aviso-titulo {
+  display: block; font-size: 10px; font-weight: 700;
+  letter-spacing: .13em; text-transform: uppercase;
+  color: var(--terracota-deep); margin-bottom: var(--e-1);
+}
+.vf-aviso[data-tom="atencao"] { border-left-color: var(--sev-alerta); background: var(--sev-alerta-bg); }
+.vf-aviso[data-tom="atencao"] .vf-aviso-titulo { color: var(--sev-alerta); }
+
+/* ---- Rodapé legal ---- */
+.vf-rodape-legal {
+  font-size: var(--t-xs); line-height: 1.5; color: var(--cafe-tenue);
+}
+
+/* ---- Grade responsiva simples (sem depender de Tailwind) ---- */
+.vf-grade   { display: grid; gap: var(--e-3) var(--e-4); grid-template-columns: 1fr; }
+@media (min-width: 760px) {
+  .vf-grade-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .vf-grade-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .vf-grade-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+.vf-col-total { grid-column: 1 / -1; }
+
+/* ---- Acessibilidade ---- */
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+}
