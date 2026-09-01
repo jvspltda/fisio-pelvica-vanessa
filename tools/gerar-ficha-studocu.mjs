@@ -38,6 +38,7 @@ const CORRECOES = [
   '"Inicio" -> "Início"; "episodio" -> "episódio"',
   'hemorróideas -> hemorroidas (inspeção do ânus)',
   '"Simetria direta-esquerda" -> "Simetria direita-esquerda"',
+  'Removida a Percepção de prolapso duplicada da seção 6 (mantida na 7)',
   'Wexner: acrescentado campo de somatório (o original não tinha)',
   'Acrescentados timbre, rodapé legal com CREFITO, numeração e assinaturas'
 ];
@@ -325,7 +326,6 @@ ${it('Adoção de novas posturas para a evacuação:', sn())}
 ${it('Uso de enemas, lavagens e supositórios:', sn() + '<span class="tx">Quantidade:</span>' + l('26mm'))}
 ${it('Sensação de esvaziamento incompleto:', sn())}
 ${it('Perda insensível de fezes:', sn())}
-${it('Percepção de prolapso:', sn())}
 ${it('Urgência:', sn() + '<span class="tx">Tempo de aviso:</span>' + lf())}
 ${it('Incontinência (por urgência):', sn())}
 ${it('Perda de fezes / flatos aos esforços:', os('Tosse', 'Espirro', 'Rir', 'Andar'))}

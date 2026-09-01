@@ -21,41 +21,14 @@
 <body>
 
 <!-- ══════════════════════════════════════════════════════════════
-     TIMBRE DE IMPRESSÃO — fixo, repetido em todas as páginas A4
-     ══════════════════════════════════════════════════════════════ -->
-<div id="timbre-impressao" class="vf-so-impr" aria-hidden="true">
-  <div class="timbre-marca">
-    <!-- Logomarca oficial. Basta colocar o arquivo em assets/logo.svg (ou .png
-         com fundo transparente) que ele passa a ser usado automaticamente.
-         Sem o arquivo, o vetor de recuo abaixo assume. -->
-    <img class="timbre-logo-img" src="assets/logo.svg" alt="" width="30" height="30"
-         onerror="this.remove(); var f=document.getElementById('timbre-logo-vetor'); if(f) f.style.display='block';">
-    <svg class="timbre-logo" id="timbre-logo-vetor" viewBox="0 0 120 120" width="30" height="30"
-         style="display:none" role="img" aria-label="Marca Vanessa Fernandes">
-      <path class="asa-solida" d="M60,44 C54,28 38,21 29,30 C20,39 30,51 49,53 C31,60 19,78 27,92 C35,106 55,99 60,74 Z"/>
-      <path class="asa-traco" d="M60,44 C54,28 38,21 29,30 C20,39 30,51 49,53 C31,60 19,78 27,92 C35,106 55,99 60,74 Z" transform="translate(120,0) scale(-1,1)"/>
-    </svg>
-    <div class="timbre-lockup">
-      <span class="timbre-nome">Vanessa Fernandes</span>
-      <span class="timbre-espec">FISIOTERAPIA PÉLVICA</span>
-    </div>
-  </div>
-  <div class="timbre-doc" id="timbre-doc-titulo">Avaliação Clínica</div>
-</div>
-
-<!-- Rodapé legal fixo da impressão -->
-<div id="rodape-impressao" class="vf-so-impr" aria-hidden="true">
-  <span id="rodape-texto-impressao"></span>
-</div>
-
-<!-- ══════════════════════════════════════════════════════════════
      CABEÇALHO DE TELA
      ══════════════════════════════════════════════════════════════ -->
 <header class="no-print" style="background:var(--branco);border-bottom:1px solid var(--linha);position:sticky;top:0;z-index:40">
   <div class="vf-container">
 
     <div style="display:flex;align-items:center;gap:var(--e-3);padding:var(--e-3) 0">
-      <img src="assets/logo.svg" alt="" width="42" height="42" style="flex:none"
+      <img src="assets/logo.svg" alt="" class="marca-tela"
+           style="flex:none;height:42px;width:auto"
            onerror="this.remove(); var f=document.getElementById('logo-vetor'); if(f) f.style.display='block';">
       <svg id="logo-vetor" viewBox="0 0 120 120" width="42" height="42"
            style="flex:none;display:none" role="img" aria-label="Marca Vanessa Fernandes">
@@ -90,6 +63,47 @@
     </nav>
   </div>
 </header>
+
+<!-- ----------------------------------------------------------------
+     FOLHA DE IMPRESSAO
+     O timbre e o rodape vivem no <thead>/<tfoot> desta tabela porque
+     e assim que o Chrome os repete em cada pagina A4. A tentativa
+     anterior usava position:fixed com deslocamento negativo: medido
+     no PDF, o cabecalho saia uma unica vez e a 266mm do topo, e o
+     rodape legal caia sobre o conteudo a 31mm.
+     Na tela a tabela e neutralizada para display:block (ver tokens.css).
+     ---------------------------------------------------------------- -->
+<table id="folha-impressao">
+
+<thead><tr><th>
+  <div id="timbre-impressao" class="vf-so-impr" aria-hidden="true">
+    <div class="timbre-marca">
+      <!-- Logomarca oficial. Basta colocar o arquivo em assets/logo.svg (ou .png
+           com fundo transparente) que ele passa a ser usado automaticamente.
+           Sem o arquivo, o vetor de recuo abaixo assume. -->
+      <img class="timbre-logo-img" src="assets/logo.svg" alt="" height="30"
+           onerror="this.remove(); var f=document.getElementById('timbre-logo-vetor'); if(f) f.style.display='block';">
+      <svg class="timbre-logo" id="timbre-logo-vetor" viewBox="0 0 120 120" width="30" height="30"
+           style="display:none" role="img" aria-label="Marca Vanessa Fernandes">
+        <path class="asa-solida" d="M60,44 C54,28 38,21 29,30 C20,39 30,51 49,53 C31,60 19,78 27,92 C35,106 55,99 60,74 Z"/>
+        <path class="asa-traco" d="M60,44 C54,28 38,21 29,30 C20,39 30,51 49,53 C31,60 19,78 27,92 C35,106 55,99 60,74 Z" transform="translate(120,0) scale(-1,1)"/>
+      </svg>
+      <div class="timbre-lockup">
+        <span class="timbre-nome">Vanessa Fernandes</span>
+        <span class="timbre-espec">FISIOTERAPIA PÉLVICA</span>
+      </div>
+    </div>
+    <div class="timbre-doc" id="timbre-doc-titulo">Avaliação Clínica</div>
+  </div>
+</th></tr></thead>
+
+<tfoot><tr><td>
+  <div id="rodape-impressao" class="vf-so-impr" aria-hidden="true">
+    <span id="rodape-texto-impressao"></span>
+  </div>
+</td></tr></tfoot>
+
+<tbody><tr><td>
 
 <main class="vf-container" style="padding-top:var(--e-5);padding-bottom:var(--e-7)">
 
@@ -147,6 +161,9 @@
   </section>
 
 </main>
+
+</td></tr></tbody>
+</table>
 
 <footer class="no-print" style="border-top:1px solid var(--linha);padding:var(--e-4) 0 var(--e-7)">
   <div class="vf-container">

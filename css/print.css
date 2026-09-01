@@ -18,9 +18,28 @@
   /* ---------- Geometria da folha ---------- */
   @page {
     size: A4 portrait;
-    /* Topo e base reservam o timbre e o rodapé fixos. */
-    margin: 26mm 14mm 20mm 14mm;
+    /* O timbre e o rodapé ocupam o fluxo, via thead/tfoot da
+       #folha-impressao. A margem não precisa mais reservá-los. */
+    margin: 10mm 14mm 9mm 14mm;
   }
+
+  /* ---------- Folha: thead/tfoot repetem em cada página ----------
+     position:fixed com deslocamento negativo NÃO repete no Chrome:
+     medido em PDF, o timbre saía uma única vez e a 266mm do topo, e o
+     rodapé legal caía sobre o conteúdo a 31mm. Grupos de tabela são a
+     única construção que o mecanismo de paginação repete de fato. */
+  #folha-impressao { display: table !important; width: 100% !important;
+                     border-collapse: collapse !important; }
+  #folha-impressao > thead { display: table-header-group !important; }
+  #folha-impressao > tfoot { display: table-footer-group !important; }
+  #folha-impressao > tbody { display: table-row-group !important; }
+  #folha-impressao > * > tr { display: table-row !important; }
+  #folha-impressao > * > tr > th,
+  #folha-impressao > * > tr > td { display: table-cell !important;
+                                   padding: 0 !important; border: 0 !important;
+                                   text-align: left !important; }
+  #folha-impressao > thead th { padding-bottom: 3mm !important; }
+  #folha-impressao > tfoot td { padding-top: 2mm !important; }
 
   /* ---------- Base ---------- */
   html, body {
@@ -55,9 +74,6 @@
 
   /* ---------- Timbre repetido em toda página ---------- */
   #timbre-impressao {
-    position: fixed;
-    top: -20mm; left: 0; right: 0;
-    height: 17mm;
     display: flex !important;
     align-items: flex-end;
     justify-content: space-between;
@@ -67,6 +83,7 @@
   }
   .timbre-marca { display: flex; align-items: center; gap: 3mm; }
   .timbre-logo  { flex: none; }
+  .timbre-logo-img { flex: none; height: 12mm !important; width: auto !important; }
 
   /* Versão monocromática da logo para impressão P&B */
   .timbre-logo .asa-solida { fill: #3D2E28; }
@@ -90,8 +107,6 @@
 
   /* ---------- Rodapé legal repetido em toda página ---------- */
   #rodape-impressao {
-    position: fixed;
-    bottom: -15mm; left: 0; right: 0;
     display: block !important;
     border-top: 0.5pt solid #E0D6CE;
     padding-top: 1.6mm;

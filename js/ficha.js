@@ -192,7 +192,6 @@
         txt('s6_enemas_quantidade', 'Enemas — quantidade'),
         radio('s6_esvaziamento_incompleto', 'Sensação de esvaziamento incompleto', SIM_NAO),
         radio('s6_perda_insensivel', 'Perda insensível de fezes', SIM_NAO),
-        radio('s6_percepcao_prolapso', 'Percepção de prolapso', SIM_NAO),
         radio('s6_urgencia', 'Urgência', SIM_NAO),
         txt('s6_urgencia_aviso', 'Urgência — tempo de aviso'),
         radio('s6_incont_urgencia', 'Incontinência por urgência', SIM_NAO),

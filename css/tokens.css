@@ -493,3 +493,29 @@ button.vf-card-cab:focus-visible { outline: 2px solid var(--terracota); outline-
   button.vf-card-cab { border-bottom: 0.5pt solid #EFE7E1 !important; }
   .vf-chevron, .vf-progresso, .vf-barra-modo { display: none !important; }
 }
+
+/* ----------------------------------------------------------------
+   #folha-impressao existe só para a paginação: o timbre e o rodapé
+   moram no thead/tfoot dela, que é o que o Chrome repete por página.
+   Na tela ela não deve introduzir layout de tabela nenhum.
+   ---------------------------------------------------------------- */
+#folha-impressao,
+#folha-impressao > thead,
+#folha-impressao > tbody,
+#folha-impressao > tfoot,
+#folha-impressao > * > tr,
+#folha-impressao > * > tr > th,
+#folha-impressao > * > tr > td {
+  display: block;
+  width: auto;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  text-align: inherit;
+  font-weight: inherit;
+}
+/* A marca oficial não é quadrada. O preflight do Tailwind aplica
+   img{height:auto}, que vence o atributo height do HTML — por isso a
+   altura precisa vir de regra de classe, não de atributo. */
+.timbre-logo-img { height: 30px; width: auto; }
+.marca-tela      { height: 42px; width: auto; }
