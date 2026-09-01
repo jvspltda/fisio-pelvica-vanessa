@@ -1,10 +1,17 @@
-Coloque aqui a logomarca oficial com o nome exato:
+assets/ -- imagens da suite
 
-    logo.svg
+logo.png  Marca oficial da Vanessa, fundo transparente, terracota #B86657.
+          Extraida do cartao de marca (WhatsApp Image 2026-08-31 at 14.37.18.jpeg)
+          por separacao de croma vermelho-azul: o fundo areia e a sombra
+          cinza do mockup caem para alfa zero sozinhos, sem mascara manual.
+          A sombra NAO foi mantida -- e efeito de apresentacao do cartao,
+          nao parte da marca.
 
-SVG e o formato preferido: escala sem perder nitidez e imprime bem em A4.
-PNG com fundo transparente tambem funciona - renomeie para logo.svg nao,
-use logo.png e ajuste o src nas duas ocorrencias do index.html.
+logo.svg  O mesmo PNG embutido em base64. index.html procura este arquivo
+          primeiro; se faltar, cai no vetor de recuo inline.
 
-Sem este arquivo, a suite usa um vetor de recuo automaticamente.
-Nada quebra.
+eva.jpg   Escala Visual Analogica 0-10 da ficha original (document-download.pdf,
+          xref 21). Instrumento clinico padrao, reaproveitado sem alteracao.
+
+Para regerar a marca a partir de outro arquivo, ver tools/extrair-logo.mjs
+nao existe: o processo esta descrito acima e foi feito com Python/PIL.

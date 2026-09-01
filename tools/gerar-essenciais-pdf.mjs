@@ -13,7 +13,7 @@
    Saida: build/essenciais-revisao.html
    ---------------------------------------------------------------- */
 import { createRequire } from 'node:module';
-import { writeFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -71,7 +71,8 @@ const corpo = [
   secao(EF.diagnostico, 'DX')
 ].filter(Boolean).join('\n');
 
-const ASA = "M60,44 C54,28 38,21 29,30 C20,39 30,51 49,53 C31,60 19,78 27,92 C35,106 55,99 60,74 Z";
+const LOGO = 'data:image/png;base64,' +
+  readFileSync(join(raiz, 'assets/logo.png')).toString('base64');
 
 const html = `<!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8">
@@ -99,7 +100,8 @@ table.folha > tfoot td{ padding:2mm 0 0; }
 .timbre{ display:flex; align-items:flex-end; justify-content:space-between;
   gap:8mm; height:14mm; border-bottom:0.8pt solid var(--terracota);
   padding-bottom:1.8mm; text-align:left; font-weight:400; }
-.marca-t{ display:flex; align-items:center; gap:2.8mm; }
+.marca-t{ display:flex; align-items:center; gap:2.6mm; }
+.logo{ height:11mm; width:auto; display:block; }
 .lockup{ display:flex; flex-direction:column; line-height:1.16; }
 .lockup .nome{ font-family:'Playfair Display',Georgia,serif; font-size:12.5pt;
   font-weight:700; color:var(--terracota); }
@@ -161,11 +163,7 @@ i.vazio{ border:0.6pt solid #C9BDB4; background:#fff; }
   <thead><tr><th>
     <div class="timbre">
       <div class="marca-t">
-        <svg viewBox="0 0 120 120" width="25" height="25" role="img" aria-label="Marca Vanessa Fernandes">
-          <path d="${ASA}" fill="#B86657"/>
-          <path d="${ASA}" transform="translate(120,0) scale(-1,1)" fill="none"
-                stroke="#B86657" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
+        <img src="${LOGO}" alt="" class="logo">
         <div class="lockup">
           <span class="nome">Vanessa Fernandes</span>
           <span class="esp">Fisioterapia Pélvica</span>
