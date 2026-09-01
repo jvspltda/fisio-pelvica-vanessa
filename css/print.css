@@ -1,0 +1,408 @@
+/* ════════════════════════════════════════════════════════════════
+   print.css — Folha dedicada à impressão em A4 timbrado.
+   Suíte Clínica · Vanessa Fernandes · Fisioterapia Pélvica
+
+   Decisões desta folha:
+   · Fragmentação exclusivamente com propriedades modernas
+     (break-inside / break-after). Nenhum page-break-* legado.
+   · Timbre e rodapé legal em elementos fixed, repetidos em todas
+     as páginas; as margens de @page reservam o espaço deles.
+   · Fundo branco estrito e economia de tinta.
+   · Cada aba imprime somente a si mesma, via classe imp-* no body.
+   · Campos vazios viram linhas de preenchimento manual, para que a
+     mesma ficha sirva em papel ou na tela.
+   ════════════════════════════════════════════════════════════════ */
+
+@media print {
+
+  /* ---------- Geometria da folha ---------- */
+  @page {
+    size: A4 portrait;
+    /* Topo e base reservam o timbre e o rodapé fixos. */
+    margin: 26mm 14mm 20mm 14mm;
+  }
+
+  /* ---------- Base ---------- */
+  html, body {
+    background: #fff !important;
+    color: #1c1a19 !important;
+    font-family: 'Plus Jakarta Sans', 'Segoe UI', Arial, sans-serif !important;
+    font-size: 9.3pt !important;
+    line-height: 1.42 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  main, .vf-container {
+    max-width: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* ---------- O que nunca vai ao papel ---------- */
+  .no-print,
+  header,
+  footer,
+  nav,
+  .vf-abas,
+  .vf-aba,
+  #aviso-privacidade { display: none !important; }
+
+  /* ---------- O que só existe no papel ---------- */
+  .vf-so-impr { display: block !important; }
+
+  /* ---------- Timbre repetido em toda página ---------- */
+  #timbre-impressao {
+    position: fixed;
+    top: -20mm; left: 0; right: 0;
+    height: 17mm;
+    display: flex !important;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 8mm;
+    padding-bottom: 2.4mm;
+    border-bottom: 0.7pt solid #B86657;
+  }
+  .timbre-marca { display: flex; align-items: center; gap: 3mm; }
+  .timbre-logo  { flex: none; }
+
+  /* Versão monocromática da logo para impressão P&B */
+  .timbre-logo .asa-solida { fill: #3D2E28; }
+  .timbre-logo .asa-traco  { fill: none; stroke: #3D2E28; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+  .timbre-logo .corpo      { stroke: #3D2E28; stroke-width: 2; stroke-linecap: round; }
+
+  .timbre-lockup { display: flex; flex-direction: column; line-height: 1.2; }
+  .timbre-nome {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 12.5pt; font-weight: 700; color: #3D2E28;
+  }
+  .timbre-espec {
+    font-size: 6.2pt; letter-spacing: .35em;
+    text-transform: uppercase; color: #3D2E28;
+  }
+  .timbre-doc {
+    font-size: 7.2pt; color: #9E4F42; text-align: right;
+    max-width: 62mm; line-height: 1.3; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .05em;
+  }
+
+  /* ---------- Rodapé legal repetido em toda página ---------- */
+  #rodape-impressao {
+    position: fixed;
+    bottom: -15mm; left: 0; right: 0;
+    display: block !important;
+    border-top: 0.5pt solid #E0D6CE;
+    padding-top: 1.6mm;
+    font-size: 6.4pt;
+    line-height: 1.4;
+    color: #6B564D;
+    text-align: center;
+  }
+
+  /* ---------- Isolamento por aba ----------
+     app.js aplica imp-{aba} no <body> antes de window.print(). */
+  body.imp-avaliacao   #painel-prescricao,
+  body.imp-avaliacao   #painel-aderencia,
+  body.imp-avaliacao   #painel-orientacoes,
+  body.imp-avaliacao   #painel-laudo,
+  body.imp-prescricao  #painel-avaliacao,
+  body.imp-prescricao  #painel-aderencia,
+  body.imp-prescricao  #painel-orientacoes,
+  body.imp-prescricao  #painel-laudo,
+  body.imp-aderencia   #painel-avaliacao,
+  body.imp-aderencia   #painel-prescricao,
+  body.imp-aderencia   #painel-orientacoes,
+  body.imp-aderencia   #painel-laudo,
+  body.imp-orientacoes #painel-avaliacao,
+  body.imp-orientacoes #painel-prescricao,
+  body.imp-orientacoes #painel-aderencia,
+  body.imp-orientacoes #painel-laudo,
+  body.imp-laudo       #painel-avaliacao,
+  body.imp-laudo       #painel-prescricao,
+  body.imp-laudo       #painel-aderencia,
+  body.imp-laudo       #painel-orientacoes { display: none !important; }
+
+  /* A aba pedida é forçada a aparecer mesmo se oculta na tela. */
+  body.imp-avaliacao   #painel-avaliacao,
+  body.imp-prescricao  #painel-prescricao,
+  body.imp-aderencia   #painel-aderencia,
+  body.imp-orientacoes #painel-orientacoes,
+  body.imp-laudo       #painel-laudo { display: block !important; }
+
+  /* Na avaliação, imprime só o perfil ativo (o oculto continua salvo). */
+  .vf-oculto { display: none !important; }
+
+  /* ---------- Cartões de seção ---------- */
+  .vf-card {
+    background: #fff !important;
+    border: 0.6pt solid #DCD2CA !important;
+    border-radius: 2pt !important;
+    box-shadow: none !important;
+    margin: 0 0 3.2mm 0 !important;
+    break-inside: avoid;
+  }
+  .vf-card-cab {
+    padding: 1.8mm 3mm !important;
+    border-bottom: 0.5pt solid #EFE7E1 !important;
+    background: #FBF7F4 !important;
+    gap: 2.2mm !important;
+    break-after: avoid;
+  }
+  .vf-card-num {
+    width: 5mm !important; height: 5mm !important;
+    background: #B86657 !important; color: #fff !important;
+    font-size: 6.2pt !important; font-weight: 700 !important;
+  }
+  .vf-card-cab h2 {
+    font-family: 'Playfair Display', Georgia, serif !important;
+    font-size: 10.5pt !important; color: #3D2E28 !important; margin: 0 !important;
+  }
+  .vf-card-corpo { padding: 2.4mm 3mm 2.8mm !important; }
+
+  h1 { font-size: 13pt !important; margin: 0 0 2mm !important; }
+  h3 { font-family: 'Playfair Display', Georgia, serif !important;
+       font-size: 9.4pt !important; color: #9E4F42 !important;
+       margin: 2mm 0 1mm !important; break-after: avoid; }
+  h4 { font-size: 8.6pt !important; margin: 1.6mm 0 0.8mm !important; break-after: avoid; }
+
+  /* ---------- Grade em duas colunas ---------- */
+  .vf-grade {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 1.8mm 4mm !important;
+    align-items: start !important;
+  }
+  .vf-grade-3, .vf-grade-4 { grid-template-columns: repeat(4, 1fr) !important; }
+  .vf-col-total { grid-column: 1 / -1 !important; }
+
+  /* ---------- Rótulos e campos ---------- */
+  .vf-rotulo {
+    font-size: 6.3pt !important;
+    letter-spacing: .05em !important;
+    color: #8A7268 !important;
+    margin-bottom: 0.5mm !important;
+  }
+
+  /* Campo vazio vira linha de escrita; preenchido, texto sobre a linha. */
+  .vf-campo {
+    border: none !important;
+    border-bottom: 0.5pt solid #C9BDB4 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    padding: 0.3mm 0 0.7mm !important;
+    font-size: 8.6pt !important;
+    color: #1c1a19 !important;
+    box-shadow: none !important;
+    min-height: 4.4mm !important;
+    width: 100% !important;
+  }
+  textarea.vf-campo {
+    min-height: 9mm !important;
+    border: 0.5pt solid #DCD2CA !important;
+    border-radius: 1.5pt !important;
+    padding: 1.1mm 1.5mm !important;
+    line-height: 1.45 !important;
+  }
+  body.imp-laudo textarea.vf-campo { min-height: 15mm !important; }
+  .vf-campo:disabled { background: transparent !important; color: #8A7268 !important; }
+  .vf-campo[readonly] { border-bottom-style: dotted !important; }
+
+  input[type=number]::-webkit-inner-spin-button,
+  input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+  select.vf-campo { background-image: none !important; padding-right: 0 !important; }
+
+  /* ---------- Opções: quadradinhos marcáveis à mão ---------- */
+  .vf-opcoes { gap: 0.9mm 2.4mm !important; }
+  .vf-opcoes label {
+    border: none !important;
+    background: transparent !important;
+    padding: 0.2mm 0 !important;
+    font-size: 8pt !important;
+    gap: 1.3mm !important;
+    color: #1c1a19 !important;
+    break-inside: avoid;
+  }
+  .vf-opcoes input {
+    appearance: none; -webkit-appearance: none;
+    width: 2.5mm !important; height: 2.5mm !important;
+    border: 0.6pt solid #8A7268 !important; border-radius: 0.5pt;
+    flex: none; position: relative; background: #fff !important;
+  }
+  .vf-opcoes input[type=radio] { border-radius: 50%; }
+  .vf-opcoes input:checked { background: #B86657 !important; border-color: #B86657 !important; }
+  .vf-opcoes input:checked::after {
+    content: ""; position: absolute; left: 0.65mm; top: 0.2mm;
+    width: 0.8mm; height: 1.45mm; border: solid #fff; border-width: 0 0.42mm 0.42mm 0;
+    transform: rotate(42deg);
+  }
+  .vf-opcoes input[type=radio]:checked::after {
+    left: 0.58mm; top: 0.58mm; width: 1.05mm; height: 1.05mm;
+    border: none; background: #fff; border-radius: 50%; transform: none;
+  }
+  .vf-opcoes label:has(input:checked) span { font-weight: 700 !important; color: #9E4F42 !important; }
+  .vf-opcoes label:has(input:disabled) { opacity: 1 !important; }
+
+  /* Escalas descritivas (Oxford/ICS) ocupam a linha inteira. */
+  .vf-escala-descritiva { gap: 0.6mm !important; }
+  .vf-escala-descritiva label { line-height: 1.35 !important; padding: 0.3mm 0 !important; }
+
+  /* ---------- Escores e badges ---------- */
+  .vf-escore {
+    background: #FBF3F1 !important;
+    border: 0.5pt solid #EBD5CE !important;
+    padding: 1.6mm 3mm !important;
+    border-radius: 2pt !important;
+    break-inside: avoid;
+  }
+  .vf-escore-valor { font-size: 14pt !important; color: #9E4F42 !important; }
+  .vf-escore-max { font-size: 7.6pt !important; }
+  .vf-badge {
+    font-size: 7pt !important; padding: 0.5mm 2mm !important;
+    border: 0.4pt solid #DCD2CA;
+  }
+
+  /* ---------- Wexner ---------- */
+  .vf-wexner { font-size: 7.8pt !important; break-inside: avoid; }
+  .vf-wexner th, .vf-wexner td { padding: 1mm 1.4mm !important; border-color: #DCD2CA !important; }
+  .vf-wexner thead th { background: #FBF7F4 !important; }
+  .vf-wexner tbody th { background: #fff !important; }
+  .vf-wexner-pt { font-size: 6.6pt !important; }
+  .vf-wexner-cel input { width: 2.6mm !important; height: 2.6mm !important;
+    appearance: none; -webkit-appearance: none; border: 0.6pt solid #8A7268;
+    border-radius: 50%; position: relative; background: #fff; }
+  .vf-wexner-cel input:checked { background: #B86657 !important; border-color: #B86657 !important; }
+
+  /* ---------- Régua EVA ---------- */
+  .vf-eva input[type=range] { height: 1.4mm !important; }
+  .vf-eva input[type=range]::-webkit-slider-runnable-track { height: 1.4mm; }
+  .vf-eva input[type=range]::-webkit-slider-thumb {
+    width: 3mm; height: 3mm; margin-top: -0.8mm; border-width: 0.6mm; box-shadow: none;
+  }
+  .vf-eva-valor { font-size: 11pt !important; }
+
+  /* ---------- Avisos ---------- */
+  .vf-aviso {
+    background: #FBF7F4 !important;
+    border-left: 1pt solid #B86657 !important;
+    padding: 1.6mm 2.4mm !important;
+    font-size: 7.8pt !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+  .vf-aviso-titulo { font-size: 6.2pt !important; }
+
+  /* ---------- Cartão VIP de Treino ---------- */
+  .vf-cartao-treino {
+    border: 0.7pt solid #B86657 !important;
+    border-radius: 3pt !important;
+    box-shadow: none !important;
+    padding: 5mm 6mm 4mm !important;
+    max-width: none !important;
+    margin-top: 3mm !important;
+    break-inside: avoid;
+  }
+  .cartao-cab h2 { font-size: 15pt !important; }
+  .cartao-etiqueta { font-size: 6.4pt !important; color: #B86657 !important; }
+  .cartao-lista > div { padding: 1.4mm 0 !important; border-bottom-color: #EFE7E1 !important; }
+  .cartao-lista dt { font-size: 8.4pt !important; }
+  .cartao-lista dd { font-size: 12pt !important; }
+  .cartao-bloco h3 { font-size: 8.8pt !important; color: #3D2E28 !important; margin-bottom: 1mm !important; }
+  .cartao-bloco ul { font-size: 8.4pt !important; padding-left: 4mm !important; }
+  .cartao-bloco li { margin-bottom: 0.6mm !important; }
+  .cartao-nota {
+    background: #FBF3F1 !important; border-left: 0.9pt solid #B86657 !important;
+    padding: 1.6mm 2.4mm !important; font-size: 8pt !important;
+  }
+  .cartao-rodape { font-size: 6.4pt !important; padding-top: 1.4mm !important; margin-top: 3mm !important; }
+
+  /* ---------- Habit tracker ---------- */
+  .vf-tracker { font-size: 8pt !important; break-inside: avoid; }
+  .vf-tracker th, .vf-tracker td { padding: 1.4mm 1mm !important; border-color: #C9BDB4 !important; }
+  .vf-tracker thead th { background: #FBF7F4 !important; }
+  .vf-tracker-rotulo { border-bottom: 0.5pt solid #C9BDB4 !important; font-size: 8pt !important; }
+  .vf-tracker-cel input {
+    width: 3.4mm !important; height: 3.4mm !important;
+    appearance: none; -webkit-appearance: none;
+    border: 0.6pt solid #8A7268; border-radius: 0.5pt; background: #fff; position: relative;
+  }
+  .vf-tracker-cel input:checked { background: #B86657 !important; border-color: #B86657 !important; }
+
+  /* ---------- Âncora ---------- */
+  .vf-ancora-saida {
+    background: #FBF3F1 !important; border-left: 1pt solid #B86657 !important;
+    padding: 2mm 3mm !important; font-size: 10.5pt !important; break-inside: avoid;
+  }
+
+  /* ---------- Assinaturas ---------- */
+  .bloco-assinaturas {
+    display: flex !important; gap: 12mm; margin-top: 12mm; break-inside: avoid;
+  }
+  .bloco-assinaturas > div { flex: 1; text-align: center; }
+  .bloco-assinaturas span { font-size: 7.4pt; color: #6B564D; }
+  .linha-assin { border-top: 0.6pt solid #3D2E28; margin-bottom: 1.4mm; }
+
+  .bloco-assinatura-laudo {
+    margin-top: 14mm !important; text-align: center; break-inside: avoid;
+  }
+  .bloco-assinatura-laudo .linha-assin { width: 74mm; margin: 0 auto 1.6mm; }
+  .assin-nome { font-family: 'Playfair Display', Georgia, serif; font-size: 11pt; font-weight: 700; color: #3D2E28; }
+  .assin-reg  { font-size: 7.2pt; color: #6B564D; margin-top: 0.5mm; }
+
+  /* ---------- Kit de orientações ---------- */
+  .vf-kit-cab {
+    border: none !important; border-bottom: 0.7pt solid #EBD5CE !important;
+    border-radius: 0 !important; box-shadow: none !important;
+    padding: 0 0 2.4mm !important; margin-bottom: 4mm !important;
+  }
+  .vf-kit-cab h2 { font-size: 15pt !important; }
+  .vf-kit-obs {
+    background: #FBF3F1 !important; border-left: 1pt solid #B86657 !important;
+    padding: 2mm 3mm !important; font-size: 8.6pt !important; margin-bottom: 4mm !important;
+    break-inside: avoid;
+  }
+  .vf-cartilha {
+    border: none !important; box-shadow: none !important;
+    padding: 0 !important; margin-bottom: 5mm !important;
+    break-inside: avoid;
+  }
+  .vf-cartilha h3 {
+    font-size: 11.5pt !important; color: #9E4F42 !important;
+    border-bottom: 0.5pt solid #EFE0DA !important;
+    padding-bottom: 1mm !important; margin: 0 0 2.2mm !important;
+  }
+  .vf-cartilha-bloco { margin-bottom: 2.4mm !important; break-inside: avoid; }
+  .vf-cartilha-bloco h4 { font-size: 8.5pt !important; font-weight: 700 !important; color: #3D2E28 !important; }
+  .vf-cartilha-bloco p  { font-size: 8.5pt !important; line-height: 1.5 !important; margin-bottom: 1mm !important; }
+  .vf-cartilha-bloco ul { padding-left: 4.2mm !important; margin: 0.5mm 0 1mm !important; list-style: disc !important; }
+  .vf-cartilha-bloco li { font-size: 8.5pt !important; line-height: 1.46 !important; margin-bottom: 0.6mm !important; }
+  .vf-cartilha-nota {
+    background: #FAF6F3 !important; border-left: 0.9pt solid #D49A8D !important;
+    padding: 1.3mm 2.2mm !important; font-size: 8pt !important;
+  }
+
+  /* ---------- Laudo ---------- */
+  .vf-laudo-ident > div { padding: 1.2mm 0 !important; border-bottom-color: #EFE7E1 !important; }
+  .vf-laudo-ident dt { font-size: 6.4pt !important; }
+  .vf-laudo-ident dd { font-size: 8.6pt !important; }
+
+  .vf-tabela-escores { font-size: 8.2pt !important; break-inside: avoid; }
+  .vf-tabela-escores th, .vf-tabela-escores td {
+    padding: 1.4mm 2mm !important; border-color: #DCD2CA !important;
+  }
+  .vf-tabela-escores thead th { background: #FBF7F4 !important; font-size: 6.6pt !important; }
+  .vf-tabela-escores tbody th { background: #fff !important; }
+  .vf-tabela-escores td input { border-bottom: 0.4pt dotted #C9BDB4 !important; min-height: 0 !important; }
+
+  .vf-lista-condutas { font-size: 8.6pt !important; padding-left: 4.5mm !important; }
+  .vf-lista-condutas li { margin-bottom: 0.7mm !important; }
+
+  /* ---------- Controle de fragmentação ---------- */
+  .quebra-evitar { break-inside: avoid; }
+  p, li { orphans: 2; widows: 2; }
+  a { color: #1c1a19 !important; text-decoration: none !important; }
+
+  /* Remove toda sombra herdada do Tailwind ou dos tokens. */
+  * { box-shadow: none !important; }
+}
