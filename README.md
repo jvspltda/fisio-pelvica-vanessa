@@ -324,17 +324,32 @@ orientações e assinatura do laudo — deriva dessa constante.
 `assets/logo.svg` é a marca oficial em **curvas de Bézier**, usada no cabeçalho de
 tela, no timbre de impressão e nos dois geradores de PDF.
 
-Ela foi obtida do cartão de visitas por `tools/vetorizar-logo.py`: máscara de tinta
-pelo croma vermelho-azul (o que descarta o fundo e a sombra do mockup), contorno por
-marching squares, simplificação Douglas-Peucker e ajuste de Béziers cúbicas.
-Fidelidade medida contra a máscara original: **IoU de 98,6%**, área dentro de 0,3%.
+Ela vem do cartão de visitas, em dois passos. `tools/vetorizar-logo.py` faz o traço:
+máscara de tinta pelo croma vermelho-azul (o que descarta o fundo e a sombra do
+mockup), contorno por marching squares e simplificação Douglas-Peucker.
+`tools/redesenhar-logo.py` **redesenha** a partir dessa máscara, ajustando Béziers
+cúbicas por mínimos quadrados com subdivisão adaptativa (Schneider) — que é o que uma
+ferramenta de traço faz: poucos segmentos, tangentes contínuas, curva lisa por
+construção. É esse o script que produz o `assets/logo.svg` em uso.
 
-Dois parâmetros do vetorizador têm teto medido, não arbitrado:
-
-| Parâmetro | Valor | Por quê |
+| | Traçado | Redesenhado |
 |---|---|---|
-| `sigma` do desfoque | 2,5 | a partir de 3,0 os dois pontos de acento se dissolvem (3 componentes viram 1) |
-| `eps` do Douglas-Peucker | 2,0 | corta 47% dos pontos por 0,39% de IoU; a borda deixa de seguir o ruído do JPEG |
+| Construção | Douglas-Peucker + Catmull-Rom | Bézier por mínimos quadrados |
+| Nós / segmentos | 754 pontos | 436 curvas |
+| Arquivo | 33 KB | 19 KB |
+| IoU contra a máscara | 98,6% | 98,1% |
+
+O traçado tem IoU meio ponto melhor porque segue o pixel — inclusive a ondulação da
+compressão. O redesenhado troca essa fidelidade de ruído por curva limpa, que é o que
+importa em tamanho grande.
+
+**Correção de uma nota anterior.** Este README dizia que o desfoque acima de `sigma
+3,0` dissolvia "dois pontos de acento". Não existem pontos de acento na marca: aquelas
+duas lascas ficam em `y` 4–5 do viewBox, no alto, e são as **pontas das asas**
+estranguladas pela suavização — 175 e 294 px na escala de trabalho, menos de 3 px² do
+cartão. Nenhuma combinação de corte e fechamento morfológico as reconecta sem trazer
+ruído de JPEG junto, então o redesenho fica só com o componente principal: soltas, em
+tamanho de banner, elas leriam como sujeira.
 
 **Limitação de origem.** O material de partida é um JPEG com ~190 px de largura útil.
 O vetor escala sem serrilhar e serve para banner, mas a ondulação fina do traço vem da
