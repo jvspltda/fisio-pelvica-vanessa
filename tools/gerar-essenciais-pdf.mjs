@@ -71,8 +71,13 @@ const corpo = [
   secao(EF.diagnostico, 'DX')
 ].filter(Boolean).join('\n');
 
-const LOGO = 'data:image/png;base64,' +
-  readFileSync(join(raiz, 'assets/logo.png')).toString('base64');
+/* Marca em vetor, pelo mesmo motivo do gerador da ficha. */
+const LOGO = readFileSync(join(raiz, 'assets/logo.svg'), 'utf8')
+  /* Tira width/height intrinsecos: o SVG traz 201x141, que renderiza a
+     ~53mm e estoura o timbre. O viewBox e mantido, entao o CSS passa a
+     controlar o tamanho sozinho. */
+  .replace(/\s(?:width|height)="[\d.]+"/g, '')
+  .replace('<svg ', '<svg class="logo" ');
 
 const html = `<!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8">
@@ -101,7 +106,11 @@ table.folha > tfoot td{ padding:2mm 0 0; }
   gap:8mm; height:14mm; border-bottom:0.8pt solid var(--terracota);
   padding-bottom:1.8mm; text-align:left; font-weight:400; }
 .marca-t{ display:flex; align-items:center; gap:2.6mm; }
-.logo{ height:11mm; width:auto; display:block; }
+/* Largura explicita, nao auto: dentro de <th> o layout de tabela e o
+   width:auto do SVG se realimentam e a marca cresce so na impressao
+   (medido: 11mm na tela, 19mm no PDF). Com as duas dimensoes fixas
+   nao ha ambiguidade. */
+.logo{ height:11mm; width:15.68mm; display:block; }
 .lockup{ display:flex; flex-direction:column; line-height:1.16; }
 .lockup .nome{ font-family:'Playfair Display',Georgia,serif; font-size:12.5pt;
   font-weight:700; color:var(--terracota); }
@@ -163,7 +172,7 @@ i.vazio{ border:0.6pt solid #C9BDB4; background:#fff; }
   <thead><tr><th>
     <div class="timbre">
       <div class="marca-t">
-        <img src="${LOGO}" alt="" class="logo">
+        ${LOGO}
         <div class="lockup">
           <span class="nome">Vanessa Fernandes</span>
           <span class="esp">Fisioterapia Pélvica</span>

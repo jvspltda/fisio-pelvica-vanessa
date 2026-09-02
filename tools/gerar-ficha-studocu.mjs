@@ -23,7 +23,14 @@ const Ficha = require(join(raiz, 'js/ficha.js'));
 const b64 = (p, mime) =>
   `data:${mime};base64,` + readFileSync(join(raiz, p)).toString('base64');
 
-const LOGO = b64('assets/logo.png', 'image/png');
+/* Marca em vetor: o PDF passa a carregar curvas, nao pixels, entao
+   a mesma arte serve do timbre de 22mm a um banner. */
+const LOGO = readFileSync(join(raiz, 'assets/logo.svg'), 'utf8')
+  /* Tira width/height intrinsecos: o SVG traz 201x141, que renderiza a
+     ~53mm e estoura o timbre. O viewBox e mantido, entao o CSS passa a
+     controlar o tamanho sozinho. */
+  .replace(/\s(?:width|height)="[\d.]+"/g, '')
+  .replace('<svg ', '<svg class="logo" ');
 const EVA  = b64('assets/eva.jpg',  'image/jpeg');
 
 /* Correcoes aplicadas ao original, para constar no README e na conversa. */
@@ -116,7 +123,11 @@ table.folha > tfoot td{ padding:2mm 0 0; }
 .timbre{ display:flex; align-items:flex-end; justify-content:space-between; gap:8mm;
   border-bottom:0.8pt solid var(--terracota); padding-bottom:1.8mm; text-align:left; }
 .marca{ display:flex; align-items:center; gap:2.6mm; }
-.marca img{ height:11mm; width:auto; display:block; }
+/* Largura explicita, nao auto: dentro de <th> o layout de tabela e o
+   width:auto do SVG se realimentam e a marca cresce so na impressao
+   (medido: 11mm na tela, 19mm no PDF). Com as duas dimensoes fixas
+   nao ha ambiguidade. */
+.marca .logo{ height:11mm; width:15.68mm; display:block; }
 .lockup{ display:flex; flex-direction:column; line-height:1.15; }
 .lockup .nome{ font-family:'Playfair Display',Georgia,serif; font-size:12.5pt;
   font-weight:700; color:var(--terracota); }
@@ -225,7 +236,7 @@ h4{ font-size:8.4pt; font-weight:600; font-style:italic; color:var(--cafe);
 <thead><tr><th>
   <div class="timbre">
     <div class="marca">
-      <img src="${LOGO}" alt="">
+      ${LOGO}
       <div class="lockup">
         <span class="nome">Vanessa Fernandes</span>
         <span class="esp">Fisioterapia Pélvica</span>

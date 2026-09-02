@@ -18,16 +18,21 @@ não nos CDNs.
 ### Estrutura
 
 ```
-index.html            Shell da aplicação: abas, containers, logo SVG inline
-css/tokens.css        Design tokens e componentes — fonte de verdade visual
-css/print.css         Folha exclusiva de impressão A4 timbrada
-js/scores.js          Motor de cálculo puro, sem DOM (window.Scores)
-js/ficha.js           Estrutura de dados da ficha (window.Ficha)
-js/storage.js         Persistência e backup (window.Storage)
-js/adherence.js       Templates de vínculo, hábito e cartilhas (window.Adherence)
-js/app.js             Render, reatividade e navegação — carrega por último
-tests/scores.test.mjs  Testes do motor de cálculo
-tests/storage.test.mjs Testes de serialização e validação
+index.html               Shell da aplicação: abas e folha de impressão
+css/tokens.css           Design tokens e componentes — fonte de verdade visual
+css/print.css            Folha exclusiva de impressão A4 timbrada
+js/scores.js             Motor de cálculo puro, sem DOM (window.Scores)
+js/ficha.js              Estrutura de dados da ficha (window.Ficha)
+js/storage.js            Persistência e backup (window.Storage)
+js/adherence.js          Templates de vínculo, hábito e cartilhas (window.Adherence)
+js/app.js                Render, reatividade e navegação — carrega por último
+assets/logo.svg          Marca oficial, em curvas de Bézier
+assets/eva.jpg           Régua EVA colorida, extraída da ficha original
+tests/scores.test.mjs    Testes do motor de cálculo
+tests/storage.test.mjs   Testes de serialização e validação
+tools/gerar-ficha-studocu.mjs   Gera a ficha em branco (PDF) a partir de js/ficha.js
+tools/gerar-essenciais-pdf.mjs  Gera a folha de revisão dos campos essenciais
+tools/vetorizar-logo.py         Converte a marca do cartão em vetor
 ```
 
 Os arquivos precisam manter essa disposição relativa. Se `css/` ou `js/` forem
@@ -153,13 +158,38 @@ Na caixa de diálogo do navegador:
 | Margens | Padrão |
 | Gráficos de plano de fundo | **desmarcado** |
 
-O timbre e o rodapé legal se repetem em todas as páginas. A logo é impressa em
-versão monocromática, adequada a impressoras P&B.
+O timbre e o rodapé legal se repetem em todas as páginas.
+
+> **Por que o timbre usa uma tabela.** `#folha-impressao` envolve o `<main>`, com o
+> timbre no `<thead>` e o rodapé no `<tfoot>`. Grupos de tabela são a única construção
+> que o mecanismo de paginação do Chrome repete de fato. A abordagem anterior —
+> `position: fixed` com deslocamento negativo — **não funcionava**: medido em PDF, o
+> timbre saía uma única vez, a 266 mm do topo, e o rodapé legal caía sobre o conteúdo,
+> a 31 mm. Na tela a tabela é neutralizada para `display: block` em `css/tokens.css`.
+
+> **Cuidado ao mexer nas imagens do timbre.** O preflight do Tailwind aplica
+> `img { height: auto }`, que vence o atributo `height` do HTML. Dimensione sempre por
+> regra de classe. E em SVG dentro de `<th>`, use largura **explícita**: com
+> `width: auto` o layout de tabela e o SVG se realimentam e a marca cresce só na
+> impressão (medido: 11 mm na tela, 19 mm no PDF).
 
 ### Ficha em branco para preenchimento manual
-Abra a aplicação sem preencher nada e imprima a aba 1. Campos vazios saem como
-**linhas de escrita** e as opções como **quadradinhos marcáveis à caneta**. A mesma
-ficha serve em papel ou na tela.
+
+Duas vias:
+
+**Pela aplicação** — abra sem preencher nada e imprima a aba 1. Campos vazios saem como
+linhas de escrita e as opções como quadradinhos marcáveis à caneta.
+
+**Pelo gerador dedicado** — `node tools/gerar-ficha-studocu.mjs` produz
+`build/ficha-studocu.html`, que reproduz a ficha original na identidade da Vanessa, em
+6 páginas A4. Converta com Chrome:
+
+```bash
+chrome --headless --print-to-pdf=Ficha.pdf --no-pdf-header-footer build/ficha-studocu.html
+```
+
+O gerador lê `js/ficha.js` e `js/scores.js`: mudou um campo na aplicação, o papel
+acompanha. Não há transcrição manual a dessincronizar.
 
 ---
 
@@ -249,20 +279,27 @@ orientações e assinatura do laudo — deriva dessa constante.
 
 ### Logomarca
 
-**Coloque o arquivo oficial em `assets/logo.svg`.** Ele passa a ser usado
-automaticamente, no cabeçalho de tela e no timbre de impressão.
+`assets/logo.svg` é a marca oficial em **curvas de Bézier**, usada no cabeçalho de
+tela, no timbre de impressão e nos dois geradores de PDF.
 
-Sem esse arquivo, a suíte cai num vetor de recuo embutido e nada quebra — mas o vetor
-é apenas uma aproximação genérica, não a marca real. **Use o arquivo oficial.**
+Ela foi obtida do cartão de visitas por `tools/vetorizar-logo.py`: máscara de tinta
+pelo croma vermelho-azul (o que descarta o fundo e a sombra do mockup), contorno por
+marching squares, simplificação Douglas-Peucker e ajuste de Béziers cúbicas.
+Fidelidade medida contra a máscara original: **IoU de 98,6%**, área dentro de 0,3%.
 
-SVG é o formato preferido: escala sem perder nitidez e imprime bem em A4. PNG com fundo
-transparente também serve — nesse caso ajuste o `src` nas duas ocorrências do
-`index.html` para `assets/logo.png`.
+Dois parâmetros do vetorizador têm teto medido, não arbitrado:
 
-A versão monocromática do vetor de recuo, para impressão P&B, é controlada em
-`css/print.css` nas regras `.timbre-logo .asa-solida` / `.asa-traco`. Se você usar o
-arquivo oficial e precisar de uma versão P&B específica, forneça também
-`assets/logo-mono.svg` e troque o `src` dentro do bloco `#timbre-impressao`.
+| Parâmetro | Valor | Por quê |
+|---|---|---|
+| `sigma` do desfoque | 2,5 | a partir de 3,0 os dois pontos de acento se dissolvem (3 componentes viram 1) |
+| `eps` do Douglas-Peucker | 2,0 | corta 47% dos pontos por 0,39% de IoU; a borda deixa de seguir o ruído do JPEG |
+
+**Limitação de origem.** O material de partida é um JPEG com ~190 px de largura útil.
+O vetor escala sem serrilhar e serve para banner, mas a ondulação fina do traço vem da
+compressão do original, não do traçado. Para uso em grande formato com acabamento
+editorial, vale pedir o arquivo nativo a quem desenhou o cartão.
+
+Para regerar após trocar o cartão de origem: `python tools/vetorizar-logo.py`.
 
 ### Cores e tipografia
 Todas as decisões visuais estão no `:root` de `css/tokens.css`:
