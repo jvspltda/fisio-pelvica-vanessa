@@ -207,6 +207,32 @@ O parâmetro que decide isso é o espaçamento: caderno pautado usa 7–8 mm. Na
 compacta a mediana era **6,1 mm**, e a letra invadia a linha de baixo. Use
 `--compacto` só para arquivo em pasta, não para preencher.
 
+#### Variante em preto e branco
+
+`node tools/gerar-ficha-studocu.mjs --pb` gera `build/ficha-studocu-pb.html`, para
+laser monocromática. Não é o colorido dessaturado: a paleta troca por tons que rendem
+em toner e a régua EVA é **redesenhada**.
+
+A EVA precisou ser redesenhada porque matiz não sobrevive à escala de cinza. Medido na
+imagem original, a separação entre a ponta leve e a intensa:
+
+| Conversão | Separação (0–255) | Problema |
+|---|---|---|
+| Luminância padrão | 20 | as faixas viram um bloco só |
+| Peso no azul | 38 | rampa fraca, cinza uniforme |
+| Canal azul puro | 91 | rampa boa, mas os números 5–8 somem no escuro |
+
+A régua desenhada resolve: números escuros sobre branco, sempre legíveis, e a
+intensidade vira a **espessura crescente da borda** sob cada número — de 0,40 mm a
+3,00 mm. Tudo em borda, nada em fundo, porque a instrução de impressão pede
+*"Gráficos de plano de fundo: desmarcado"* e nesse modo qualquer `background` sumiria.
+
+#### Sobre as quebras de página
+
+A quebra forçada antes do **Exame Físico** é deliberada e **não custa página** —
+medido: 8 páginas com ou sem ela. Ela permite separar as folhas da anamnese das do
+exame, que são dois momentos distintos da consulta.
+
 ---
 
 ## Salvamento e backup

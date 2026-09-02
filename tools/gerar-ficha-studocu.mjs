@@ -8,8 +8,8 @@
    mesmas opcoes, mesmo fluxo em linha corrida. O que muda e a forma --
    timbre, tipografia, cor -- e as correcoes listadas em CORRECOES.
 
-   Uso:   node tools/gerar-ficha-studocu.mjs
-   Saida: build/ficha-studocu.html
+   Uso:   node tools/gerar-ficha-studocu.mjs [--pb] [--compacto]
+   Saida: build/ficha-studocu.html  ou  build/ficha-studocu-pb.html
    ---------------------------------------------------------------- */
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -24,6 +24,13 @@ const raiz = join(dirname(fileURLToPath(import.meta.url)), '..');
    filetes, contra 7-8mm de caderno pautado -- a letra invadia a linha de
    baixo. --compacto devolve o layout apertado, para arquivo em pasta. */
 const CANETA = !process.argv.includes('--compacto');
+
+/* Modo P&B: para laser monocromatica. Nao e dessaturar o colorido --
+   e trocar a paleta por tons que rendem em toner e redesenhar a EVA,
+   porque matiz nao sobrevive a escala de cinza (medido: o cinza padrao
+   deixa 20 niveis de separacao entre a ponta leve e a intensa, contra
+   os 91 do canal azul, e nenhum dos dois mantem os numeros legiveis). */
+const PB = process.argv.includes('--pb');
 const v = (folgado, apertado) => (CANETA ? folgado : apertado);
 const Ficha = require(join(raiz, 'js/ficha.js'));
 
@@ -37,8 +44,33 @@ const LOGO = readFileSync(join(raiz, 'assets/logo.svg'), 'utf8')
      ~53mm e estoura o timbre. O viewBox e mantido, entao o CSS passa a
      controlar o tamanho sozinho. */
   .replace(/\s(?:width|height)="[\d.]+"/g, '')
-  .replace('<svg ', '<svg class="logo" ');
+  .replace('<svg ', '<svg class="logo" ')
+  .replace(/fill="#B86657"/g, PB ? 'fill="#1A1A1A"' : 'fill="#B86657"');
 const EVA  = b64('assets/eva.jpg',  'image/jpeg');
+
+/* No modo colorido vale a arte original da ficha; no P&B, a regua
+   desenhada, que imprime melhor e economiza toner. A rampa de
+   intensidade e a espessura crescente da borda sob cada numero. */
+function evaBloco() {
+  if (!PB) {
+    return `<div class="eva-bloco">` +
+      `<img src="${EVA}" alt="Escala Visual Analógica de 0 a 10"></div>`;
+  }
+  const celulas = Array.from({ length: 11 }, (_, n) => {
+    const esp = (0.4 + n * 0.26).toFixed(2);   // 0,40mm a 3,00mm
+    return `<div class="eva-c"><b>${n}</b>` +
+           `<i style="border-bottom-width:${esp}mm"></i></div>`;
+  }).join('');
+  return `<div class="eva-bloco"><div class="eva-d">
+    <div class="eva-zonas">
+      <span style="flex:3">Leve</span>
+      <span style="flex:5">Moderada</span>
+      <span style="flex:3">Intensa</span>
+    </div>
+    <div class="eva-reg">${celulas}</div>
+    <div class="eva-leg">Escala Visual Analógica — EVA</div>
+  </div></div>`;
+}
 
 /* Correcoes aplicadas ao original, para constar no README e na conversa. */
 const CORRECOES = [
@@ -112,8 +144,11 @@ const html = `<!doctype html>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap">
 <style>
-:root{ --terracota:#B86657; --deep:#9E4F42; --cafe:#3D2E28;
-       --areia:#F7F4F0; --rosegold:#D49A8D; --linha:#C9BDB4; --tenue:#8A7268; }
+${PB
+  ? `:root{ --terracota:#2E2A28; --deep:#000000; --cafe:#1A1A1A;
+       --areia:#F2F2F2; --rosegold:#767676; --linha:#8C8C8C; --tenue:#4A4A4A; }`
+  : `:root{ --terracota:#B86657; --deep:#9E4F42; --cafe:#3D2E28;
+       --areia:#F7F4F0; --rosegold:#D49A8D; --linha:#C9BDB4; --tenue:#8A7268; }`}
 @page{ size:A4 portrait; margin:10mm 12mm 9mm 12mm; }
 *{ box-sizing:border-box; }
 html,body{ margin:0; padding:0; background:#fff; color:var(--cafe);
@@ -210,6 +245,23 @@ h4{ font-size:8.4pt; font-weight:600; font-style:italic; color:var(--cafe);
 /* EVA */
 .eva-bloco{ text-align:center; margin:2.5mm 0 1.5mm; break-inside:avoid; }
 .eva-bloco img{ width:132mm; max-width:100%; height:auto; }
+/* Regua desenhada, usada no modo P&B. Tudo em borda, nada em fundo:
+   a instrucao de impressao pede "graficos de plano de fundo" desmarcado,
+   e nesse modo qualquer background-color ou gradiente sumiria. */
+.eva-d{ width:132mm; max-width:100%; margin:0 auto; }
+.eva-zonas{ display:flex; font-size:7.4pt; font-weight:700; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--cafe); margin-bottom:0.8mm; }
+.eva-zonas span{ text-align:center; }
+.eva-zonas span + span{ border-left:0.8pt solid var(--cafe); }
+.eva-reg{ display:flex; }
+.eva-c{ flex:1; border:0.5pt solid var(--cafe); text-align:center;
+  padding:1.1mm 0 0.5mm; }
+.eva-c + .eva-c{ border-left:none; }
+.eva-c b{ font-size:10pt; font-weight:700; color:var(--cafe); }
+.eva-c i{ display:block; margin:1.1mm 1.1mm 0.2mm;
+  border-bottom:0 solid var(--cafe); }
+.eva-leg{ font-size:7.6pt; font-weight:700; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--cafe); margin-top:1.2mm; }
 .eva-val{ text-align:right; font-weight:700; margin-top:1mm; }
 
 /* Wexner */
@@ -302,7 +354,7 @@ ${it('Queixa principal, início, duração, evolução, limitações funcionais 
 ${area(4)}
 
 <h3 class="c">Estimativa do incômodo relacionado à queixa principal</h3>
-<div class="eva-bloco"><img src="${EVA}" alt="Escala Visual Analógica de 0 a 10"></div>
+${evaBloco()}
 <div class="eva-val">EVA: ${l('22mm')}</div>
 
 ${h(4, 'Hábitos de Vida e Antecedentes Clínicos e Cirúrgicos')}
@@ -475,7 +527,7 @@ ${it('Outros testes específicos (Perineometria, Pad test, EMG):', '')}
 ${area(3)}
 
 <h3 class="c">Estimativa de desconforto da paciente ao exame do assoalho pélvico</h3>
-<div class="eva-bloco"><img src="${EVA}" alt="Escala Visual Analógica de 0 a 10"></div>
+${evaBloco()}
 <div class="eva-val">EVA: ${l('22mm')}</div>
 
 <h3>Diagnóstico Fisioterapêutico da condição do AP</h3>
@@ -493,7 +545,9 @@ ${area(3)}
 </body></html>`;
 
 mkdirSync(join(raiz, 'build'), { recursive: true });
-writeFileSync(join(raiz, 'build/ficha-studocu.html'), html, 'utf8');
-console.log('  build/ficha-studocu.html gerado ·', html.length, 'bytes');
+/* Arquivos separados: gerar uma variante nao pode apagar a outra. */
+const SAIDA = PB ? 'build/ficha-studocu-pb.html' : 'build/ficha-studocu.html';
+writeFileSync(join(raiz, SAIDA), html, 'utf8');
+console.log('  ' + SAIDA + ' gerado ·', html.length, 'bytes');
 console.log('  correcoes aplicadas ao original:', CORRECOES.length);
 CORRECOES.forEach(c => console.log('    -', c));
