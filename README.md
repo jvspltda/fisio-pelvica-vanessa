@@ -191,6 +191,22 @@ chrome --headless --print-to-pdf=Ficha.pdf --no-pdf-header-footer build/ficha-st
 O gerador lê `js/ficha.js` e `js/scores.js`: mudou um campo na aplicação, o papel
 acompanha. Não há transcrição manual a dessincronizar.
 
+#### Modo caneta × modo compacto
+
+O padrão é o **modo caneta**, dimensionado para ser preenchido à mão:
+
+| | Caneta (padrão) | Compacto (`--compacto`) |
+|---|---|---|
+| Altura da linha de escrita | 6,6 mm | 4,1 mm |
+| Espaçamento medido entre filetes | 9,0 mm | 6,1 mm |
+| Corpo do texto | 9,3 pt | 8,7 pt |
+| Diâmetro das opções | 3,2 mm | 2,5 mm |
+| Páginas | 8 | 6 |
+
+O parâmetro que decide isso é o espaçamento: caderno pautado usa 7–8 mm. Na versão
+compacta a mediana era **6,1 mm**, e a letra invadia a linha de baixo. Use
+`--compacto` só para arquivo em pasta, não para preencher.
+
 ---
 
 ## Salvamento e backup

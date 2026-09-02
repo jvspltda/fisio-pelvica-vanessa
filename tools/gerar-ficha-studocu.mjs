@@ -18,6 +18,13 @@ import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
 const raiz = join(dirname(fileURLToPath(import.meta.url)), '..');
+
+/* Este PDF existe para ser preenchido a caneta, entao o padrao e o modo
+   folgado. Medido na versao anterior: 6,1mm de espacamento mediano entre
+   filetes, contra 7-8mm de caderno pautado -- a letra invadia a linha de
+   baixo. --compacto devolve o layout apertado, para arquivo em pasta. */
+const CANETA = !process.argv.includes('--compacto');
+const v = (folgado, apertado) => (CANETA ? folgado : apertado);
 const Ficha = require(join(raiz, 'js/ficha.js'));
 
 const b64 = (p, mime) =>
@@ -111,7 +118,7 @@ const html = `<!doctype html>
 *{ box-sizing:border-box; }
 html,body{ margin:0; padding:0; background:#fff; color:var(--cafe);
   font-family:'Plus Jakarta Sans','Segoe UI',Arial,sans-serif;
-  font-size:8.7pt; line-height:1.5;
+  font-size:${v('9.3pt','8.7pt')}; line-height:${v('1.5','1.5')};
   -webkit-print-color-adjust:exact; print-color-adjust:exact; }
 
 /* folha: thead/tfoot repetem em cada pagina */
@@ -165,8 +172,12 @@ h4{ font-size:8.4pt; font-weight:600; font-style:italic; color:var(--cafe);
 
 /* itens em linha corrida */
 .it{ display:flex; flex-wrap:wrap; align-items:baseline; gap:0 2.2mm;
-  padding-left:3.4mm; position:relative; margin-bottom:0.9mm; break-inside:avoid; }
-.it::before{ content:"–"; position:absolute; left:0; color:var(--rosegold); }
+  margin-bottom:${v('1.2mm','0.9mm')}; break-inside:avoid; }
+/* O travessao e item de flex, nao pseudo-elemento absoluto: com
+   align-items:baseline ele acompanha a linha de base sozinho. Absoluto
+   sem top ancorava no topo da caixa e, com a linha de escrita alta do
+   modo caneta, ficava boiando acima do texto. */
+.it::before{ content:"–"; flex:none; width:3.4mm; color:var(--rosegold); }
 .it.sub{ padding-left:9mm; }
 .it.sub::before{ content:none; }
 .it.plain{ padding-left:0; }
@@ -176,14 +187,17 @@ h4{ font-size:8.4pt; font-weight:600; font-style:italic; color:var(--cafe);
 .tx.nota{ font-size:7.4pt; color:#6B564D; }
 
 /* linhas de escrita */
-.l,.lf{ display:inline-block; border-bottom:0.5pt solid var(--linha); height:4.1mm; }
+.l,.lf{ display:inline-block; border-bottom:0.5pt solid var(--linha);
+  height:${v('6.6mm','4.1mm')}; }
 .lf{ flex:1 1 40mm; min-width:20mm; }
-.area{ display:flex; flex-direction:column; gap:2.4mm; margin:1mm 0 1.4mm; }
+.area{ display:flex; flex-direction:column; gap:${v('6.6mm','2.4mm')};
+  margin:${v('2mm 0 2.4mm','1mm 0 1.4mm')}; }
 .area .lf{ width:100%; flex:none; }
 
 /* opcoes */
 .o{ display:inline-flex; align-items:center; gap:1.1mm; white-space:nowrap; margin-right:3.2mm; }
-.o i{ width:2.5mm; height:2.5mm; border:0.6pt solid var(--tenue); border-radius:50%;
+.o i{ width:${v('3.2mm','2.5mm')}; height:${v('3.2mm','2.5mm')};
+  border:0.6pt solid var(--tenue); border-radius:50%;
   background:#fff; flex:none; }
 .ops{ display:flex; flex-wrap:wrap; }
 
@@ -204,7 +218,7 @@ h4{ font-size:8.4pt; font-weight:600; font-style:italic; color:var(--cafe);
   letter-spacing:.04em; color:var(--deep); border-bottom:0.5pt solid var(--linha);
   padding-bottom:0.8mm; margin-bottom:1mm; }
 .wx-tipo{ flex:0 0 52mm; }
-.wx-l{ display:flex; align-items:baseline; padding:0.6mm 0;
+.wx-l{ display:flex; align-items:baseline; padding:${v('1.5mm','0.6mm')} 0;
   border-bottom:0.4pt solid #EFE7E1; }
 .wx-l .wx-tipo{ flex:0 0 52mm; }
 .wx-ops{ display:flex; flex-wrap:wrap; }
@@ -214,7 +228,8 @@ h4{ font-size:8.4pt; font-weight:600; font-style:italic; color:var(--cafe);
 .wx-soma .max{ color:var(--tenue); font-weight:400; }
 
 /* escalas graduadas */
-.grad{ display:flex; align-items:baseline; gap:2mm; padding:0.55mm 0; break-inside:avoid; }
+.grad{ display:flex; align-items:baseline; gap:2mm;
+  padding:${v('1.4mm','0.55mm')} 0; break-inside:avoid; }
 .grad i{ width:2.5mm; height:2.5mm; border:0.6pt solid var(--tenue); border-radius:50%;
   background:#fff; flex:none; position:relative; top:0.3mm; }
 .grad b{ flex:none; min-width:3.5mm; color:var(--deep); }
