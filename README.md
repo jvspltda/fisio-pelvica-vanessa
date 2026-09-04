@@ -207,6 +207,33 @@ O parâmetro que decide isso é o espaçamento: caderno pautado usa 7–8 mm. Na
 compacta a mediana era **6,1 mm**, e a letra invadia a linha de baixo. Use
 `--compacto` só para arquivo em pasta, não para preencher.
 
+#### Duas colunas: de 8 para 5 páginas
+
+A ficha ocupava só **19% da largura útil** e deixava a metade direita vazia em 56%
+das linhas. O que sobrava era espaço horizontal, não vertical — então o corpo virou
+grade de duas colunas e a pauta de escrita **não foi tocada**.
+
+Um item só vai à largura inteira quando precisa, por peso de conteúdo
+(`LIMITE_LARGO = 100`, o equilíbrio medido: abaixo disso a ficha volta a 6 páginas)
+ou quando tem opção de texto longo. Essa segunda regra é obrigatória: as opções usam
+`white-space: nowrap` para não separar o círculo do rótulo, então em meia coluna elas
+não quebram — são **cortadas na borda**, que foi o que aconteceu com as descrições de
+Oxford, ICS e movimento interno do períneo.
+
+Três armadilhas que a conversão expôs:
+
+| Sintoma | Causa |
+|---|---|
+| Página 1 quase vazia, 244 mm perdidos | `break-inside: avoid` no `.ident`, que é grade dentro de grade. A fragmentação do Chrome empurrava o bloco inteiro para a página 2. A grade agora começa na seção 1, com cabeçalho e identificação fora dela |
+| Página inteira transbordando a margem direita | item de grade nasce com `min-width: auto` (= `min-content`). Com rótulos em `nowrap`, as colunas `1fr` recusavam encolher. Corrigido com `min-width: 0` |
+| Um grupo engolindo 28 mil caracteres | `[\s\S]*?` retrocede e casa através de outros itens. Trocado por padrão temperado que proíbe `<div>` no miolo |
+
+Pai e linhas recuadas viram um `.grupo`, que é quem ocupa a coluna — sem isso "Tipo:"
+caía numa coluna e "Trocas:" na outra, sendo ambos filhos de "Uso de proteção".
+
+A quebra forçada antes do **Exame Físico** foi solta: ela separava bem anamnese de
+exame, mas deixava 160 mm vazios e sozinha impedia fechar em 5 páginas.
+
 #### Variante em preto e branco
 
 `node tools/gerar-ficha-studocu.mjs --pb` gera `build/ficha-studocu-pb.html`, para
@@ -335,21 +362,25 @@ construção. É esse o script que produz o `assets/logo.svg` em uso.
 | | Traçado | Redesenhado |
 |---|---|---|
 | Construção | Douglas-Peucker + Catmull-Rom | Bézier por mínimos quadrados |
-| Nós / segmentos | 754 pontos | 436 curvas |
-| Arquivo | 33 KB | 19 KB |
-| IoU contra a máscara | 98,6% | 98,1% |
+| Nós / segmentos | 754 pontos | **98 curvas** |
+| Arquivo | 33 KB | **4,8 KB** |
+| IoU contra a máscara | 98,6% | 91,4% |
+| Área | 100,3% | 99,7% |
 
-O traçado tem IoU meio ponto melhor porque segue o pixel — inclusive a ondulação da
-compressão. O redesenhado troca essa fidelidade de ruído por curva limpa, que é o que
-importa em tamanho grande.
+**A queda de IoU é o objetivo, não um defeito.** O traçado tinha IoU alto porque seguia
+o pixel — a ondulação da compressão do JPEG inclusive. Suavizar a `sigma 18` antes de
+ajustar tira essa ondulação; a área permanece em 99,7%, o que mostra que o desvio é
+simétrico (borda mais lisa), não encolhimento ou distorção da forma.
 
-**Correção de uma nota anterior.** Este README dizia que o desfoque acima de `sigma
-3,0` dissolvia "dois pontos de acento". Não existem pontos de acento na marca: aquelas
-duas lascas ficam em `y` 4–5 do viewBox, no alto, e são as **pontas das asas**
-estranguladas pela suavização — 175 e 294 px na escala de trabalho, menos de 3 px² do
-cartão. Nenhuma combinação de corte e fechamento morfológico as reconecta sem trazer
-ruído de JPEG junto, então o redesenho fica só com o componente principal: soltas, em
-tamanho de banner, elas leriam como sujeira.
+**Uma abordagem que não deu certo.** Tentei desenhar a asa direita pela linha de centro:
+separar corpo e traço por espessura local (meia-espessura mediana de 1,5 unidade no
+traço contra 8,1 no corpo, separação limpa), esqueletizar por Zhang-Suen e traçar com
+espessura constante — o que resolveria de vez a variação de espessura, já que uma
+linha de centro não tem duas margens para discordar. O esqueleto estilhaçou: 105 arcos,
+61 mesmo após podar as farpas, e o traço saiu tracejado. Costurar os arcos através das
+junções exigiria escolher a continuação mais reta em cada cruzamento — mais trabalho
+com retorno incerto neste nível de ruído. A abordagem está descrita aqui caso valha
+retomar com um material de origem melhor.
 
 **Limitação de origem.** O material de partida é um JPEG com ~190 px de largura útil.
 O vetor escala sem serrilhar e serve para banner, mas a ondulação fina do traço vem da

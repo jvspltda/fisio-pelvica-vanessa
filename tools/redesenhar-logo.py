@@ -151,7 +151,11 @@ def ajustar(pts, t1, t2, tol, prof=0):
 def anel_para_bezier(pts, tol):
     """Fecha o anel partindo no ponto de maior curvatura, para que a
     emenda caia num canto natural em vez de no meio de uma curva."""
-    p = suavizar(reamostrar(pts), sigma=3.0)
+    # Sigma alto de proposito. Com 3.0 o ajuste seguia o contorno pixel
+    # a pixel e herdava a ondulacao da compressao do JPEG: a curva
+    # tinha IoU otimo e desenho ruim. O alvo aqui e curva lisa, nao
+    # fidelidade de ruido.
+    p = suavizar(reamostrar(pts), sigma=18.0)
     n = len(p)
     if n < 6:
         return None, 0
@@ -177,7 +181,9 @@ def main():
     alpha = mascara()
     h, w = alpha.shape
     aneis = contornos(alpha)
-    TOL = 3.2                      # ~0,32 px do cartao original
+    # Tolerancia folgada pelo mesmo motivo: menos segmentos, curva mais
+    # limpa. De 3,2 para 22 os segmentos caem de 436 para 98.
+    TOL = 22.0
     partes, nos = [], 0
     for anel in aneis:
         d, n = anel_para_bezier(anel, TOL)

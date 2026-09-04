@@ -95,10 +95,38 @@ const os = (...ts) => ts.map(o).join('');
 const sn = () => os('Sim', 'Não');
 const l  = (w) => `<span class="l" style="width:${w}"></span>`;  // linha de escrita
 const lf = () => `<span class="lf"></span>`;                     // linha que ocupa o resto
+/* A ficha ocupava so 19% da largura util e deixava a metade direita
+   vazia em 56% das linhas. O corpo virou grade de duas colunas: o que
+   sobra e espaco horizontal, nao vertical, entao encurtar por aqui nao
+   rouba nada do espaco de escrita a mao. Um item so toma a largura
+   inteira quando precisa -- linha que se estica, muitas opcoes, ou
+   rotulo longo demais para caber em meia coluna. */
+/* 100 e o ponto de equilibrio medido: abaixo disso mais itens vao a
+   largura inteira e a ficha volta a 6 paginas. */
+const LIMITE_LARGO = 100;
+const largura = (txt, resto) => {
+  const rot = txt.replace(/<[^>]*>/g, '').length;
+  const ops = (resto.match(/class="o"/g) || []).length;
+  const lin = (resto.match(/class="lf?"/g) || []).length;
+  const extra = (resto.replace(/<[^>]*>/g, '') || '').length;
+  /* Opcao com texto longo tem de ir a largura inteira. As opcoes usam
+     white-space:nowrap para nao separar o circulo do rotulo, entao numa
+     meia coluna elas nao quebram -- sao cortadas na borda. Foi o que
+     acontecia com as descricoes de Oxford, ICS e movimento interno. */
+  const tudo = txt + resto;   // a opcao pode vir aninhada no rotulo
+  const maiorOpcao = Math.max(0, ...(tudo.match(/class="o"><i><\/i>([^<]*)</g) || [])
+    .map(m => m.replace(/.*<\/i>/, '').replace('<', '').length));
+  if (maiorOpcao > 26) return ' largo';
+  return rot + extra + ops * 9 + lin * 12 > LIMITE_LARGO ? ' largo' : '';
+};
 const it = (txt, resto = '') =>                                  // item com traço
-  `<div class="it"><span class="tx">${txt}</span>${resto}</div>`;
+  `<div class="it${largura(txt, resto)}"><span class="tx">${txt}</span>${resto}</div>`;
+/* Recuado tambem se classifica: nem todo recuado tem item pai -- os de
+   Oxford, ICS e movimento interno vem soltos depois de um h4, e sem
+   classificacao suas opcoes longas eram cortadas na borda da coluna.
+   Quando ha pai, quem manda na largura e o grupo, e isso aqui e inocuo. */
 const sub = (txt, resto = '') =>                                 // linha recuada
-  `<div class="it sub"><span class="tx">${txt}</span>${resto}</div>`;
+  `<div class="it sub${largura(txt, resto)}"><span class="tx">${txt}</span>${resto}</div>`;
 const h   = (n, t) => `<h2><span class="n">${n}</span>${t}</h2>`;
 const area = (n = 2) =>
   `<div class="area">${Array.from({ length: n }, () => '<span class="lf"></span>').join('')}</div>`;
@@ -137,7 +165,7 @@ const ICS = [
   [0, 'Ausente (sem contração)']
 ];
 
-const html = `<!doctype html>
+let html = `<!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8">
 <title>Ficha de Avaliação — Disfunções dos Músculos do Assoalho Pélvico Feminino</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -189,25 +217,42 @@ table.folha > tfoot td{ padding:2mm 0 0; }
 
 /* identificacao */
 .ident{ border:0.6pt solid var(--linha); border-radius:2pt; padding:2.4mm 3mm;
-  background:#FDFCFB; margin-bottom:3.5mm; break-inside:avoid; }
+  background:#FDFCFB; margin-bottom:3.5mm;
+  /* Sem break-inside:avoid de proposito. Como .ident e uma grade
+     aninhada dentro da grade do corpo, o avoid fazia o Chrome empurrar
+     o bloco inteiro para a pagina 2 e deixar 244mm vazios na 1. */ }
 
 /* secoes */
 h2{ font-size:9pt; font-weight:700; letter-spacing:.07em; text-transform:uppercase;
-  color:var(--deep); margin:4.5mm 0 1.8mm; padding-bottom:1.1mm;
+  color:var(--deep); margin:3.4mm 0 1.4mm; padding-bottom:1.1mm;
   border-bottom:0.7pt solid var(--rosegold); display:flex; align-items:center; gap:2.2mm;
   break-after:avoid; }
 h2 .n{ flex:none; min-width:5mm; height:5mm; border-radius:99px; background:var(--terracota);
   color:#fff; font-size:5.9pt; display:flex; align-items:center; justify-content:center;
   letter-spacing:0; }
-h3{ font-size:8.4pt; font-weight:700; color:var(--deep); margin:3mm 0 1.4mm;
+h3{ font-size:8.4pt; font-weight:700; color:var(--deep); margin:2.2mm 0 1.1mm;
   letter-spacing:.03em; break-after:avoid; }
 h3.c{ text-align:center; }
 h4{ font-size:8.4pt; font-weight:600; font-style:italic; color:var(--cafe);
   margin:2.4mm 0 1mm; break-after:avoid; }
 
 /* itens em linha corrida */
+/* Grade de duas colunas. O padrao e largura inteira; so .it sem
+   .largo desce para uma coluna. Assim qualquer bloco novo nasce
+   seguro e nunca quebra em meia largura por engano. */
+.g2{ display:grid; grid-template-columns:1fr 1fr; column-gap:9mm; align-items:start; }
+/* min-width:0 e obrigatorio: item de grade nasce com min-width:auto,
+   que e o tamanho min-content. Com rotulos em nowrap e linhas com
+   min-width, as colunas 1fr recusavam encolher e a pagina inteira
+   transbordava a margem direita -- ate o titulo do timbre saia cortado. */
+.g2 > *{ grid-column:1 / -1; min-width:0; }
+.g2 > .it{ grid-column:auto; }
+.g2 > .it.largo{ grid-column:1 / -1; }
+.g2 > .grupo{ grid-column:auto; }
+.g2 > .grupo.largo{ grid-column:1 / -1; }
+.grupo{ break-inside:avoid; }
 .it{ display:flex; flex-wrap:wrap; align-items:baseline; gap:0 2.2mm;
-  margin-bottom:${v('1.2mm','0.9mm')}; break-inside:avoid; }
+  margin-bottom:${v('0.9mm','0.7mm')}; break-inside:avoid; }
 /* O travessao e item de flex, nao pseudo-elemento absoluto: com
    align-items:baseline ele acompanha a linha de base sozinho. Absoluto
    sem top ancorava no topo da caixa e, com a linha de escrita alta do
@@ -225,7 +270,7 @@ h4{ font-size:8.4pt; font-weight:600; font-style:italic; color:var(--cafe);
 .l,.lf{ display:inline-block; border-bottom:0.5pt solid var(--linha);
   height:${v('6.6mm','4.1mm')}; }
 .lf{ flex:1 1 40mm; min-width:20mm; }
-.area{ display:flex; flex-direction:column; gap:${v('6.6mm','2.4mm')};
+.area{ display:flex; flex-direction:column; gap:${v('6.2mm','2.4mm')};
   margin:${v('2mm 0 2.4mm','1mm 0 1.4mm')}; }
 .area .lf{ width:100%; flex:none; }
 
@@ -243,12 +288,12 @@ h4{ font-size:8.4pt; font-weight:600; font-style:italic; color:var(--cafe);
 .consent .q + .q{ margin-top:1.8mm; }
 
 /* EVA */
-.eva-bloco{ text-align:center; margin:2.5mm 0 1.5mm; break-inside:avoid; }
-.eva-bloco img{ width:132mm; max-width:100%; height:auto; }
+.eva-bloco{ text-align:center; margin:1.6mm 0 1.1mm; break-inside:avoid; }
+.eva-bloco img{ width:100mm; max-width:100%; height:auto; }
 /* Regua desenhada, usada no modo P&B. Tudo em borda, nada em fundo:
    a instrucao de impressao pede "graficos de plano de fundo" desmarcado,
    e nesse modo qualquer background-color ou gradiente sumiria. */
-.eva-d{ width:132mm; max-width:100%; margin:0 auto; }
+.eva-d{ width:118mm; max-width:100%; margin:0 auto; }
 .eva-zonas{ display:flex; font-size:7.4pt; font-weight:700; letter-spacing:.14em;
   text-transform:uppercase; color:var(--cafe); margin-bottom:0.8mm; }
 .eva-zonas span{ text-align:center; }
@@ -289,10 +334,13 @@ h4{ font-size:8.4pt; font-weight:600; font-style:italic; color:var(--cafe);
   letter-spacing:.05em; color:var(--tenue); margin-bottom:0.8mm; }
 .cab-grad .g1{ flex:0 0 12mm; }
 
-.quebra{ break-before:page; }
+/* Sem break-before:page. A quebra forcada antes do Exame Fisico
+   separava bem anamnese de exame, mas deixava 160mm vazios na
+   pagina 4 e sozinha impedia fechar em 5 paginas. */
+.quebra{ break-before:auto; }
 
 /* assinaturas */
-.assin{ display:flex; gap:14mm; margin-top:6mm; break-inside:avoid; }
+.assin{ display:flex; gap:14mm; margin-top:4mm; break-inside:avoid; }
 .assin > div{ flex:1; text-align:center; }
 .assin .r{ border-top:0.6pt solid var(--cafe); margin-bottom:1.3mm; }
 .assin .n2{ font-size:8pt; font-weight:600; }
@@ -326,7 +374,7 @@ h4{ font-size:8.4pt; font-weight:600; font-style:italic; color:var(--cafe);
 
 <div class="data">Data: ${l('9mm')} / ${l('9mm')} / ${l('14mm')}</div>
 
-<div class="ident">
+<div class="ident g2">
   ${it('Nome:', lf())}
   ${it('Idade:', l('16mm') + '<span class="tx">Data de Nascimento:</span>' + l('9mm') + '/' + l('9mm') + '/' + l('13mm') + '<span class="tx">Estado Civil:</span>' + lf())}
   ${it('Profissão:', lf())}
@@ -335,6 +383,11 @@ h4{ font-size:8.4pt; font-weight:600; font-style:italic; color:var(--cafe);
   ${it('Clínica Solicitante:', lf())}
   ${it('Diagnóstico médico:', lf())}
 </div>
+
+<!-- A grade comeca aqui, nao antes. Com .abre/.data/.ident dentro
+     dela a fragmentacao do Chrome empurrava o bloco de identificacao
+     inteiro para a pagina 2 e deixava 244mm vazios na 1. -->
+<div class="corpo g2">
 
 ${h(1, 'Antecedentes Ginecológicos')}
 ${it('Estado reprodutivo:', os('Menacme', 'Climatério', 'Pós-menopausa'))}
@@ -540,12 +593,32 @@ ${area(3)}
        <div class="g">Ciente da avaliação realizada</div></div>
 </div>
 
+</div>
+
 </td></tr></tbody>
 </table>
 </body></html>`;
 
 mkdirSync(join(raiz, 'build'), { recursive: true });
 /* Arquivos separados: gerar uma variante nao pode apagar a outra. */
+/* Pai + recuados viram um grupo. E o grupo que ocupa uma coluna da
+   grade, entao a familia nunca se parte entre colunas -- o defeito que
+   aparecia com "Tipo:" numa coluna e "Trocas:" na outra, sendo os dois
+   filhos de "Uso de protecao". */
+html = html.replace(
+  /* Padrao temperado: o miolo do item nao pode conter <div>. Com
+     [\s\S]*? o motor retrocedia e casava atraves de outros itens -- um
+     unico grupo chegou a abrir em "Nome:" e engolir 28 mil caracteres,
+     incluindo o bloco de identificacao inteiro. */
+  /(<div class="it( largo)?">(?:(?!<\/?div)[\s\S])*<\/div>)((?:\s*<div class="it sub">(?:(?!<\/?div)[\s\S])*<\/div>)+)/g,
+  (m, pai, largo, filhos) => {
+    /* Se qualquer filho tiver opcao de texto longo, o grupo inteiro vai
+       a largura inteira: as opcoes usam nowrap e, em meia coluna, sao
+       cortadas na borda em vez de quebrar. */
+    const maior = Math.max(0, ...((pai + filhos).match(/class="o"><i><\/i>([^<]*)</g) || [])
+      .map(x => x.replace(/.*<\/i>/, '').replace('<', '').length));
+    return `<div class="grupo${largo || (maior > 26 ? ' largo' : '')}">${pai}${filhos}</div>`;
+  });
 const SAIDA = PB ? 'build/ficha-studocu-pb.html' : 'build/ficha-studocu.html';
 writeFileSync(join(raiz, SAIDA), html, 'utf8');
 console.log('  ' + SAIDA + ' gerado ·', html.length, 'bytes');
