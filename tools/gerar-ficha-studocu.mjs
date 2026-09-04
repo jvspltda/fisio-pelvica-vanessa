@@ -334,10 +334,11 @@ h4{ font-size:8.4pt; font-weight:600; font-style:italic; color:var(--cafe);
   letter-spacing:.05em; color:var(--tenue); margin-bottom:0.8mm; }
 .cab-grad .g1{ flex:0 0 12mm; }
 
-/* Sem break-before:page. A quebra forcada antes do Exame Fisico
-   separava bem anamnese de exame, mas deixava 160mm vazios na
-   pagina 4 e sozinha impedia fechar em 5 paginas. */
-.quebra{ break-before:auto; }
+/* O Exame Fisico comeca em folha nova. Custa uma pagina -- a
+   anamnese termina no meio da 4 -- e a troca e deliberada: sao dois
+   momentos distintos da consulta, e assim as folhas da anamnese se
+   separam das do exame, que acontece com a paciente ja posicionada. */
+.quebra{ break-before:page; }
 
 /* assinaturas */
 .assin{ display:flex; gap:14mm; margin-top:4mm; break-inside:avoid; }

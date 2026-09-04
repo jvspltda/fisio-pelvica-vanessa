@@ -207,7 +207,7 @@ O parâmetro que decide isso é o espaçamento: caderno pautado usa 7–8 mm. Na
 compacta a mediana era **6,1 mm**, e a letra invadia a linha de baixo. Use
 `--compacto` só para arquivo em pasta, não para preencher.
 
-#### Duas colunas: de 8 para 5 páginas
+#### Duas colunas: de 8 para 6 páginas
 
 A ficha ocupava só **19% da largura útil** e deixava a metade direita vazia em 56%
 das linhas. O que sobrava era espaço horizontal, não vertical — então o corpo virou
@@ -231,8 +231,11 @@ Três armadilhas que a conversão expôs:
 Pai e linhas recuadas viram um `.grupo`, que é quem ocupa a coluna — sem isso "Tipo:"
 caía numa coluna e "Trocas:" na outra, sendo ambos filhos de "Uso de proteção".
 
-A quebra forçada antes do **Exame Físico** foi solta: ela separava bem anamnese de
-exame, mas deixava 160 mm vazios e sozinha impedia fechar em 5 páginas.
+A quebra forçada antes do **Exame Físico** foi mantida, por escolha da Vanessa. Ela
+custa uma página — a anamnese termina a 91 mm da página 4 — e a troca é deliberada:
+são dois momentos distintos da consulta, e assim as folhas da anamnese se separam das
+do exame, que acontece com a paciente já posicionada. Sem ela a ficha fecha em 5
+páginas; com ela, em 6.
 
 #### Variante em preto e branco
 
