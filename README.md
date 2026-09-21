@@ -304,6 +304,15 @@ próxima ação e autorizações de registro e de WhatsApp.
 - **Não sincroniza entre aparelhos.** Para usar em outro computador, restaure o backup
   lá. Não use em computador compartilhado.
 
+## Roteiros de Reels (`roteiros.html`)
+
+Fonte única em `js/roteiros.js`. A página mostra falas, texto na tela, legenda com botão de
+copiar e, em cada roteiro, o bloco "No tráfego pago": quando impulsionar, público, **abertura
+neutra** para a versão de anúncio, título e texto do anúncio, e o link do WhatsApp com o
+código do vídeo. `tests/roteiros.test.mjs` roda na publicação e barra palavra proibida,
+percentual ou nome de estudo na fala, e anúncio com pergunta ou dirigido à pessoa (política
+de atributos pessoais da Meta).
+
 ## Salvamento e backup
 
 ### Onde os dados ficam

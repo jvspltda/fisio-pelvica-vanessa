@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:,">
+<meta name="robots" content="noindex, nofollow">
+<title>Roteiros — Vanessa Fernandes</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="css/roteiros.css">
+</head>
+<body>
+<header class="topo">
+  <div class="marca"><span class="nome">Vanessa Fernandes</span><span class="esp">Roteiros de Reels · tráfego pago</span></div>
+  <a class="voltar" href="materiais.html">← Materiais</a>
+</header>
+
+<main>
+  <section class="cartao intro">
+    <h1>Roteiros para gravar</h1>
+    <p>Cada roteiro tem as falas, o texto que vai na tela e a legenda pronta para copiar. No fim de cada um, o bloco
+    <b>No tráfego pago</b> diz se vale impulsionar, para quem, e traz o texto do anúncio e o link do WhatsApp.</p>
+    <p class="apoio">Padrão de todos: cerca de 45 segundos, uma pergunta sobre o que a paciente sente na abertura,
+    linguagem do dia a dia e fecho em "isso pede avaliação". Nenhuma fala cita estudo ou número.</p>
+  </section>
+
+  <section class="cartao">
+    <h2>Antes de gravar</h2>
+    <ul id="gravacao"></ul>
+    <div class="duas">
+      <div><h3>Selo na tela, do início ao fim</h3><p class="selo" id="selo"></p></div>
+      <div><h3>Cartela final (3 segundos)</h3><pre class="cartela" id="cartela"></pre></div>
+    </div>
+  </section>
+
+  <section class="cartao destaque">
+    <h2>Como o tráfego pago entra</h2>
+    <ol class="funil">
+      <li><b>Publique primeiro no orgânico.</b> Deixe o Reel alguns dias no perfil antes de colocar dinheiro.</li>
+      <li><b>Impulsione pelo Gerenciador de Anúncios</b>, com objetivo <b>Mensagens → WhatsApp</b>, público na cidade + 25 km.</li>
+      <li><b>No anúncio, use a abertura neutra</b> que você gravou e o texto de anúncio desta página. A Meta proíbe anúncio que
+        pergunte ou insinue a condição de saúde de quem vê — "Escapou xixi?" serve no post, não no anúncio.</li>
+      <li><b>Mensagem pronta com código.</b> Configure a mensagem do anúncio com o código do vídeo (ex.: "código A"). Quando a
+        paciente chama, você sabe qual vídeo a trouxe — sem que a mensagem fale da queixa dela.</li>
+      <li><b>Registre no prontuário:</b> "Como chegou: Instagram" e, em "Encaminhada por", o código do vídeo.</li>
+      <li><b>Toda semana, corte o vídeo que trouxe menos conversas</b> e passe o valor para o que trouxe mais.</li>
+    </ol>
+    <h3>Calendário das 4 primeiras semanas</h3>
+    <div class="tabela"><table>
+      <thead><tr><th>Semana</th><th>O que rodar</th><th>Objetivo</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>A — escape no esforço · G3 — primeira consulta</td><td>Mensagens</td></tr>
+        <tr><td>2</td><td>B — urgência · G1 — escape na gravidez</td><td>Mensagens</td></tr>
+        <tr><td>3</td><td>Os dois que mais trouxeram conversa</td><td>Mensagens</td></tr>
+        <tr><td>4</td><td>O melhor de todos</td><td>Reconhecimento, para a cidade te conhecer</td></tr>
+      </tbody>
+    </table></div>
+    <p class="apoio">O valor por dia é decisão sua: escolha um que dê para manter as quatro semanas sem aperto. Anúncio segue as mesmas
+    regras do conselho que o post: nome, CREFITO e data na peça, sem promessa, sem depoimento, sem preço.</p>
+  </section>
+
+  <nav class="filtros" id="filtros" aria-label="Filtrar roteiros"></nav>
+  <div id="lista"></div>
+
+  <section class="cartao">
+    <h2>Antes de publicar, confira</h2>
+    <ul class="check" id="checklist"></ul>
+    <h3>Nunca dizer</h3>
+    <p class="nunca" id="nunca"></p>
+  </section>
+
+  <section class="cartao">
+    <h2>Não regravar</h2>
+    <ul id="descartados"></ul>
+  </section>
+</main>
+
+<div id="toast" role="status"></div>
+<script src="js/roteiros.js"></script>
+<script src="js/roteiros-pagina.js"></script>
+</body>
+</html>

@@ -194,11 +194,11 @@
   };
 
   Cofre.buscar = function (banco, termo, incluirArquivadas) {
-    var t = String(termo || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+    var t = String(termo || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
     return banco.pacientes.filter(function (p) {
       if (!incluirArquivadas && p.arquivada) return false;
       if (!t) return true;
-      return p.nome.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().indexOf(t) !== -1;
+      return p.nome.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().indexOf(t) !== -1;
     }).sort(function (a, b) {
       /* primeiro quem tem próxima ação com data, pela data; depois alfabético */
       var da = a.proximaAcao && a.proximaAcao.data, db = b.proximaAcao && b.proximaAcao.data;

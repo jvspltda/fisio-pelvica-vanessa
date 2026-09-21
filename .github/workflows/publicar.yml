@@ -42,6 +42,7 @@ jobs:
           node tests/scores.test.mjs
           node tests/storage.test.mjs
           node tests/cofre.test.mjs
+          node tests/roteiros.test.mjs
 
       - name: Gerar ficha, cartilhas e carta
         run: |
@@ -52,7 +53,7 @@ jobs:
       - name: Montar o site
         run: |
           mkdir -p _site/impressos
-          cp index.html materiais.html prontuario.html _site/
+          cp index.html materiais.html prontuario.html roteiros.html _site/
           cp -r css js assets _site/
           cp build/ficha-studocu.html      _site/impressos/ficha-avaliacao.html
           cp build/ficha-studocu-pb.html   _site/impressos/ficha-avaliacao-pb.html

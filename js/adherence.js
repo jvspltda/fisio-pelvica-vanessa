@@ -288,6 +288,33 @@
       ]
     },
     {
+      id: 'diastase',
+      titulo: 'Cuidando da Diástase Abdominal',
+      resumo: 'Quando a barriga se afasta no meio — e como ajudar o corpo a se recuperar.',
+      blocos: [
+        {
+          h: 'O que é a diástase',
+          p: 'Na gravidez a barriga estica muito, e os dois lados do músculo da frente da barriga se afastam no meio. É muito comum na gestação e depois do parto, e não é culpa sua. Com os cuidados certos, a gente ajuda essa musculatura a voltar a trabalhar junto.'
+        },
+        {
+          h: 'No dia a dia',
+          l: ['Para levantar da cama, vire de lado primeiro e use os braços para subir — nada de levantar "de frente", dobrando a barriga',
+              'Ao pegar o bebê ou qualquer peso, traga perto do corpo e solte o ar enquanto levanta',
+              'Evite carregar peso além do necessário neste começo',
+              'Cuide do intestino e não faça força para evacuar; se estiver com uma tosse que não passa, procure tratamento']
+        },
+        {
+          h: 'Evite, por enquanto',
+          p: 'Abdominal tradicional, prancha, flexão e qualquer movimento que faça a barriga estufar ou formar uma "montanhinha" no meio. Esses exercícios voltam depois, quando a gente avaliar que é a hora.'
+        },
+        {
+          h: 'O que ajuda',
+          p: 'A respiração e os exercícios lentos que combinamos na sessão, feitos com calma e do jeito que conferimos juntas. Pouco todo dia vale mais do que muito de vez em quando. Se ficar em dúvida se está fazendo certo, pare e me mande mensagem.',
+          nota: 'Procure a sua médica se sentir dor na barriga, notar uma bolinha ou um abaulamento perto do umbigo, ou se sentir muita fraqueza para as tarefas do dia a dia.'
+        }
+      ]
+    },
+    {
       id: 'incontinencia',
       titulo: 'Reeducação na Perda de Urina',
       resumo: 'Treino, hábitos e o que você bebe — tudo junto, no seu ritmo.',

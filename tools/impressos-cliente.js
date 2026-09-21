@@ -30,6 +30,8 @@
   var campoNome = document.getElementById('b-nome');
   var campoTrat = document.getElementById('b-trat');
   var aviso = document.getElementById('b-aviso');
+  var campoServico = document.getElementById('b-servico');
+  var campoMsg = document.getElementById('b-msg');
 
   function avisar(txt, erro) {
     if (!aviso) return;
@@ -55,9 +57,22 @@
     document.querySelectorAll('[data-nome-cheio]').forEach(function (el) {
       el.hidden = !n;
     });
+    /* carta: saudacao concorda com o titulo escolhido */
+    var t = campoTrat ? campoTrat.value : '';
+    var conc = { 'Dra.': ['Prezada', 'À'], 'Dr.': ['Prezado', 'Ao'] }[t] || ['Prezado(a)', 'À(o)'];
+    document.querySelectorAll('[data-prezado]').forEach(function (el) { el.textContent = conc[0]; });
+    document.querySelectorAll('[data-ao]').forEach(function (el) { el.textContent = conc[1]; });
+    /* carta: bloco do destinatario e mensagem pessoal */
+    var sv = (campoServico && campoServico.value || '').trim();
+    var ms = (campoMsg && campoMsg.value || '').trim();
+    document.querySelectorAll('[data-servico-alvo]').forEach(function (el) { el.textContent = sv; el.hidden = !sv; });
+    document.querySelectorAll('[data-destino]').forEach(function (el) { el.hidden = !(n || sv); });
+    document.querySelectorAll('[data-msg-alvo]').forEach(function (el) { el.textContent = ms; el.hidden = !ms; });
   }
   if (campoNome) campoNome.addEventListener('input', aplicarNome);
   if (campoTrat) campoTrat.addEventListener('change', aplicarNome);
+  if (campoServico) campoServico.addEventListener('input', aplicarNome);
+  if (campoMsg) campoMsg.addEventListener('input', aplicarNome);
 
   /* ---------- data de hoje (carta e ficha) ---------- */
   var MESES = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho',
@@ -108,7 +123,7 @@
     return Array.prototype.filter.call(document.querySelectorAll('.pagina'), function (p) { return !p.hidden; });
   }
   function slug(t) {
-    return (t || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
+    return (t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
       .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
   }
   function nomeArquivo(ext, i, total) {

@@ -99,14 +99,21 @@ h2{ font-size:9.6pt; font-weight:700; letter-spacing:.07em; text-transform:upper
 .agenda b{ color:#fff; }
 
 /* carta */
+.cab-carta{ display:flex; justify-content:space-between; align-items:flex-start; gap:8mm; margin:0 0 2.5mm; }
+.cab-carta .local-data{ margin:0 0 0 auto; white-space:nowrap; }
+.destino{ font-size:9.4pt; line-height:1.45; max-width:95mm; }
 .local-data{ text-align:right; margin:0 0 3.5mm; }
+.msg-pessoal{ font-style:italic; }
+.carta h2{ margin:2.6mm 0 1.1mm; }
+.carta p{ margin-bottom:1.5mm; }
+.carta .contato{ padding:2.6mm 5mm; }
 .duas{ display:grid; grid-template-columns:1fr 1fr; column-gap:9mm; }
 .duas ul{ margin:0; }
 .duas li{ text-align:left; }
 .formacao{ margin:0 0 1mm; columns:2; column-gap:9mm; }
 .formacao li{ break-inside:avoid; }
 .formacao li{ text-align:left; margin-bottom:0.8mm; }
-.assin{ margin-top:7mm; width:84mm; }
+.assin{ margin-top:4mm; width:84mm; }
 .assin .r{ border-top:0.6pt solid var(--cafe); margin-bottom:1.4mm; }
 .assin .n{ font-weight:700; }
 .assin .g{ font-size:8.6pt; color:var(--tenue); }
@@ -181,11 +188,14 @@ const documento = (titulo, paginas, barraHtml) => `<!doctype html><html lang="pt
    titulo stricto sensu, que o Artigo 30, III permite. A contrarreferencia e mencionada em
    uma frase: o detalhe vai no proprio laudo, nao na apresentacao. */
 const carta = documento('Carta de apresentação — Vanessa Fernandes', `
-<section class="pagina">
+<section class="pagina carta">
   ${cabecalho('Carta de apresentação<br>a profissionais de saúde')}
 
-  <p class="local-data">Conceição do Mato Dentro, <span data-data-vazio>______ de ____________________ de ________</span><span data-data-cheio hidden data-data-extenso></span>.</p>
-  <p><span data-nome-vazio>Prezado(a) colega,</span><span data-nome-cheio hidden>Prezado(a) <span data-nome-alvo></span>,</span></p>
+  <div class="cab-carta">
+    <div class="destino" data-destino hidden><span data-ao>À(o)</span> <span data-nome-alvo></span><br><span data-servico-alvo hidden></span></div>
+    <p class="local-data">Conceição do Mato Dentro, <span data-data-vazio>______ de ____________________ de ________</span><span data-data-cheio hidden data-data-extenso></span>.</p>
+  </div>
+  <p><span data-nome-vazio>Prezado(a) colega,</span><span data-nome-cheio hidden><span data-prezado>Prezado(a)</span> <span data-nome-alvo></span>,</span></p>
 
   <p>Meu nome é Vanessa Fernandes, sou fisioterapeuta (${esc(Ficha.CREFITO)}) com atuação em
   <b>fisioterapia pélvica</b>, e passei a atender em Conceição do Mato Dentro, na Clínica Veracis.
@@ -230,6 +240,7 @@ const carta = documento('Carta de apresentação — Vanessa Fernandes', `
   <p>Coloco-me à disposição para discutir casos e alinhar condutas — o contato comigo
   pode ser feito diretamente pelo número <b>(31) 98323-9192</b>.</p>
 
+  <p class="msg-pessoal" data-msg-alvo hidden></p>
   <p style="margin-top:2mm">Com estima e à disposição,</p>
   <div class="assin"><div class="r"></div>
     <div class="n">Vanessa Fernandes</div>
@@ -249,7 +260,9 @@ const carta = documento('Carta de apresentação — Vanessa Fernandes', `
     <option value="Dr(a).">Dr(a).</option><option value="Dra.">Dra.</option><option value="Dr.">Dr.</option>
     <option value="Enf.">Enf.</option><option value="">(sem título)</option></select></label>
   <input id="b-nome" type="text" placeholder="Nome do(a) colega (opcional)" autocomplete="off">
-  <label><input id="b-data" type="checkbox" checked> Data de hoje</label>`));
+  <input id="b-servico" type="text" placeholder="Especialidade ou serviço (opcional)" autocomplete="off">
+  <label><input id="b-data" type="checkbox" checked> Data de hoje</label>
+  <input id="b-msg" type="text" maxlength="140" placeholder="Mensagem pessoal, até 140 letras (opcional)" autocomplete="off" style="width:420px">`));
 
 /* ---------- 2. Cartilhas para a paciente, uma por folha ----------
    Toda folha abre com uma frase de acolhimento e fecha com o quadro

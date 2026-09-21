@@ -184,7 +184,7 @@
     var nome = '';
     try { nome = (doc && doc.dadosComuns && doc.dadosComuns.ident_nome) || ''; } catch (e) { nome = ''; }
     var limpo = String(nome).trim().toLowerCase()
-      .normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
       .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
     var d = new Date();
     var p = function (n) { return String(n).padStart(2, '0'); };
