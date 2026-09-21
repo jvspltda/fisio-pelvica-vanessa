@@ -174,6 +174,7 @@ let html = `<!doctype html>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap">
+<link rel="stylesheet" href="../css/navegacao.css">
 <style>
 ${PB
   ? `:root{ --terracota:#2E2A28; --deep:#000000; --cafe:#1A1A1A;
@@ -365,6 +366,7 @@ h4{ font-size:8.4pt; font-weight:600; font-style:italic; color:var(--cafe);
 </style></head>
 <body>
 <div id="barra" data-tipo="ficha"><div class="in">
+  <a class="link-inicio" href="../index.html">← Início</a>
   <label for="b-nome">Paciente</label>
   <input id="b-nome" type="text" placeholder="Nome da paciente (opcional)" autocomplete="off">
   <label><input id="b-data" type="checkbox"> Data de hoje</label>

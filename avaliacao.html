@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Avaliação — Vanessa Fernandes</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="css/navegacao.css">
+
+<!-- Fontes com fallback completo de sistema: a suíte permanece legível sem CDN -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap">
+
+<!-- Tokens e impressão: fonte de verdade visual, independentes de CDN -->
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/print.css">
+
+<!-- Tailwind Play CDN: conveniência de layout, nunca requisito -->
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body>
+
+<!-- ══════════════════════════════════════════════════════════════
+     CABEÇALHO DE TELA
+     ══════════════════════════════════════════════════════════════ -->
+<header class="no-print" style="background:var(--branco);border-bottom:1px solid var(--linha);position:sticky;top:0;z-index:40">
+  <div class="vf-container">
+
+    <div style="display:flex;align-items:center;gap:var(--e-3);padding:var(--e-3) 0">
+      <a class="link-inicio" href="index.html" title="Voltar à página inicial">← Início</a>
+      <img src="assets/logo.svg" alt="" class="marca-tela"
+           style="flex:none;height:42px;width:auto"
+           onerror="this.remove(); var f=document.getElementById('logo-vetor'); if(f) f.style.display='block';">
+      <svg id="logo-vetor" viewBox="0 0 120 120" width="42" height="42"
+           style="flex:none;display:none" role="img" aria-label="Marca Vanessa Fernandes">
+        <path d="M60,44 C54,28 38,21 29,30 C20,39 30,51 49,53 C31,60 19,78 27,92 C35,106 55,99 60,74 Z" fill="var(--terracota)"/>
+        <path d="M60,44 C54,28 38,21 29,30 C20,39 30,51 49,53 C31,60 19,78 27,92 C35,106 55,99 60,74 Z" transform="translate(120,0) scale(-1,1)"
+              fill="none" stroke="var(--terracota)" stroke-width="4.5"
+              stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+
+      <div style="line-height:1.2">
+        <div class="titulo" style="font-size:var(--t-lg);color:var(--terracota);font-weight:700">Vanessa Fernandes</div>
+        <div style="font-size:10px;letter-spacing:.35em;color:var(--cafe);text-transform:uppercase">Fisioterapia Pélvica</div>
+      </div>
+
+      <div style="margin-left:auto;display:flex;align-items:center;gap:var(--e-2);flex-wrap:wrap">
+        <span id="vf-status" style="font-size:var(--t-xs);color:var(--cafe-tenue)" role="status" aria-live="polite"></span>
+        <button class="vf-btn" id="btn-novo">Novo atendimento</button>
+        <button class="vf-btn" id="btn-salvar">Salvar rascunho</button>
+        <button class="vf-btn" id="btn-exportar">Exportar JSON</button>
+        <button class="vf-btn" id="btn-importar">Importar JSON</button>
+        <input type="file" id="input-importar" accept="application/json,.json" hidden>
+        <button class="vf-btn vf-btn-primario" id="btn-imprimir">Imprimir / PDF</button>
+      </div>
+    </div>
+
+    <nav class="vf-abas" role="tablist" aria-label="Módulos da suíte">
+      <button class="vf-aba" role="tab" id="aba-avaliacao"  aria-selected="true"  aria-controls="painel-avaliacao"  data-painel="avaliacao">Avaliação Clínica</button>
+      <button class="vf-aba" role="tab" id="aba-prescricao" aria-selected="false" aria-controls="painel-prescricao" data-painel="prescricao">Prescrição de Treino</button>
+      <button class="vf-aba" role="tab" id="aba-aderencia"  aria-selected="false" aria-controls="painel-aderencia"  data-painel="aderencia">Aderência &amp; Vínculo</button>
+      <button class="vf-aba" role="tab" id="aba-orientacoes" aria-selected="false" aria-controls="painel-orientacoes" data-painel="orientacoes">Orientações ao Paciente</button>
+      <button class="vf-aba" role="tab" id="aba-laudo"      aria-selected="false" aria-controls="painel-laudo"      data-painel="laudo">Laudo</button>
+    </nav>
+  </div>
+</header>
+
+<!-- ----------------------------------------------------------------
+     FOLHA DE IMPRESSAO
+     O timbre e o rodape vivem no <thead>/<tfoot> desta tabela porque
+     e assim que o Chrome os repete em cada pagina A4. A tentativa
+     anterior usava position:fixed com deslocamento negativo: medido
+     no PDF, o cabecalho saia uma unica vez e a 266mm do topo, e o
+     rodape legal caia sobre o conteudo a 31mm.
+     Na tela a tabela e neutralizada para display:block (ver tokens.css).
+     ---------------------------------------------------------------- -->
+<table id="folha-impressao">
+
+<thead><tr><th>
+  <div id="timbre-impressao" class="vf-so-impr" aria-hidden="true">
+    <div class="timbre-marca">
+      <!-- Logomarca oficial. Basta colocar o arquivo em assets/logo.svg (ou .png
+           com fundo transparente) que ele passa a ser usado automaticamente.
+           Sem o arquivo, o vetor de recuo abaixo assume. -->
+      <img class="timbre-logo-img" src="assets/logo.svg" alt="" height="30"
+           onerror="this.remove(); var f=document.getElementById('timbre-logo-vetor'); if(f) f.style.display='block';">
+      <svg class="timbre-logo" id="timbre-logo-vetor" viewBox="0 0 120 120" width="30" height="30"
+           style="display:none" role="img" aria-label="Marca Vanessa Fernandes">
+        <path class="asa-solida" d="M60,44 C54,28 38,21 29,30 C20,39 30,51 49,53 C31,60 19,78 27,92 C35,106 55,99 60,74 Z"/>
+        <path class="asa-traco" d="M60,44 C54,28 38,21 29,30 C20,39 30,51 49,53 C31,60 19,78 27,92 C35,106 55,99 60,74 Z" transform="translate(120,0) scale(-1,1)"/>
+      </svg>
+      <div class="timbre-lockup">
+        <span class="timbre-nome">Vanessa Fernandes</span>
+        <span class="timbre-espec">FISIOTERAPIA PÉLVICA</span>
+      </div>
+    </div>
+    <div class="timbre-doc" id="timbre-doc-titulo">Avaliação Clínica</div>
+  </div>
+</th></tr></thead>
+
+<tfoot><tr><td>
+  <div id="rodape-impressao" class="vf-so-impr" aria-hidden="true">
+    <span id="rodape-texto-impressao"></span>
+  </div>
+</td></tr></tfoot>
+
+<tbody><tr><td>
+
+<main class="vf-container" style="padding-top:var(--e-5);padding-bottom:var(--e-7)">
+
+  <!-- Aviso de privacidade (LGPD) -->
+  <div class="vf-aviso no-print" id="aviso-privacidade" style="margin-bottom:var(--e-5)">
+    <span class="vf-aviso-titulo">Privacidade e proteção de dados</span>
+    <p style="margin:0">
+      Os dados preenchidos ficam armazenados <strong>apenas neste navegador e neste dispositivo</strong>
+      (localStorage). Nada é enviado a servidores. Faça <strong>backup em JSON</strong> ao final de cada
+      atendimento e tenha cautela em computadores compartilhados — dados de saúde são dados pessoais
+      sensíveis sob a LGPD.
+    </p>
+    <button class="vf-btn no-print" id="btn-fechar-aviso" style="margin-top:var(--e-2)">Entendi</button>
+  </div>
+
+  <!-- ── PAINEL 1 · AVALIAÇÃO CLÍNICA ── -->
+  <section id="painel-avaliacao" role="tabpanel" aria-labelledby="aba-avaliacao">
+    <div class="no-print" style="margin-bottom:var(--e-4)">
+      <h1>Avaliação Clínica</h1>
+      <div class="vf-opcoes" role="radiogroup" aria-label="Perfil de atendimento" style="margin-top:var(--e-3)">
+        <label><input type="radio" name="perfil" value="feminino" checked><span>Saúde da Mulher</span></label>
+        <label><input type="radio" name="perfil" value="masculino"><span>Saúde do Homem</span></label>
+      </div>
+    </div>
+
+    <!-- Modo de exibição e controle de recolhimento -->
+    <div class="vf-barra-modo no-print" id="barra-modo"></div>
+    <div id="render-comum"></div>
+    <div id="render-feminino"></div>
+    <div id="render-masculino" class="vf-oculto"></div>
+  </section>
+
+  <!-- ── PAINEL 2 · PRESCRIÇÃO DE TREINO ── -->
+  <section id="painel-prescricao" role="tabpanel" aria-labelledby="aba-prescricao" class="vf-oculto">
+    <div class="no-print" style="margin-bottom:var(--e-4)"><h1>Prescrição de Treino (TMFAP)</h1></div>
+    <div id="render-prescricao"></div>
+  </section>
+
+  <!-- ── PAINEL 3 · ADERÊNCIA & VÍNCULO ── -->
+  <section id="painel-aderencia" role="tabpanel" aria-labelledby="aba-aderencia" class="vf-oculto">
+    <div class="no-print" style="margin-bottom:var(--e-4)"><h1>Aderência &amp; Vínculo</h1></div>
+    <div id="render-aderencia"></div>
+  </section>
+
+  <!-- ── PAINEL 4 · ORIENTAÇÕES AO PACIENTE ── -->
+  <section id="painel-orientacoes" role="tabpanel" aria-labelledby="aba-orientacoes" class="vf-oculto">
+    <div class="no-print" style="margin-bottom:var(--e-4)"><h1>Orientações ao Paciente</h1></div>
+    <div id="render-orientacoes"></div>
+  </section>
+
+  <!-- ── PAINEL 5 · LAUDO ── -->
+  <section id="painel-laudo" role="tabpanel" aria-labelledby="aba-laudo" class="vf-oculto">
+    <div class="no-print" style="margin-bottom:var(--e-4)"><h1>Laudo</h1></div>
+    <div id="render-laudo"></div>
+  </section>
+
+</main>
+
+</td></tr></tbody>
+</table>
+
+<footer class="no-print" style="border-top:1px solid var(--linha);padding:var(--e-4) 0 var(--e-7)">
+  <div class="vf-container">
+    <p class="vf-rodape-legal" id="rodape-tela" style="margin:0"></p>
+  </div>
+</footer>
+
+<!-- Ordem de dependência: scores → ficha → storage → adherence → app -->
+<script src="js/scores.js"></script>
+<script src="js/ficha.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/adherence.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

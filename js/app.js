@@ -742,10 +742,26 @@
   function agendarSalvamento() {
     clearTimeout(temporizadorSalvar);
     temporizadorSalvar = setTimeout(function () {
+      temporizadorSalvar = null;
       var r = St.salvar(doc);
       status(r.ok ? 'Rascunho salvo' : r.erro);
     }, 800);
   }
+
+  /* Saída da página (link "Início", fechar a aba, trocar de app no
+     celular): o que ainda esperava os 0,8 s é gravado agora. O
+     localStorage é síncrono, então a gravação termina antes de a
+     página sair. */
+  function salvarPendente() {
+    if (!temporizadorSalvar) return;
+    clearTimeout(temporizadorSalvar);
+    temporizadorSalvar = null;
+    St.salvar(doc);
+  }
+  window.addEventListener('pagehide', salvarPendente);
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'hidden') salvarPendente();
+  });
 
   /* ──────────────────────────────────────────────────────────────
      NAVEGAÇÃO ENTRE ABAS

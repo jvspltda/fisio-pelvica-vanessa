@@ -1,0 +1,17 @@
+/* css/navegacao.css — Transição suave entre as páginas do site e o
+   link "Início" comum a todas.
+
+   A transição usa a View Transitions API entre documentos (Chrome e
+   Edge atuais). Onde não houver suporte, a troca de página é a normal
+   — nada quebra. Quem pede menos animação no sistema não vê nenhuma. */
+@view-transition { navigation: auto; }
+::view-transition-old(root), ::view-transition-new(root){ animation-duration:.22s; }
+@media (prefers-reduced-motion: reduce){
+  @view-transition { navigation: none; }
+}
+
+/* Link de volta ao início */
+.link-inicio{ display:inline-flex; align-items:center; gap:6px; font:600 14px/1 'Plus Jakarta Sans','Segoe UI',Arial,sans-serif;
+  color:#9E4F42; text-decoration:none; padding:8px 12px; border:1px solid #D9CCC3; border-radius:8px; background:#fff; white-space:nowrap; }
+.link-inicio:hover, .link-inicio:focus-visible{ border-color:#B86657; outline:none; }
+@media print{ .link-inicio{ display:none !important; } }

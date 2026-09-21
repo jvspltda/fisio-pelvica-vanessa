@@ -12,6 +12,7 @@ button,input,select,textarea{ font:inherit; color:inherit; }
 .marca .nome{ font-family:'Playfair Display',Georgia,serif; font-weight:700; font-size:20px; color:var(--terracota); display:block; line-height:1.1; }
 .marca .esp{ font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--tenue); }
 .acoes-topo{ display:flex; flex-wrap:wrap; gap:8px; }
+.marca-grupo{ display:flex; align-items:center; gap:14px; }
 
 main{ max-width:960px; margin:0 auto; padding:20px 16px 60px; }
 .cartao{ background:#fff; border:1px solid var(--linha); border-radius:12px; padding:18px 20px; margin-bottom:16px; }

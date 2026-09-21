@@ -53,7 +53,7 @@ jobs:
       - name: Montar o site
         run: |
           mkdir -p _site/impressos
-          cp index.html materiais.html prontuario.html roteiros.html _site/
+          cp index.html avaliacao.html materiais.html prontuario.html roteiros.html 404.html _site/
           cp -r css js assets _site/
           cp build/ficha-studocu.html      _site/impressos/ficha-avaliacao.html
           cp build/ficha-studocu-pb.html   _site/impressos/ficha-avaliacao-pb.html

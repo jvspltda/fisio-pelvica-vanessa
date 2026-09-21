@@ -154,6 +154,7 @@ const CSS_BARRA = `
 
 const barra = (tipo, extra, escolha) => `<div id="barra" data-tipo="${tipo}">
   <div class="in">
+    <a class="link-inicio" href="../index.html">← Início</a>
     <div class="grupo">${extra}</div>
     <div class="grupo">
       <button id="b-imprimir" class="pri" type="button">Imprimir / PDF</button>
@@ -177,6 +178,7 @@ const documento = (titulo, paginas, barraHtml) => `<!doctype html><html lang="pt
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${esc(titulo)}</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../css/navegacao.css">
 <style>${CSS}${CSS_BARRA}</style></head><body>${barraHtml || ''}<div class="folhas">${paginas}</div>
 <script>${SCRIPT}</script></body></html>`;
 

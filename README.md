@@ -7,7 +7,7 @@ em Fisioterapia Pélvica. HTML5 + CSS + JavaScript vanilla, sem build e sem serv
 
 ## Como abrir
 
-**Duplo clique em `index.html`.** É só isso.
+**Duplo clique em `index.html`** — abre a página inicial, com atalhos para a avaliação (`avaliacao.html`), o prontuário, os impressos e os roteiros.
 
 Funciona em Chrome, Edge, Firefox e Safari. Na primeira abertura, com internet, o
 navegador baixa as fontes e o Tailwind e guarda em cache. Depois disso a suíte abre
@@ -18,7 +18,8 @@ não nos CDNs.
 ### Estrutura
 
 ```
-index.html               Shell da aplicação: abas e folha de impressão
+index.html               Página inicial (atalhos para tudo)
+avaliacao.html           Suíte de avaliação: abas e folha de impressão
 css/tokens.css           Design tokens e componentes — fonte de verdade visual
 css/print.css            Folha exclusiva de impressão A4 timbrada
 js/scores.js             Motor de cálculo puro, sem DOM (window.Scores)
@@ -272,7 +273,7 @@ A suíte é publicada no GitHub Pages pelo workflow `.github/workflows/publicar.
 A cada alteração no ramo principal o GitHub roda os testes, gera ficha, cartilhas e
 carta, e atualiza o site em um ou dois minutos.
 
-- **Página de entrada:** `materiais.html` — atalhos para a suíte e para os impressos.
+- **Página de entrada:** `index.html`, a raiz do site. `materiais.html` só redireciona para ela (era o endereço antigo).
 - **Editar um texto pelo navegador:** no GitHub, abra o arquivo, clique no lápis
   (*Edit this file*), altere e clique em *Commit changes*. Os textos das cartilhas e
   das mensagens de WhatsApp ficam em `js/adherence.js`; CREFITO, endereço e contato

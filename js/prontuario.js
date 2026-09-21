@@ -62,14 +62,16 @@
 
   /* ── persistência: toda alteração é cifrada e gravada ────────── */
   var fila = Promise.resolve();
+  var gravando = 0;
   function salvar() {
+    gravando++;
     fila = fila.then(async function () {
       var env = await C.cifrar(estado.sessao, estado.banco);
       await C.Armazem.gravar('envelope', env);
       $('status-salvo').textContent = 'Salvo às ' + horaBR(new Date());
     }).catch(function (e) {
       avisar('Não foi possível salvar: ' + e.message, true);
-    });
+    }).finally(function () { gravando--; });
     return fila;
   }
 
@@ -186,6 +188,7 @@
 
   function bloquear(motivo) {
     if (document.activeElement) document.activeElement.blur();
+    gravarFormularioPendente();
     return fila.then(function () {
       estado.sessao = null;
       estado.banco = null;
@@ -309,7 +312,20 @@
     mostrar('tela-paciente');
   }
 
-  $('form-paciente').addEventListener('change', async function () {
+  var temporizadorForm = null;
+  $('form-paciente').addEventListener('input', function () {
+    clearTimeout(temporizadorForm);
+    temporizadorForm = setTimeout(aplicarFormulario, 1000);
+  });
+  $('form-paciente').addEventListener('change', aplicarFormulario);
+  function gravarFormularioPendente() {
+    if (!temporizadorForm) return;
+    clearTimeout(temporizadorForm);
+    aplicarFormulario();
+  }
+  async function aplicarFormulario() {
+    clearTimeout(temporizadorForm);
+    temporizadorForm = null;
     var p = estado.atual, f = $('form-paciente');
     if (!p) return;
     var nome = f.nome.value.trim();
@@ -327,7 +343,7 @@
     p.atualizadoEm = new Date().toISOString();
     await salvar();
     atualizarAcoes();
-  });
+  }
   $('form-paciente').addEventListener('submit', function (e) { e.preventDefault(); });
 
   function atualizarAcoes() {
@@ -594,6 +610,39 @@
     estado.sessao = r.sessao;
     await C.Armazem.gravar('envelope', r.envelope);
     avisar('Senha trocada.');
+  });
+
+  /* ── saída da página ──────────────────────────────────────────── */
+  function evolucaoDigitada() {
+    return !!(estado.atual && $('form-evolucao').texto.value.trim());
+  }
+  $('link-inicio').addEventListener('click', async function (e) {
+    e.preventDefault();
+    var destino = this.href;
+    if (document.activeElement) document.activeElement.blur();
+    if (estado.sessao) {
+      gravarFormularioPendente();
+      await fila;
+      if (evolucaoDigitada()) {
+        var ok = await perguntar({
+          titulo: 'Evolução não registrada', ok: 'Sair sem registrar', perigo: true,
+          texto: 'Há uma evolução digitada que ainda não foi registrada. Se sair agora, esse texto se perde.'
+        });
+        if (!ok) { $('form-evolucao').texto.focus(); return; }
+      }
+    }
+    window.location.href = destino;
+  });
+  /* Fechar a aba ou recarregar: grava o formulário na hora e só pede
+     confirmação se ainda houver gravação em andamento ou evolução
+     digitada sem registrar. */
+  window.addEventListener('beforeunload', function (e) {
+    if (!estado.sessao) return;
+    gravarFormularioPendente();
+    if (gravando > 0 || evolucaoDigitada()) { e.preventDefault(); e.returnValue = ''; }
+  });
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'hidden' && estado.sessao) gravarFormularioPendente();
   });
 
   /* ── início ───────────────────────────────────────────────────── */
