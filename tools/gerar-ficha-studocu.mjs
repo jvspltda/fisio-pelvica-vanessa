@@ -343,6 +343,19 @@ h4{ font-size:8.4pt; font-weight:600; font-style:italic; color:var(--cafe);
    separam das do exame, que acontece com a paciente ja posicionada. */
 .quebra{ break-before:page; }
 
+/* campos preenchidos pela barra (nome e data) */
+.preench{ font-size:10pt; line-height:6.4mm; padding-left:1.2mm; color:#1A1A1A; white-space:nowrap; overflow:hidden; }
+.data .preench{ text-align:center; padding-left:0; }
+@media print{ #barra{ display:none !important; } }
+#barra{ position:sticky; top:0; z-index:10; background:#fff; border-bottom:1px solid #E6DCD4;
+  box-shadow:0 2px 10px rgba(61,46,40,.08); font-family:'Plus Jakarta Sans','Segoe UI',Arial,sans-serif; margin-bottom:10px; }
+#barra .in{ max-width:1100px; margin:0 auto; padding:10px 14px; display:flex; flex-wrap:wrap; gap:10px 14px; align-items:center; }
+#barra label{ font-size:13px; display:flex; gap:6px; align-items:center; }
+#barra input[type=text]{ font:inherit; font-size:14px; padding:7px 10px; border:1px solid #C9BDB4; border-radius:8px; width:260px; max-width:62vw; }
+#barra button{ font:inherit; font-size:13px; font-weight:600; padding:8px 12px; border-radius:8px; cursor:pointer;
+  border:1px solid #B86657; background:#B86657; color:#fff; }
+#barra .dica{ font-size:12px; color:#7A6960; }
+
 /* assinaturas */
 .assin{ display:flex; gap:14mm; margin-top:1.2mm; break-inside:avoid; }
 .assin > div{ flex:1; text-align:center; }
@@ -351,6 +364,14 @@ h4{ font-size:8.4pt; font-weight:600; font-style:italic; color:var(--cafe);
 .assin .g{ font-size:6.6pt; color:#6B564D; margin-top:0.3mm; }
 </style></head>
 <body>
+<div id="barra" data-tipo="ficha"><div class="in">
+  <label for="b-nome">Paciente</label>
+  <input id="b-nome" type="text" placeholder="Nome da paciente (opcional)" autocomplete="off">
+  <label><input id="b-data" type="checkbox"> Data de hoje</label>
+  <button id="b-imprimir" type="button">Imprimir / PDF</button>
+  <span class="dica">Na janela de impressão: papel A4, margens Padrão, sem cabeçalhos e rodapés.</span>
+  <span id="b-aviso" role="status"></span>
+</div></div>
 <table class="folha">
 <thead><tr><th>
   <div class="timbre">
@@ -377,10 +398,10 @@ h4{ font-size:8.4pt; font-weight:600; font-style:italic; color:var(--cafe);
        o timbre ja traz em toda pagina. Ver docs/lyra/layout-fichas.md, P-01. -->
 </div>
 
-<div class="data">Data: ${l('9mm')} / ${l('9mm')} / ${l('14mm')}</div>
+<div class="data">Data: <span class="l preench" style="width:9mm" data-data-dia></span> / <span class="l preench" style="width:9mm" data-data-mes></span> / <span class="l preench" style="width:14mm" data-data-ano></span></div>
 
 <div class="ident g2">
-  ${it('Nome:', lf())}
+  ${it('Nome:', '<span class="lf preench" data-nome-alvo></span>')}
   ${it('Idade:', l('16mm') + '<span class="tx">Data de Nascimento:</span>' + l('9mm') + '/' + l('9mm') + '/' + l('13mm') + '<span class="tx">Estado Civil:</span>' + lf())}
   ${it('Profissão:', lf())}
   ${it('Endereço:', l('62mm') + '<span class="tx">Escolaridade:</span>' + lf())}
@@ -598,6 +619,7 @@ ${area(2)}
 
 </td></tr></tbody>
 </table>
+<script>${readFileSync(join(raiz, 'tools/impressos-cliente.js'), 'utf8')}</script>
 </body></html>`;
 
 mkdirSync(join(raiz, 'build'), { recursive: true });

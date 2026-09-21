@@ -30,8 +30,13 @@ const A = require(join(raiz, 'js/adherence.js'));
 
 const esc = (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
+/* width/height explicitos (na proporcao do viewBox, 201 x 141): sem eles
+   o html2canvas usa o tamanho padrao de SVG e a marca sai recortada no
+   PDF e na imagem gerados pelo navegador. O CSS continua mandando no
+   tamanho exibido e impresso. */
 const LOGO_SVG = readFileSync(join(raiz, 'assets/logo.svg'), 'utf8')
-  .replace(/\s(?:width|height)="[\d.]+"/g, '');
+  .replace(/\s(?:width|height)="[\d.]+"/g, '')
+  .replace('<svg ', '<svg width="402" height="282" ');
 const LOGO = '<img class="logo" alt="" src="data:image/svg+xml;base64,' +
   Buffer.from(LOGO_SVG, 'utf8').toString('base64') + '">';
 
@@ -111,16 +116,62 @@ h2{ font-size:9.6pt; font-weight:700; letter-spacing:.07em; text-transform:upper
 .contato b{ color:var(--deep); display:block; font-size:7.6pt; letter-spacing:.07em; text-transform:uppercase; }
 `;
 
+/* Barra de personalizacao (so na tela) e previa das folhas como A4.
+   Na impressao a barra some e a folha volta a ocupar a area util. */
+const CSS_BARRA = `
+@media screen{
+  body{ background:#E9E4DF; }
+  .folhas{ padding:16px 12px 40px; overflow-x:auto; }
+  .pagina{ width:210mm; height:297mm; padding:12mm 17mm; margin:0 auto 10mm; background:#fff;
+    box-shadow:0 2px 14px rgba(61,46,40,.16); }
+}
+@media print{ #barra{ display:none !important; } }
+.pagina[hidden]{ display:none !important; }
+#barra{ position:sticky; top:0; z-index:10; background:#fff; border-bottom:1px solid #E6DCD4;
+  box-shadow:0 2px 10px rgba(61,46,40,.08); font-family:'Plus Jakarta Sans','Segoe UI',Arial,sans-serif; }
+#barra .in{ max-width:1100px; margin:0 auto; padding:10px 14px; display:flex; flex-wrap:wrap; gap:10px 14px; align-items:center; }
+#barra .grupo{ display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+#barra label{ font-size:13px; color:var(--cafe); display:flex; gap:6px; align-items:center; }
+#barra input[type=text], #barra select{ font:inherit; font-size:14px; padding:7px 10px; border:1px solid #C9BDB4;
+  border-radius:8px; min-width:0; }
+#barra input[type=text]{ width:240px; max-width:62vw; }
+#barra button{ font:inherit; font-size:13px; font-weight:600; padding:8px 12px; border-radius:8px; cursor:pointer;
+  border:1px solid var(--terracota); background:#fff; color:var(--deep); }
+#barra button.pri{ background:var(--terracota); color:#fff; }
+#barra button:disabled{ opacity:.5; cursor:wait; }
+#barra .escolha{ max-width:1100px; margin:0 auto; padding:0 14px 10px; display:flex; flex-wrap:wrap; gap:6px 14px; font-size:13px; }
+#barra .escolha label{ font-size:12.5px; }
+#b-aviso{ font-size:12.5px; color:var(--tenue); }
+#b-aviso.erro{ color:#A33; }
+`;
+
+const barra = (tipo, extra, escolha) => `<div id="barra" data-tipo="${tipo}">
+  <div class="in">
+    <div class="grupo">${extra}</div>
+    <div class="grupo">
+      <button id="b-imprimir" class="pri" type="button">Imprimir / PDF</button>
+      <button id="b-pdf" type="button">Enviar PDF</button>
+      <button id="b-img" type="button">Enviar como imagem</button>
+    </div>
+    <span id="b-aviso" role="status"></span>
+  </div>
+  ${escolha || ''}
+</div>`;
+
+const SCRIPT = readFileSync(join(raiz, 'tools/impressos-cliente.js'), 'utf8');
+
 const cabecalho = (tituloDoc) => `<div class="timbre">
   <div class="marca">${LOGO}<div class="lockup"><span class="nome">Vanessa Fernandes</span><span class="esp">Fisioterapia Pélvica</span></div></div>
   <div class="doc-tit">${tituloDoc}</div>
 </div>`;
 const rodape = `<div class="rodape">Vanessa Fernandes · Fisioterapeuta · ${esc(Ficha.CREFITO)}<br>${esc(Ficha.CONTATO)}</div>`;
 
-const documento = (titulo, paginas) => `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+const documento = (titulo, paginas, barraHtml) => `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${esc(titulo)}</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap">
-<style>${CSS}</style></head><body>${paginas}</body></html>`;
+<style>${CSS}${CSS_BARRA}</style></head><body>${barraHtml || ''}<div class="folhas">${paginas}</div>
+<script>${SCRIPT}</script></body></html>`;
 
 /* ---------- 1. Carta de apresentacao a profissionais de saude ----------
    Registro formal: o leitor e colega de saude. Sem promessa de resultado
@@ -133,8 +184,8 @@ const carta = documento('Carta de apresentação — Vanessa Fernandes', `
 <section class="pagina">
   ${cabecalho('Carta de apresentação<br>a profissionais de saúde')}
 
-  <p class="local-data">Conceição do Mato Dentro, ______ de ____________________ de ________.</p>
-  <p>Prezado(a) colega,</p>
+  <p class="local-data">Conceição do Mato Dentro, <span data-data-vazio>______ de ____________________ de ________</span><span data-data-cheio hidden data-data-extenso></span>.</p>
+  <p><span data-nome-vazio>Prezado(a) colega,</span><span data-nome-cheio hidden>Prezado(a) <span data-nome-alvo></span>,</span></p>
 
   <p>Meu nome é Vanessa Fernandes, sou fisioterapeuta (${esc(Ficha.CREFITO)}) com atuação em
   <b>fisioterapia pélvica</b>, e passei a atender em Conceição do Mato Dentro, na Clínica Veracis.
@@ -193,7 +244,12 @@ const carta = documento('Carta de apresentação — Vanessa Fernandes', `
     <div><b>Instagram</b>@vanessa.fernands<br>@clinicaveracis</div>
   </div>
   <div class="rodape">Vanessa Fernandes · Fisioterapeuta · ${esc(Ficha.CREFITO)}</div>
-</section>`);
+</section>`, barra('carta', `
+  <label>Para <select id="b-trat" aria-label="Tratamento">
+    <option value="Dr(a).">Dr(a).</option><option value="Dra.">Dra.</option><option value="Dr.">Dr.</option>
+    <option value="Enf.">Enf.</option><option value="">(sem título)</option></select></label>
+  <input id="b-nome" type="text" placeholder="Nome do(a) colega (opcional)" autocomplete="off">
+  <label><input id="b-data" type="checkbox" checked> Data de hoje</label>`));
 
 /* ---------- 2. Cartilhas para a paciente, uma por folha ----------
    Toda folha abre com uma frase de acolhimento e fecha com o quadro
@@ -217,8 +273,9 @@ const paginasCartilhas = A.CARTILHAS.map((c) => {
     ${b.l ? `<ul>${b.l.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}
     ${b.nota ? `<div class="nota">${esc(b.nota)}</div>` : ''}
   </div>`).join('');
-  return `<section class="pagina">
-    ${cabecalho('Orientações para você<br>levar para casa')}
+  return `<section class="pagina" id="c-${c.id}">
+    ${cabecalho('<span data-nome-vazio>Orientações para você<br>levar para casa</span>' +
+      '<span data-nome-cheio hidden>Orientações para<br><span data-nome-alvo></span></span>')}
     <h1>${esc(c.titulo)}</h1>
     <p class="sub">${esc(c.resumo)}</p>
     <p class="acolhe">${esc(ACOLHE)}</p>
@@ -230,7 +287,12 @@ const paginasCartilhas = A.CARTILHAS.map((c) => {
     <div class="rodape">Vanessa Fernandes · Fisioterapeuta · ${esc(Ficha.CREFITO)}</div>
   </section>`;
 }).join('');
-const cartilhas = documento('Cartilhas — Vanessa Fernandes', paginasCartilhas);
+const escolha = `<div class="escolha"><strong style="font-size:12.5px">Folhas:</strong>
+  ${A.CARTILHAS.map(c => `<label><input type="checkbox" data-escolhe="c-${c.id}" checked> ${esc(c.titulo)}</label>`).join('')}
+  <button id="b-todas" type="button" style="padding:4px 10px;font-size:12px">Marcar / desmarcar todas</button></div>`;
+const cartilhas = documento('Cartilhas — Vanessa Fernandes', paginasCartilhas, barra('cartilhas',
+  `<label for="b-nome">Paciente</label>
+   <input id="b-nome" type="text" placeholder="Nome da paciente (opcional)" autocomplete="off">`, escolha));
 
 mkdirSync(join(raiz, 'build'), { recursive: true });
 writeFileSync(join(raiz, 'build/carta-profissionais.html'), carta, 'utf8');

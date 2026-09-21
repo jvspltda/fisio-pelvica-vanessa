@@ -283,6 +283,27 @@ carta, e atualiza o site em um ou dois minutos.
 - **Dados de pacientes nunca vão para o GitHub.** A suíte guarda tudo no navegador de
   quem usa. Usar a versão online não muda isso.
 
+## Prontuário das pacientes (`prontuario.html`)
+
+Histórico de cada paciente com os itens que a Resolução COFFITO nº 414/2012 exige
+(identificação, história clínica, exame físico, exames complementares, diagnóstico e
+prognóstico, plano terapêutico, evolução e identificação da profissional), mais etapa,
+próxima ação e autorizações de registro e de WhatsApp.
+
+- **Onde ficam os dados:** só no navegador do aparelho em que foi criado, cifrados com
+  AES-256 a partir da senha (PBKDF2, 310 mil iterações). Nada vai para a internet nem
+  para o GitHub; a página bloqueia qualquer conexão de rede (Content-Security-Policy).
+- **Não existe recuperação de senha.** Esqueceu a senha, perdeu o acesso — por isso o
+  **backup** (arquivo `.vfcofre`, também cifrado). A página avisa quando o último
+  backup tem mais de 7 dias.
+- **Bloqueio automático** após 15 minutos sem uso.
+- **Evolução não se edita nem se apaga:** corrige-se com "Retificar", que fica ligada à
+  original.
+- **Guarda mínima de 5 anos** a contar do último registro (art. 6º, I): até lá só é
+  possível arquivar a paciente; o botão de excluir fica desativado.
+- **Não sincroniza entre aparelhos.** Para usar em outro computador, restaure o backup
+  lá. Não use em computador compartilhado.
+
 ## Salvamento e backup
 
 ### Onde os dados ficam

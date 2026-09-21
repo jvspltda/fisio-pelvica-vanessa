@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<!-- Nenhum script de fora, nenhuma conexão de rede a partir desta página:
+     mesmo que algo fosse injetado, não teria para onde mandar os dados. -->
+<meta http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+<title>Prontuário — Vanessa Fernandes</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="css/prontuario.css">
+</head>
+<body>
+
+<header class="topo">
+  <div class="marca"><span class="nome">Vanessa Fernandes</span><span class="esp">Prontuário · Fisioterapia Pélvica</span></div>
+  <nav class="acoes-topo" id="acoes-topo" hidden>
+    <button type="button" id="bt-backup">Fazer backup</button>
+    <button type="button" id="bt-importar">Restaurar backup</button>
+    <button type="button" id="bt-senha">Trocar senha</button>
+    <button type="button" id="bt-bloquear" class="pri">Bloquear</button>
+  </nav>
+</header>
+
+<main>
+  <!-- ── Cofre: criar, abrir ou restaurar ── -->
+  <section id="tela-cofre" class="tela cartao estreito" hidden>
+    <h1 id="cofre-titulo">Prontuário</h1>
+    <p id="cofre-texto" class="apoio"></p>
+    <form id="form-cofre" autocomplete="off">
+      <label>Senha <input type="password" id="senha" autocomplete="current-password" required></label>
+      <label id="rotulo-senha2" hidden>Repita a senha <input type="password" id="senha2" autocomplete="new-password"></label>
+      <button type="submit" class="pri" id="bt-cofre">Entrar</button>
+    </form>
+    <p class="erro" id="erro-cofre" role="alert"></p>
+    <div class="aviso-cofre" id="aviso-criar" hidden>
+      <b>Antes de criar, saiba:</b>
+      <ul>
+        <li>Os dados ficam <b>só neste navegador, neste aparelho</b>, cifrados com a sua senha. Nada vai para a internet.</li>
+        <li><b>Não existe recuperação de senha.</b> Sem ela, ninguém abre o prontuário — nem quem fez o sistema.</li>
+        <li>Faça <b>backup</b> com frequência e guarde o arquivo em lugar seguro (pendrive, nuvem pessoal). É com ele que o prontuário volta se o computador quebrar.</li>
+        <li>Não use em computador compartilhado, e não apague os dados de navegação deste site.</li>
+      </ul>
+    </div>
+    <p class="apoio pequeno"><button type="button" class="link" id="bt-restaurar-inicio">Tenho um arquivo de backup e quero restaurar</button></p>
+  </section>
+
+  <!-- ── Lista de pacientes ── -->
+  <section id="tela-lista" class="tela" hidden>
+    <div class="alerta" id="alerta-backup" hidden></div>
+    <div class="barra-lista">
+      <input type="search" id="busca" placeholder="Buscar paciente pelo nome" autocomplete="off">
+      <label class="check"><input type="checkbox" id="ver-arquivadas"> Mostrar arquivadas</label>
+      <button type="button" class="pri" id="bt-nova">Nova paciente</button>
+    </div>
+    <ul class="lista" id="lista"></ul>
+    <p class="vazio" id="lista-vazia" hidden>Nenhuma paciente encontrada.</p>
+  </section>
+
+  <!-- ── Paciente ── -->
+  <section id="tela-paciente" class="tela" hidden>
+    <div class="barra-paciente">
+      <button type="button" id="bt-voltar">← Pacientes</button>
+      <span class="status" id="status-salvo" role="status"></span>
+      <span class="espaco"></span>
+      <button type="button" id="bt-imprimir">Imprimir prontuário</button>
+      <button type="button" id="bt-arquivar"></button>
+      <button type="button" id="bt-excluir" class="perigo">Excluir</button>
+    </div>
+    <p class="apoio pequeno" id="guarda-info"></p>
+
+    <form id="form-paciente" class="cartao" autocomplete="off">
+      <h2>Identificação e acompanhamento</h2>
+      <div class="grade">
+        <label class="largo">Nome completo <input name="nome" required></label>
+        <label>Nascimento <input name="nascimento" type="date"></label>
+        <label>Telefone <input name="telefone" inputmode="tel"></label>
+        <label>Como chegou <select name="origem">
+          <option value=""></option><option>Colega de saúde</option><option>Instagram</option>
+          <option>Indicação de paciente</option><option>Passou na frente</option><option>Outro</option></select></label>
+        <label>Encaminhada por <input name="encaminhadoPor"></label>
+        <label>Etapa <select name="etapa" id="sel-etapa"></select></label>
+        <label>Próxima ação <input name="proximaTexto" placeholder="ex.: lembrete D+7, reavaliação"></label>
+        <label>Data da próxima ação <input name="proximaData" type="date"></label>
+        <label class="check largo"><input type="checkbox" name="consentimentoRegistro"> Paciente ciente e de acordo com o registro eletrônico dos seus dados</label>
+        <label class="check largo"><input type="checkbox" name="consentimentoWhatsapp"> Autorizou receber lembretes e mensagens pelo WhatsApp</label>
+      </div>
+
+      <h2>Prontuário</h2>
+      <p class="apoio pequeno">Conteúdo exigido pela Resolução COFFITO nº 414/2012. A ficha de avaliação em papel e o laudo impresso complementam estes registros.</p>
+      <label>História clínica <textarea name="historia" rows="4"></textarea></label>
+      <label>Exame físico <span class="dica">resumo dos achados</span><textarea name="exameFisico" rows="4"></textarea></label>
+      <label>Exames complementares <textarea name="examesComplementares" rows="3"></textarea></label>
+      <label>Diagnóstico fisioterapêutico <textarea name="diagnostico" rows="3"></textarea></label>
+      <label>Prognóstico <textarea name="prognostico" rows="2"></textarea></label>
+      <label>Plano terapêutico <textarea name="plano" rows="4"></textarea></label>
+    </form>
+
+    <section class="cartao">
+      <h2>Evolução</h2>
+      <form id="form-evolucao" autocomplete="off">
+        <p class="retifica" id="retifica-info" hidden></p>
+        <div class="linha-evo">
+          <label>Data <input type="date" name="data" required></label>
+          <span class="autoria" id="autoria"></span>
+        </div>
+        <label>Registro da sessão <textarea name="texto" rows="4" required></textarea></label>
+        <div class="linha-evo">
+          <button type="submit" class="pri">Registrar evolução</button>
+          <button type="button" id="bt-cancela-retifica" hidden>Cancelar retificação</button>
+        </div>
+        <p class="apoio pequeno">Evolução registrada não se edita nem se apaga. Para corrigir, use "Retificar": a correção fica registrada junto da original.</p>
+      </form>
+      <ol class="evolucoes" id="evolucoes"></ol>
+    </section>
+  </section>
+
+  <!-- ── Diálogo simples (senha de backup, troca de senha, confirmações) ── -->
+  <dialog id="dialogo">
+    <form method="dialog" id="form-dialogo">
+      <h2 id="dlg-titulo"></h2>
+      <p id="dlg-texto" class="apoio"></p>
+      <div id="dlg-campos"></div>
+      <p class="erro" id="dlg-erro" role="alert"></p>
+      <div class="dlg-botoes">
+        <button value="cancelar" type="button" id="dlg-cancelar">Cancelar</button>
+        <button value="ok" class="pri" id="dlg-ok">Confirmar</button>
+      </div>
+    </form>
+  </dialog>
+  <input type="file" id="arquivo-backup" accept=".vfcofre,application/json" hidden>
+</main>
+
+<!-- Só aparece na impressão -->
+<div id="impressao" aria-hidden="true"></div>
+
+<script src="js/ficha.js"></script>
+<script src="js/cofre.js"></script>
+<script src="js/prontuario.js"></script>
+</body>
+</html>
