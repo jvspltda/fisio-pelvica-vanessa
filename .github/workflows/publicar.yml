@@ -1,0 +1,66 @@
+# Publica a suíte no GitHub Pages a cada alteração no ramo principal.
+#
+# Por que um workflow e não "publicar a pasta": os impressos (ficha,
+# cartilhas, carta) são gerados por Node a partir de js/ficha.js e
+# js/adherence.js, e build/ não vai para o git. Aqui o GitHub roda os
+# geradores sozinho — basta editar um texto pelo site do GitHub e, em
+# um ou dois minutos, a versão online já sai atualizada.
+#
+# Nenhum dado de paciente passa por aqui: a aplicação guarda tudo no
+# navegador de quem usa (localStorage), nunca no repositório.
+name: Publicar online
+
+on:
+  push:
+    branches: [master, main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Testes do motor de cálculo e do salvamento
+        run: |
+          node tests/scores.test.mjs
+          node tests/storage.test.mjs
+
+      - name: Gerar ficha, cartilhas e carta
+        run: |
+          node tools/gerar-ficha-studocu.mjs
+          node tools/gerar-ficha-studocu.mjs --pb
+          node tools/gerar-materiais-impressos.mjs
+
+      - name: Montar o site
+        run: |
+          mkdir -p _site/impressos
+          cp index.html materiais.html _site/
+          cp -r css js assets _site/
+          cp build/ficha-studocu.html      _site/impressos/ficha-avaliacao.html
+          cp build/ficha-studocu-pb.html   _site/impressos/ficha-avaliacao-pb.html
+          cp build/cartilhas-pacientes.html _site/impressos/cartilhas.html
+          cp build/carta-profissionais.html _site/impressos/carta-profissionais.html
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - id: deploy
+        uses: actions/deploy-pages@v4

@@ -485,9 +485,16 @@
      ══════════════════════════════════════════════════════════════ */
 
   /* Registro profissional: constante única, alterada num só lugar.
-     Número lido da identificação em vídeo institucional da própria
-     profissional. Confirmar antes do uso em documento oficial. */
+     Confirmado pela profissional em 2026-09-20. O número 3060 que
+     circulava em duas peças de vídeo é da clínica antiga, não dela. */
   Ficha.CREFITO = 'CREFITO-4: 252806-F';
+
+  /* Contato do local de atendimento. Endereco, telefone e horario sao
+     facultativos no anuncio pelo inciso III do Artigo 48 da Resolucao
+     COFFITO 424/2013, mas na ficha impressa eles servem a paciente. */
+  Ficha.CONTATO =
+    'Clínica Veracis — Rodovia MG-010, 598 · Bela Vista Mall · ' +
+    'Conceição do Mato Dentro/MG · (31) 3868-1120 · @vanessa.fernands · @clinicaveracis';
 
   Ficha.RODAPE_LEGAL =
     'Prescrição privativa de Fisioterapia Pélvica. Este documento é individual, ' +

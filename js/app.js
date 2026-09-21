@@ -1439,7 +1439,7 @@
 
     var b1 = el('div', { class: 'vf-card-corpo' });
     var g1 = el('div', { class: 'vf-grade vf-grade-2' });
-    [['laudo_destinatario', 'Encaminhado a (Urologia / Ginecologia)'],
+    [['laudo_destinatario', 'Destinatário (Obstetrícia / Ginecologia / Urologia / Coloproctologia / Clínica / UBS)'],
      ['laudo_data', 'Data de emissão'],
      ['laudo_sessoes', 'Nº de sessões realizadas']].forEach(function (par) {
       baldeDoCampo[par[0]] = 'aderencia';
@@ -1561,7 +1561,7 @@
 
     [['laudo_plano', 'Plano terapêutico', 4],
      ['laudo_frequencia', 'Frequência e duração previstas', 1],
-     ['laudo_consideracoes', 'Considerações ao médico solicitante', 3]].forEach(function (par) {
+     ['laudo_consideracoes', 'Considerações ao profissional solicitante', 3]].forEach(function (par) {
       baldeDoCampo[par[0]] = 'aderencia';
       var w = el('div', { style: 'margin-top:var(--e-3)' });
       w.appendChild(el('label', { class: 'vf-rotulo', for: par[0], texto: par[1] }));
@@ -1577,7 +1577,9 @@
     var assin = el('div', { class: 'vf-so-impr bloco-assinatura-laudo' });
     assin.innerHTML = '<div class="linha-assin"></div>' +
       '<div class="assin-nome">Vanessa Fernandes</div>' +
-      '<div class="assin-reg">Fisioterapeuta — ' + escapar(F.CREFITO) + '</div>';
+      '<div class="assin-reg">Fisioterapeuta — ' + escapar(F.CREFITO) + '</div>' +
+      /* Contato para o colega responder ou encaminhar de volta. */
+      (F.CONTATO ? '<div class="assin-reg">' + escapar(F.CONTATO) + '</div>' : '');
     alvo.appendChild(assin);
   }
 

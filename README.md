@@ -32,6 +32,7 @@ tests/scores.test.mjs    Testes do motor de cálculo
 tests/storage.test.mjs   Testes de serialização e validação
 tools/gerar-ficha-studocu.mjs   Gera a ficha em branco (PDF) a partir de js/ficha.js
 tools/gerar-essenciais-pdf.mjs  Gera a folha de revisão dos campos essenciais
+tools/gerar-materiais-impressos.mjs  Gera a carta aos profissionais de saúde e as cartilhas das pacientes
 tools/vetorizar-logo.py         Converte a marca do cartão em vetor
 ```
 
@@ -264,6 +265,23 @@ medido: 8 páginas com ou sem ela. Ela permite separar as folhas da anamnese das
 exame, que são dois momentos distintos da consulta.
 
 ---
+
+## Versão online e como editar
+
+A suíte é publicada no GitHub Pages pelo workflow `.github/workflows/publicar.yml`.
+A cada alteração no ramo principal o GitHub roda os testes, gera ficha, cartilhas e
+carta, e atualiza o site em um ou dois minutos.
+
+- **Página de entrada:** `materiais.html` — atalhos para a suíte e para os impressos.
+- **Editar um texto pelo navegador:** no GitHub, abra o arquivo, clique no lápis
+  (*Edit this file*), altere e clique em *Commit changes*. Os textos das cartilhas e
+  das mensagens de WhatsApp ficam em `js/adherence.js`; CREFITO, endereço e contato
+  ficam em `js/ficha.js`; a carta aos profissionais fica em
+  `tools/gerar-materiais-impressos.mjs`.
+- **Se o site não atualizar:** veja a aba *Actions*. Um X vermelho quase sempre é
+  vírgula ou aspas faltando no arquivo editado — o erro aponta a linha.
+- **Dados de pacientes nunca vão para o GitHub.** A suíte guarda tudo no navegador de
+  quem usa. Usar a versão online não muda isso.
 
 ## Salvamento e backup
 

@@ -39,13 +39,18 @@ const b64 = (p, mime) =>
 
 /* Marca em vetor: o PDF passa a carregar curvas, nao pixels, entao
    a mesma arte serve do timbre de 22mm a um banner. */
-const LOGO = readFileSync(join(raiz, 'assets/logo.svg'), 'utf8')
+/* Como <img> data-URI, nao SVG inline: o Chrome so pinta o SVG inline
+   na primeira pagina do <thead> repetido -- medido, o timbre das paginas
+   2 a 4 saia sem a marca. Como imagem, ele repete em todas. */
+const LOGO_SVG = readFileSync(join(raiz, 'assets/logo.svg'), 'utf8')
   /* Tira width/height intrinsecos: o SVG traz 201x141, que renderiza a
      ~53mm e estoura o timbre. O viewBox e mantido, entao o CSS passa a
      controlar o tamanho sozinho. */
   .replace(/\s(?:width|height)="[\d.]+"/g, '')
   .replace('<svg ', '<svg class="logo" ')
   .replace(/fill="#B86657"/g, PB ? 'fill="#1A1A1A"' : 'fill="#B86657"');
+const LOGO = '<img class="logo" alt="" src="data:image/svg+xml;base64,' +
+  Buffer.from(LOGO_SVG, 'utf8').toString('base64') + '">';
 const EVA  = b64('assets/eva.jpg',  'image/jpeg');
 
 /* No modo colorido vale a arte original da ficha; no P&B, a regua
@@ -103,7 +108,7 @@ const lf = () => `<span class="lf"></span>`;                     // linha que oc
    rotulo longo demais para caber em meia coluna. */
 /* 100 e o ponto de equilibrio medido: abaixo disso mais itens vao a
    largura inteira e a ficha volta a 6 paginas. */
-const LIMITE_LARGO = 100;
+const LIMITE_LARGO = 260;
 const largura = (txt, resto) => {
   const rot = txt.replace(/<[^>]*>/g, '').length;
   const ops = (resto.match(/class="o"/g) || []).length;
@@ -138,14 +143,12 @@ const wexner = `
   <div class="wx-cab"><span class="wx-tipo">TIPO DE INCONTINÊNCIA</span><span>FREQUÊNCIA</span></div>
   ${WX.map(t => `<div class="wx-l"><span class="wx-tipo">${t}</span>
     <span class="wx-ops">${os('Nunca','Raramente','Às vezes','Frequentemente','Sempre')}</span></div>`).join('')}
+  <!-- Mesma regra de pontuacao do original, em 3 linhas no lugar de 7.
+       Nenhum criterio foi alterado. Ver layout-fichas.md, P-04. -->
   <div class="wx-nota">
-    0 = Perfeito<br>
-    20 = Completa incontinência<br>
-    Nunca = 0 (Nota: 0)<br>
-    Raramente = Menor que uma vez por mês (Nota: 1)<br>
-    Às vezes = Menor que uma vez por semana e maior ou igual a uma vez por mês (Nota: 2)<br>
-    Frequentemente = Menor que uma vez por dia e maior ou igual a uma vez por semana (Nota: 3)<br>
-    Sempre = Maior ou igual a uma vez por dia (Nota: 4)
+    0 = Perfeito · 20 = Completa incontinência<br>
+    Nunca = 0 · Raramente = menos de 1×/mês (1) · Às vezes = menos de 1×/semana e ao menos 1×/mês (2)<br>
+    Frequentemente = menos de 1×/dia e ao menos 1×/semana (3) · Sempre = 1×/dia ou mais (4)
   </div>
   <div class="wx-soma"><span>Somatório</span><span class="cx"></span><span class="max">/ 20</span></div>
 </div>`;
@@ -181,7 +184,7 @@ ${PB
 *{ box-sizing:border-box; }
 html,body{ margin:0; padding:0; background:#fff; color:var(--cafe);
   font-family:'Plus Jakarta Sans','Segoe UI',Arial,sans-serif;
-  font-size:${v('9.3pt','8.7pt')}; line-height:${v('1.5','1.5')};
+  font-size:${v('8.8pt','8.7pt')}; line-height:${v('1.35','1.5')};
   -webkit-print-color-adjust:exact; print-color-adjust:exact; }
 
 /* folha: thead/tfoot repetem em cada pagina */
@@ -208,33 +211,33 @@ table.folha > tfoot td{ padding:2mm 0 0; }
   font-size:5.8pt; line-height:1.4; color:#7A6960; text-align:center; }
 
 /* abertura */
-.abre{ text-align:center; margin:1mm 0 3mm; }
+.abre{ text-align:center; margin:0.5mm 0 1.6mm; }
 .abre .t1{ font-family:'Playfair Display',Georgia,serif; font-size:12pt;
   font-weight:600; color:var(--deep); }
 .abre .t2{ font-family:'Playfair Display',Georgia,serif; font-size:10pt;
   color:var(--cafe); margin-top:0.4mm; }
-.data{ text-align:right; margin-bottom:2.5mm; font-size:8.7pt; }
+.data{ text-align:right; margin-bottom:1.4mm; font-size:8.7pt; }
 
 /* identificacao */
-.ident{ border:0.6pt solid var(--linha); border-radius:2pt; padding:2.4mm 3mm;
-  background:#FDFCFB; margin-bottom:3.5mm;
+.ident{ border:0.6pt solid var(--linha); border-radius:2pt; padding:1.8mm 3mm;
+  background:#FDFCFB; margin-bottom:2.2mm;
   /* Sem break-inside:avoid de proposito. Como .ident e uma grade
      aninhada dentro da grade do corpo, o avoid fazia o Chrome empurrar
      o bloco inteiro para a pagina 2 e deixar 244mm vazios na 1. */ }
 
 /* secoes */
 h2{ font-size:9pt; font-weight:700; letter-spacing:.07em; text-transform:uppercase;
-  color:var(--deep); margin:3.4mm 0 1.4mm; padding-bottom:1.1mm;
+  color:var(--deep); margin:1.3mm 0 0.6mm; padding-bottom:0.5mm;
   border-bottom:0.7pt solid var(--rosegold); display:flex; align-items:center; gap:2.2mm;
   break-after:avoid; }
 h2 .n{ flex:none; min-width:5mm; height:5mm; border-radius:99px; background:var(--terracota);
   color:#fff; font-size:5.9pt; display:flex; align-items:center; justify-content:center;
   letter-spacing:0; }
-h3{ font-size:8.4pt; font-weight:700; color:var(--deep); margin:2.2mm 0 1.1mm;
+h3{ font-size:8.2pt; font-weight:700; color:var(--deep); margin:1.2mm 0 0.6mm;
   letter-spacing:.03em; break-after:avoid; }
 h3.c{ text-align:center; }
 h4{ font-size:8.4pt; font-weight:600; font-style:italic; color:var(--cafe);
-  margin:2.4mm 0 1mm; break-after:avoid; }
+  margin:1.1mm 0 0.5mm; break-after:avoid; }
 
 /* itens em linha corrida */
 /* Grade de duas colunas. O padrao e largura inteira; so .it sem
@@ -252,7 +255,7 @@ h4{ font-size:8.4pt; font-weight:600; font-style:italic; color:var(--cafe);
 .g2 > .grupo.largo{ grid-column:1 / -1; }
 .grupo{ break-inside:avoid; }
 .it{ display:flex; flex-wrap:wrap; align-items:baseline; gap:0 2.2mm;
-  margin-bottom:${v('0.9mm','0.7mm')}; break-inside:avoid; }
+  margin-bottom:${v('1.8mm','0.7mm')}; break-inside:avoid; }
 /* O travessao e item de flex, nao pseudo-elemento absoluto: com
    align-items:baseline ele acompanha a linha de base sozinho. Absoluto
    sem top ancorava no topo da caixa e, com a linha de escrita alta do
@@ -270,8 +273,8 @@ h4{ font-size:8.4pt; font-weight:600; font-style:italic; color:var(--cafe);
 .l,.lf{ display:inline-block; border-bottom:0.5pt solid var(--linha);
   height:${v('6.6mm','4.1mm')}; }
 .lf{ flex:1 1 40mm; min-width:20mm; }
-.area{ display:flex; flex-direction:column; gap:${v('6.2mm','2.4mm')};
-  margin:${v('2mm 0 2.4mm','1mm 0 1.4mm')}; }
+.area{ display:flex; flex-direction:column; gap:${v('2.9mm','2.4mm')};
+  margin:${v('1.2mm 0 1.4mm','1mm 0 1.4mm')}; }
 .area .lf{ width:100%; flex:none; }
 
 /* opcoes */
@@ -283,13 +286,13 @@ h4{ font-size:8.4pt; font-weight:600; font-style:italic; color:var(--cafe);
 
 /* destaque do consentimento */
 .consent{ border:0.7pt solid var(--terracota); border-radius:2pt; background:var(--areia);
-  padding:2.4mm 3mm; margin-bottom:3mm; break-inside:avoid; }
+  padding:1.6mm 3mm; margin-bottom:2mm; break-inside:avoid; }
 .consent .q{ font-weight:700; display:flex; flex-wrap:wrap; align-items:baseline; gap:0 3mm; }
 .consent .q + .q{ margin-top:1.8mm; }
 
 /* EVA */
-.eva-bloco{ text-align:center; margin:1.6mm 0 1.1mm; break-inside:avoid; }
-.eva-bloco img{ width:100mm; max-width:100%; height:auto; }
+.eva-bloco{ text-align:center; margin:1mm 0 0.6mm; break-inside:avoid; }
+.eva-bloco img{ width:64mm; max-width:100%; height:auto; }
 /* Regua desenhada, usada no modo P&B. Tudo em borda, nada em fundo:
    a instrucao de impressao pede "graficos de plano de fundo" desmarcado,
    e nesse modo qualquer background-color ou gradiente sumiria. */
@@ -315,22 +318,22 @@ h4{ font-size:8.4pt; font-weight:600; font-style:italic; color:var(--cafe);
   letter-spacing:.04em; color:var(--deep); border-bottom:0.5pt solid var(--linha);
   padding-bottom:0.8mm; margin-bottom:1mm; }
 .wx-tipo{ flex:0 0 52mm; }
-.wx-l{ display:flex; align-items:baseline; padding:${v('1.5mm','0.6mm')} 0;
+.wx-l{ display:flex; align-items:baseline; padding:${v('0.5mm','0.6mm')} 0;
   border-bottom:0.4pt solid #EFE7E1; }
 .wx-l .wx-tipo{ flex:0 0 52mm; }
 .wx-ops{ display:flex; flex-wrap:wrap; }
-.wx-nota{ font-size:6.9pt; color:#6B564D; line-height:1.5; margin:1.8mm 0 0 6mm; }
+.wx-nota{ font-size:6.2pt; color:#6B564D; line-height:1.5; margin:1.8mm 0 0 6mm; }
 .wx-soma{ display:flex; align-items:center; gap:2mm; margin-top:2mm; font-weight:600; }
 .wx-soma .cx{ width:13mm; height:5.6mm; border:0.7pt solid var(--terracota); border-radius:1.5pt; }
 .wx-soma .max{ color:var(--tenue); font-weight:400; }
 
 /* escalas graduadas */
-.grad{ display:flex; align-items:baseline; gap:2mm;
-  padding:${v('1.4mm','0.55mm')} 0; break-inside:avoid; }
+.grad{ display:flex; align-items:baseline; gap:2mm; font-size:8.2pt;
+  padding:${v('0.5mm','0.55mm')} 0; break-inside:avoid; }
 .grad i{ width:2.5mm; height:2.5mm; border:0.6pt solid var(--tenue); border-radius:50%;
   background:#fff; flex:none; position:relative; top:0.3mm; }
 .grad b{ flex:none; min-width:3.5mm; color:var(--deep); }
-.cab-grad{ display:flex; gap:2mm; font-weight:700; font-size:7.6pt; text-transform:uppercase;
+.cab-grad{ display:flex; gap:2mm; font-weight:700; font-size:7.2pt; text-transform:uppercase;
   letter-spacing:.05em; color:var(--tenue); margin-bottom:0.8mm; }
 .cab-grad .g1{ flex:0 0 12mm; }
 
@@ -341,10 +344,10 @@ h4{ font-size:8.4pt; font-weight:600; font-style:italic; color:var(--cafe);
 .quebra{ break-before:page; }
 
 /* assinaturas */
-.assin{ display:flex; gap:14mm; margin-top:4mm; break-inside:avoid; }
+.assin{ display:flex; gap:14mm; margin-top:1.2mm; break-inside:avoid; }
 .assin > div{ flex:1; text-align:center; }
-.assin .r{ border-top:0.6pt solid var(--cafe); margin-bottom:1.3mm; }
-.assin .n2{ font-size:8pt; font-weight:600; }
+.assin .r{ border-top:0.6pt solid var(--cafe); margin-bottom:0.8mm; }
+.assin .n2{ font-size:7.6pt; font-weight:600; }
 .assin .g{ font-size:6.6pt; color:#6B564D; margin-top:0.3mm; }
 </style></head>
 <body>
@@ -363,14 +366,15 @@ h4{ font-size:8.4pt; font-weight:600; font-style:italic; color:var(--cafe);
 </th></tr></thead>
 
 <tfoot><tr><td>
-  <div class="rodape">${Ficha.RODAPE_LEGAL}</div>
+  <div class="rodape">${Ficha.RODAPE_LEGAL}<br>${Ficha.CONTATO}</div>
 </td></tr></tfoot>
 
 <tbody><tr><td>
 
 <div class="abre">
   <div class="t1">Fisioterapia Aplicada à Saúde da Mulher</div>
-  <div class="t2">Avaliação das Disfunções dos Músculos do Assoalho Pélvico Feminino</div>
+  <!-- A linha .t2 foi removida: repetia palavra por palavra o titulo que
+       o timbre ja traz em toda pagina. Ver docs/lyra/layout-fichas.md, P-01. -->
 </div>
 
 <div class="data">Data: ${l('9mm')} / ${l('9mm')} / ${l('14mm')}</div>
@@ -405,7 +409,7 @@ ${area(1)}
 
 ${h(3, 'História da Moléstia Atual')}
 ${it('Queixa principal, início, duração, evolução, limitações funcionais / participação social:', '')}
-${area(4)}
+${area(3)}
 
 <h3 class="c">Estimativa do incômodo relacionado à queixa principal</h3>
 ${evaBloco()}
@@ -450,7 +454,7 @@ ${sub('Trocas:', os('Secos', 'Úmidos', 'Molhados'))}
 ${it('Mobilidade / Acesso ao banheiro limitada:', sn() + '<span class="tx">Motivo:</span>' + lf())}
 ${it('ITU:', sn() + '<span class="tx">Último episódio:</span>' + l('30mm'))}
 ${it('Outros Sintomas e Observações TUI:', '')}
-${area(2)}
+${area(1)}
 
 ${h(6, 'Sintomas Intestinais')}
 ${it('Necessidade de manobras para completar a evacuação:', sn())}
@@ -472,8 +476,8 @@ ${it('Cronologia em relação às refeições:', lf())}
 ${it('Sintomas associados:', os('Dor', 'Esforço', 'Diarreia', 'Fecaloma'))}
 ${sub(os('Sangramento', 'Flatulência', 'Urgência', 'Soiling', 'Constipação'))}
 
-<h3 class="c">Continence Grading Scale — Índice de Incontinência ou Escala de Wexner</h3>
-${wexner}
+<!-- Escala de Wexner retirada do papel a pedido da profissional
+     (2026-09-20). O motor de calculo continua em js/scores.js. -->
 
 ${h(7, 'Sintomas Vaginais')}
 ${it('Percepção de prolapso:', sn())}
@@ -493,8 +497,8 @@ ${it('Sintomas:', lf())}
 ${area(1)}
 ${it('Horário de agravamento / limitações de atividades / fatores que agravam ou diminuem a dor:', '')}
 ${area(2)}
-${it('Exames complementares e testes especiais:', '')}
-${area(2)}
+<!-- "Exames complementares e testes especiais" + area(2) sairam daqui:
+     duplicavam as secoes 10 e 11 inteiras. Ver layout-fichas.md, P-02. -->
 
 ${h(10, 'Exames Complementares em Urologia / Uroginecologia')}
 ${it('Diagnóstico Urodinâmico:', lf())}
@@ -503,17 +507,14 @@ ${sub('* Data:', l('8mm') + '/' + l('8mm') + '/' + l('12mm'))}
 ${it('Cistoscopia:', lf())}
 ${sub('* Data:', l('8mm') + '/' + l('8mm') + '/' + l('12mm'))}
 ${it('Outros Exames:', lf())}
-${area(1)}
 
-${h(11, 'Exames Complementares em Proctologia')}
-${it('Manometria Anorretal:', lf())}
-${sub('* Considerações:', lf())}
-${sub('* Data:', l('8mm') + '/' + l('8mm') + '/' + l('12mm'))}
-${it('Outros Exames:', lf())}
-${area(1)}
+<!-- Secao 11 (Exames Complementares em Proctologia) retirada a pedido
+     da profissional (2026-09-20). -->
 
-<div class="quebra"></div>
-<h3 class="c" style="font-size:11pt;margin-top:0">Exame Físico</h3>
+<!-- A quebra forcada antes do Exame Fisico saiu: ela custava ~187mm de
+     pagina em branco e a meta agora e 4 folhas A4. A pauta de escrita
+     continua em 6,6mm -- nenhuma linha de anotacao foi encurtada. -->
+<h3 class="c largo" style="font-size:11pt;margin-top:3mm">Exame Físico</h3>
 
 <div class="consent">
   <div class="q"><span class="tx w">A paciente foi esclarecida e orientada com relação aos procedimentos
@@ -578,14 +579,13 @@ ${it('Simetria direita-esquerda:', sn() + lf())}
 ${it('Simetria anteroposterior:', sn() + lf())}
 ${it('Teste de esforço (+):', os('Deitada', 'Em pé'))}
 ${it('Outros testes específicos (Perineometria, Pad test, EMG):', '')}
-${area(3)}
+${area(2)}
 
-<h3 class="c">Estimativa de desconforto da paciente ao exame do assoalho pélvico</h3>
-${evaBloco()}
-<div class="eva-val">EVA: ${l('22mm')}</div>
+<!-- EVA de desconforto ao exame retirada a pedido da profissional
+     (2026-09-20). A EVA da queixa principal, na secao 3, permanece. -->
 
-<h3>Diagnóstico Fisioterapêutico da condição do AP</h3>
-${area(3)}
+<!-- Diagnostico Fisioterapeutico retirado do papel a pedido da
+     profissional (2026-09-20); segue disponivel no laudo da suite. -->
 
 <div class="assin">
   <div><div class="r"></div><div class="n2">Dra. Vanessa Fernandes</div>
