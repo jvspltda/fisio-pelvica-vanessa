@@ -46,6 +46,12 @@
     return n;
   }
 
+  /* 2026-09-22 -> 22/09/2026. Texto que não é data ISO passa como está. */
+  function dataBR(v) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(v || ''));
+    return m ? m[3] + '/' + m[2] + '/' + m[1] : v;
+  }
+
   function escapar(s) {
     return String(s === null || s === undefined ? '' : s)
       .replace(/[&<>"']/g, function (c) {
@@ -200,17 +206,35 @@
 
     /* --- Régua EVA --- */
     if (campo.tipo === 'eva') {
-      var v0 = (valor === undefined || valor === '') ? 0 : Number(valor);
-      var box = el('div', { class: 'vf-eva' });
+      /* EVA não medida é diferente de EVA zero. Antes, o desenho da régua
+         gravava 0 no documento, e o laudo saía com "0/10 · Sem dor" para
+         medições que ninguém fez. Agora só grava quando a régua é movida;
+         até lá mostra "—" e "Não medida". */
+      var medida = !(valor === undefined || valor === '');
+      var v0 = medida ? Number(valor) : 0;
+      var box = el('div', { class: 'vf-eva' + (medida ? '' : ' vf-eva-vazia') });
       var rg = el('input', { type: 'range', id: campo.id, name: campo.id,
-                             min: 0, max: 10, step: 1, value: v0 });
-      var out = el('span', { class: 'vf-eva-valor', id: campo.id + '_valor', texto: String(v0) });
+                             min: 0, max: 10, step: 1, value: v0, 'aria-label': campo.label });
+      var out = el('span', { class: 'vf-eva-valor', id: campo.id + '_valor', texto: medida ? String(v0) : '—' });
       var bd = el('span', { class: 'vf-badge', id: campo.id + '_badge' });
-      box.appendChild(rg); box.appendChild(out); box.appendChild(bd);
+      var limpar = el('button', { type: 'button', class: 'vf-eva-limpar no-print', texto: 'Limpar',
+                                  title: 'Desfazer a medição' });
+      box.appendChild(rg); box.appendChild(out); box.appendChild(bd); box.appendChild(limpar);
       var wrap = envolver(campo, box, recolhido);
-      atualizarBadgeEVA(campo.id, v0, bd, out);
+      if (medida) atualizarBadgeEVA(campo.id, v0, bd, out);
+      else mostrarEVAVazia(bd, out, limpar);
       rg.addEventListener('input', function () {
+        box.classList.remove('vf-eva-vazia');
+        limpar.hidden = false;
         atualizarBadgeEVA(campo.id, this.value, bd, out);
+      });
+      limpar.addEventListener('click', function () {
+        escrever(campo.id, '');
+        rg.value = 0;
+        box.classList.add('vf-eva-vazia');
+        mostrarEVAVazia(bd, out, limpar);
+        atualizarProgresso();
+        agendarSalvamento();
       });
       return wrap;
     }
@@ -280,6 +304,13 @@
       alvo.setAttribute('data-estado',
         preenchidos === 0 ? 'vazio' : (preenchidos === total ? 'completo' : 'parcial'));
     });
+  }
+
+  function mostrarEVAVazia(badge, saida, limpar) {
+    if (saida) saida.textContent = '—';
+    badge.textContent = 'Não medida';
+    badge.setAttribute('data-sev', 'neutro');
+    if (limpar) limpar.hidden = true;
   }
 
   function atualizarBadgeEVA(id, valor, badge, saida) {
@@ -794,6 +825,15 @@
      IMPRESSÃO
      ────────────────────────────────────────────────────────────── */
   function imprimir() {
+    /* Sem cartilha marcada, a aba Orientações imprimiria só timbre e
+       rodapé: uma folha em branco. */
+    if (abaAtual === 'orientacoes') {
+      var sel = ler('orient_sel');
+      if (!Array.isArray(sel) || !sel.length) {
+        status('Marque ao menos uma cartilha antes de imprimir as orientações.');
+        return;
+      }
+    }
     document.getElementById('timbre-doc-titulo').textContent = TITULOS_IMPRESSAO[abaAtual] || '';
     /* O papel é o registro: imprime sempre a ficha inteira, independente
        do modo de tela, para não omitir campo preenchido do documento. */
@@ -802,6 +842,15 @@
     window.print();
   }
   window.addEventListener('afterprint', function () { document.body.className = ''; });
+
+  /* Data vazia no papel: o navegador imprimiria "dd/mm/aaaa" e um ícone
+     de calendário. Marcamos as vazias para a folha de impressão mostrar
+     só a linha. Vale também para Ctrl+P, que não passa pelo botão. */
+  window.addEventListener('beforeprint', function () {
+    document.querySelectorAll('input[type=date]').forEach(function (d) {
+      if (d.value) d.removeAttribute('data-vazio'); else d.setAttribute('data-vazio', '');
+    });
+  });
 
   /* ──────────────────────────────────────────────────────────────
      AÇÕES DE ARQUIVO
@@ -1471,7 +1520,7 @@
 
     var resumo = el('dl', { class: 'vf-laudo-ident' });
     [['Paciente', ler('ident_nome')], ['Idade', ler('ident_idade')],
-     ['Data do atendimento', ler('ident_data')],
+     ['Data do atendimento', dataBR(ler('ident_data'))],
      ['Perfil', doc.perfil === 'feminino' ? 'Saúde da Mulher' : 'Saúde do Homem'],
      ['Diagnóstico médico', ler('ident_diagnostico_med')]].forEach(function (par) {
       if (!par[1]) return;
@@ -1499,7 +1548,8 @@
 
     baldeDoCampo['laudo_diagnostico'] = 'aderencia';
     var ta2 = el('textarea', { class: 'vf-campo', id: 'laudo_diagnostico',
-                               name: 'laudo_diagnostico', rows: 5 });
+                               name: 'laudo_diagnostico', rows: 5,
+                               'aria-label': 'Diagnóstico cinético-funcional' });
     ta2.value = ler('laudo_diagnostico') || ler('ef_diagnostico_ap') || '';
     b2.appendChild(ta2);
     b2.appendChild(el('p', { class: 'no-print',

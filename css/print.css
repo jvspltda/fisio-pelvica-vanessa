@@ -420,4 +420,16 @@
 
   /* Remove toda sombra herdada do Tailwind ou dos tokens. */
   * { box-shadow: none !important; }
+
+  /* Datas: sem ícone de calendário no papel, e a vazia vira só a linha
+     (o atributo data-vazio é posto pelo app.js no beforeprint). */
+  input[type=date]::-webkit-calendar-picker-indicator { display: none !important; }
+  input[type=date][data-vazio] { color: transparent !important; }
+  input[type=date][data-vazio]::-webkit-datetime-edit { color: transparent !important; }
+
+  /* Caixas de texto sem o cantinho de redimensionar. */
+  textarea { resize: none !important; }
+
+  /* EVA não medida: a régua fica apagada, para não parecer "zero". */
+  .vf-eva-vazia input[type=range] { opacity: .35; }
 }

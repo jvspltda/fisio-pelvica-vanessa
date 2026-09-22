@@ -519,3 +519,9 @@ button.vf-card-cab:focus-visible { outline: 2px solid var(--terracota); outline-
    altura precisa vir de regra de classe, não de atributo. */
 .timbre-logo-img { height: 30px; width: auto; }
 .marca-tela      { height: 42px; width: auto; }
+
+/* EVA ainda não medida: régua apagada até a primeira marcação. */
+.vf-eva-vazia input[type=range] { opacity: .4; }
+.vf-eva-limpar { margin-left: var(--e-2); padding: 2px 8px; font-size: var(--t-xs); border: 1px solid var(--linha);
+  border-radius: var(--raio-sm); background: var(--branco); color: var(--cafe-suave); cursor: pointer; }
+.vf-eva-limpar:hover { border-color: var(--terracota); color: var(--terracota-deep); }
