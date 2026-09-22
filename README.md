@@ -60,7 +60,7 @@ menos a identificação.
 | | Perguntas visíveis |
 |---|---|
 | **Essencial** | 36 — o que muda a conduta na primeira sessão |
-| **Ficha completa** | 183 — a ficha integral |
+| **Ficha completa** | a ficha integral (todas as seções) |
 
 O modo essencial **não é uma ficha reduzida**: é a mesma ficha, com o resto recolhido.
 Nada é apagado, nada deixa de ser salvo, e **a impressão sempre leva a ficha completa** —
@@ -184,7 +184,8 @@ linhas de escrita e as opções como quadradinhos marcáveis à caneta.
 
 **Pelo gerador dedicado** — `node tools/gerar-ficha-studocu.mjs` produz
 `build/ficha-studocu.html`, que reproduz a ficha original na identidade da Vanessa, em
-6 páginas A4. Converta com Chrome:
+**4 folhas A4**. No site, a mesma ficha abre em `impressos/ficha-avaliacao.html`, com nome
+e data preenchíveis. Converta com Chrome:
 
 ```bash
 chrome --headless --print-to-pdf=Ficha.pdf --no-pdf-header-footer build/ficha-studocu.html
@@ -200,16 +201,16 @@ O padrão é o **modo caneta**, dimensionado para ser preenchido à mão:
 | | Caneta (padrão) | Compacto (`--compacto`) |
 |---|---|---|
 | Altura da linha de escrita | 6,6 mm | 4,1 mm |
-| Espaçamento medido entre filetes | 9,0 mm | 6,1 mm |
-| Corpo do texto | 9,3 pt | 8,7 pt |
+| Espaçamento medido entre filetes (mediana) | 7,6 mm | 6,1 mm |
+| Corpo do texto | 8,8 pt | 8,7 pt |
 | Diâmetro das opções | 3,2 mm | 2,5 mm |
-| Páginas | 8 | 6 |
+| Páginas | 4 | — |
 
 O parâmetro que decide isso é o espaçamento: caderno pautado usa 7–8 mm. Na versão
 compacta a mediana era **6,1 mm**, e a letra invadia a linha de baixo. Use
 `--compacto` só para arquivo em pasta, não para preencher.
 
-#### Duas colunas: de 8 para 6 páginas
+#### Duas colunas (histórico: de 8 para 6 páginas)
 
 A ficha ocupava só **19% da largura útil** e deixava a metade direita vazia em 56%
 das linhas. O que sobrava era espaço horizontal, não vertical — então o corpo virou
@@ -233,11 +234,17 @@ Três armadilhas que a conversão expôs:
 Pai e linhas recuadas viram um `.grupo`, que é quem ocupa a coluna — sem isso "Tipo:"
 caía numa coluna e "Trocas:" na outra, sendo ambos filhos de "Uso de proteção".
 
-A quebra forçada antes do **Exame Físico** foi mantida, por escolha da Vanessa. Ela
-custa uma página — a anamnese termina a 91 mm da página 4 — e a troca é deliberada:
-são dois momentos distintos da consulta, e assim as folhas da anamnese se separam das
-do exame, que acontece com a paciente já posicionada. Sem ela a ficha fecha em 5
-páginas; com ela, em 6.
+#### De 6 para 4 folhas (setembro de 2026)
+
+Para caber em 4 folhas sem apertar a escrita à mão, a pauta foi mantida perto de
+caderno pautado (7,6 mm de mediana entre filetes) e o que saiu foi conteúdo, por
+decisão da Vanessa: a Escala de Wexner, a seção 11 (Exames Complementares em
+Proctologia), a EVA de desconforto ao exame e o Diagnóstico Fisioterapêutico. A seção
+10 (Urologia) ficou. A quebra forçada antes do Exame Físico também saiu.
+
+O diagnóstico fisioterapêutico é conteúdo obrigatório do prontuário (Resolução COFFITO
+nº 414/2012, art. 1º, § 1º, V): fora da ficha de papel, ele fica no laudo impresso e no
+prontuário eletrônico, que acompanham a ficha.
 
 #### Variante em preto e branco
 
@@ -259,11 +266,6 @@ intensidade vira a **espessura crescente da borda** sob cada número — de 0,40
 3,00 mm. Tudo em borda, nada em fundo, porque a instrução de impressão pede
 *"Gráficos de plano de fundo: desmarcado"* e nesse modo qualquer `background` sumiria.
 
-#### Sobre as quebras de página
-
-A quebra forçada antes do **Exame Físico** é deliberada e **não custa página** —
-medido: 8 páginas com ou sem ela. Ela permite separar as folhas da anamnese das do
-exame, que são dois momentos distintos da consulta.
 
 ---
 
