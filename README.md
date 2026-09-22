@@ -10,7 +10,7 @@ em Fisioterapia Pélvica. HTML5 + CSS + JavaScript vanilla, sem build e sem serv
 **Duplo clique em `index.html`** — abre a página inicial, com atalhos para a avaliação (`avaliacao.html`), o prontuário, os impressos e os roteiros.
 
 Funciona em Chrome, Edge, Firefox e Safari. Na primeira abertura, com internet, o
-navegador baixa as fontes e o Tailwind e guarda em cache. Depois disso a suíte abre
+navegador baixa as fontes e guarda em cache. Depois disso a suíte abre
 offline — e mesmo sem cache ela **permanece legível e imprimível**, porque todos os
 tokens e todas as regras críticas de layout vivem em `css/tokens.css` e `css/print.css`,
 não nos CDNs.
@@ -494,8 +494,8 @@ Node é usado **apenas para os testes** — a aplicação não depende dele.
 - **Sem sincronização.** Os dados vivem no navegador daquela máquina.
 - **A coluna "Reavaliação" do laudo é preenchida à mão.** Como não há histórico
   armazenado, a evolução é documentada manualmente pela profissional.
-- **Tailwind via Play CDN.** Adequado ao uso por duplo clique. Para hospedagem em
-  intranet clínica, vale gerar o CSS compilado.
+- **Tailwind compilado no projeto** (`css/tailwind.css`, a partir de `tailwind.config.js`).
+  Não depende mais do Play CDN. A publicação regera o arquivo a cada alteração.
 - **A impressão varia entre navegadores.** O Chrome dá o resultado mais fiel ao que
   foi desenhado aqui.
 - **Sem criptografia local.** O localStorage é legível por quem tiver acesso ao

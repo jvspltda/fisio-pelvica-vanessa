@@ -16,8 +16,10 @@
 <link rel="stylesheet" href="css/tokens.css">
 <link rel="stylesheet" href="css/print.css">
 
-<!-- Tailwind Play CDN: conveniência de layout, nunca requisito -->
-<script src="https://cdn.tailwindcss.com"></script>
+<!-- Tailwind compilado no projeto (antes vinha do Play CDN). Fica por último,
+     na mesma posição em que o CDN injetava o estilo, para manter a mesma
+     ordem de prioridade. Regerar: ver tailwind.config.js. -->
+<link rel="stylesheet" href="css/tailwind.css">
 </head>
 
 <body>

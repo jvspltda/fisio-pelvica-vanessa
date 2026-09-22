@@ -44,6 +44,9 @@ jobs:
           node tests/cofre.test.mjs
           node tests/roteiros.test.mjs
 
+      - name: Compilar o Tailwind da avaliação
+        run: npx --yes tailwindcss@3 -c tailwind.config.js -i css/tailwind.src.css -o css/tailwind.css --minify
+
       - name: Gerar ficha, cartilhas e carta
         run: |
           node tools/gerar-ficha-studocu.mjs
