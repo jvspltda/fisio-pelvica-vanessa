@@ -170,6 +170,7 @@ const ICS = [
 
 let html = `<!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8">
+<link rel="icon" href="data:,">
 <title>Ficha de Avaliação — Disfunções dos Músculos do Assoalho Pélvico Feminino</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

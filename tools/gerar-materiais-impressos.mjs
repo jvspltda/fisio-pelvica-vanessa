@@ -177,6 +177,7 @@ const rodape = `<div class="rodape">Vanessa Fernandes · Fisioterapeuta · ${esc
 const documento = (titulo, paginas, barraHtml) => `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${esc(titulo)}</title>
+<link rel="icon" href="data:,">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap">
 <link rel="stylesheet" href="../css/navegacao.css">
 <style>${CSS}${CSS_BARRA}</style></head><body>${barraHtml || ''}<div class="folhas">${paginas}</div>
