@@ -5,7 +5,7 @@
    tools/gerar-materiais-impressos.mjs) lê daqui, e o teste
    tests/exercicios.test.mjs confere.
 
-   Ilustrações: extraídas da cartilha da Vanessa (cartilha.pdf, 2026-09-29),
+   Ilustrações: extraídas da cartilha da Vanessa (Referencias/Cartilha-Exercicios-original.pdf, 2026-09-29),
    1536 × 1024 px (ou 1024 × 1536). Na folha, a maior tem 74 mm de largura —
    passa de 500 pontos por polegada, sobra para impressão.
 

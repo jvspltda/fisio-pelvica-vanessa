@@ -1,17 +1,15 @@
-assets/ -- imagens da suite
+assets/ -- imagens da suite (revisto em 2026-09-29)
 
-logo.png  Marca oficial da Vanessa, fundo transparente, terracota #B86657.
-          Extraida do cartao de marca (WhatsApp Image 2026-08-31 at 14.37.18.jpeg)
-          por separacao de croma vermelho-azul: o fundo areia e a sombra
-          cinza do mockup caem para alfa zero sozinhos, sem mascara manual.
-          A sombra NAO foi mantida -- e efeito de apresentacao do cartao,
-          nao parte da marca.
+logo.svg      Marca oficial da Vanessa, terracota #B86657. Os geradores de
+              impressos a embutem como imagem em cada folha. Copia em alta
+              resolucao, PNG e SVG, na pasta Marca/ da raiz.
 
-logo.svg  O mesmo PNG embutido em base64. index.html procura este arquivo
-          primeiro; se faltar, cai no vetor de recuo inline.
+eva.jpg       Escala Visual Analogica 0-10 da ficha original
+              (Referencias/ficha-original-studocu.pdf). Instrumento clinico
+              padrao, reaproveitado sem alteracao.
 
-eva.jpg   Escala Visual Analogica 0-10 da ficha original (document-download.pdf,
-          xref 21). Instrumento clinico padrao, reaproveitado sem alteracao.
-
-Para regerar a marca a partir de outro arquivo, ver tools/extrair-logo.mjs
-nao existe: o processo esta descrito acima e foi feito com Python/PIL.
+exercicios/   As cinco ilustracoes da folha "Exercicios para casa", extraidas
+              em resolucao original da cartilha da Vanessa
+              (Referencias/Cartilha-Exercicios-original.pdf). A lista de
+              exercicios que usa cada figura esta em js/exercicios.js.
+              Nenhuma e foto de paciente.

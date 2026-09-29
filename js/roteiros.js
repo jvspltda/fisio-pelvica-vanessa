@@ -65,9 +65,12 @@
     'Salve o projeto de edição junto do vídeo final — sem ele, corrigir depois exige regravar.'
   ];
 
+  /* Foco revisto em 2026-09-29: gestação/pós-parto e perda de urina.
+     Os outros temas continuam atendidos, mas saem da vitrine. */
   R.SERIES = [
-    { id: 'gestantes', nome: 'Gestantes', descricao: 'Série nova, para a gestação e o pós-parto.' },
-    { id: 'regravacao', nome: 'Regravação dos antigos', descricao: 'Substituem os Reels gravados na clínica anterior.' }
+    { id: 'gestantes', nome: 'Gestação e pós-parto', descricao: 'Foco principal.' },
+    { id: 'incontinencia', nome: 'Perda de urina', descricao: 'Foco principal. Substituem os Reels antigos de incontinência e urgência.' },
+    { id: 'fora', nome: 'Fora do foco', descricao: 'Temas atendidos, mas fora da vitrine por enquanto: gravar só se houver demanda.' }
   ];
 
   R.LISTA = [
@@ -179,9 +182,37 @@
       ]
     },
 
-    /* ───────────── REGRAVAÇÃO ───────────── */
     {
-      id: 'A', serie: 'regravacao', titulo: 'Escape de xixi ao tossir, rir ou na academia', duracao: '45 s',
+      id: 'P1', serie: 'gestantes', titulo: 'Escape de xixi depois do parto', duracao: '45 s',
+      objetivo: 'RASCUNHO para aprovação da Vanessa (2026-09-29). Junta os dois focos: pós-parto e perda de urina.',
+      cenas: [
+        { tempo: '0–6 s', imagem: 'Plano médio, olhando para a câmera', fala: 'Teve bebê e agora escapa xixi quando tosse, espirra ou pega o bebê no colo?', tela: 'Escapa xixi depois do parto?' },
+        { tempo: '6–22 s', imagem: 'Mesmo plano', fala: 'A gestação e o parto, normal ou cesárea, exigem muito da musculatura lá embaixo, a que segura a bexiga. Depois, ela precisa de tempo e de treino certo pra voltar a trabalhar. Muita mulher acha que é o preço de ter tido filho e fica calada.', tela: 'Não é o preço de ter tido filho' },
+        { tempo: '22–38 s', imagem: 'Sala de atendimento, sem ninguém na maca', fala: 'Na consulta eu vejo como essa musculatura está respondendo e confiro se a contração está certa. Com a liberação médica, os exercícios são curtos e cabem na rotina com o bebê.', tela: 'O que eu avalio' },
+        { tempo: '38–45 s', imagem: 'Plano médio, tom acolhedor', fala: 'Se isso está acontecendo com você depois do parto, isso pede avaliação.', tela: 'Isso pede avaliação' }
+      ],
+      legenda: 'Teve bebê e agora escapa xixi quando tosse, espirra ou pega o bebê no colo?\n\nA gestação e o parto, normal ou cesárea, exigem muito da musculatura que segura a bexiga. Depois, ela precisa de tempo e de treino certo para voltar a trabalhar — e não é o preço de ter tido filho.\n\nNa consulta eu vejo como essa musculatura está respondendo e confiro se a contração está certa. Com a liberação médica, os exercícios são curtos e cabem na rotina com o bebê.',
+      hashtags: '#fisioterapiapelvica #posparto #puerperio #conceicaodomatodentro',
+      trafego: {
+        prioridade: 'Orgânico na semana 3; entra no anúncio depois do teste, ao lado do vídeo que mais trouxe conversa', objetivo: 'Mensagens (WhatsApp)',
+        publico: 'Mulheres de 20 a 45 anos, Conceição do Mato Dentro + 25 km',
+        anuncioCenas: [
+          { como: 'regravar', fala: 'Escape de urina depois do parto tem avaliação.', tela: 'Escape de urina no pós-parto' },
+          null,
+          null,
+          { como: 'regravar', fala: 'Escape de urina no pós-parto tem avaliação. Agende pelo WhatsApp da clínica.', tela: 'Fisioterapia pélvica no pós-parto' }
+        ],
+        anuncio: { titulo: 'Fisioterapia pélvica no pós-parto', texto: 'Avaliação do assoalho pélvico depois do parto, normal ou cesárea, com exercícios curtos que cabem na rotina com o bebê. Hora marcada na Clínica Veracis, Conceição do Mato Dentro.' }
+      },
+      lastro: [
+        ['"precisa de tempo e de treino certo"', 'Revisão Cochrane 2020 (Woodley SJ e cols., CD007471.pub4), que também avalia o treino do assoalho pélvico no pós-parto. A fala não afirma resultado: só convida à avaliação. https://pmc.ncbi.nlm.nih.gov/articles/PMC7203602/ (acesso em 2026-09-20)'],
+        ['"normal ou cesárea" e "com a liberação médica"', 'Mesma orientação da cartilha de pós-parto já entregue às pacientes (js/adherence.js).']
+      ]
+    },
+
+    /* ───────────── PERDA DE URINA ───────────── */
+    {
+      id: 'A', serie: 'incontinencia', titulo: 'Escape de xixi ao tossir, rir ou na academia', duracao: '45 s',
       objetivo: 'Substitui os dois vídeos antigos de incontinência (um deles dizia "de Capelinha e região").',
       cenas: [
         { tempo: '0–6 s', imagem: 'Você na sala da Veracis, plano médio', fala: 'Já escapou xixi quando você tossiu, riu, espirrou ou levantou um peso na academia? Então esse vídeo é pra você.', tela: 'Escapou xixi no esforço?' },
@@ -207,7 +238,7 @@
       ]
     },
     {
-      id: 'B', serie: 'regravacao', titulo: 'Vontade de fazer xixi que chega de repente', duracao: '45 s',
+      id: 'B', serie: 'incontinencia', titulo: 'Vontade de fazer xixi que chega de repente', duracao: '45 s',
       objetivo: 'Substitui o vídeo antigo sobre urgência.',
       cenas: [
         { tempo: '0–6 s', imagem: 'Plano médio', fala: 'Aquela vontade de fazer xixi que chega de repente e você mal consegue segurar até o banheiro — acontece com você?', tela: 'Vontade que chega de repente' },
@@ -232,8 +263,9 @@
         ['"isso tem nome"', 'International Continence Society, definição de urgency (2017): "A compelling need to urinate which is difficult to defer". https://www.ics.org/committees/standardisation/terminologydiscussions/urgency (acesso em 2026-09-20)']
       ]
     },
+    /* ───────────── FORA DO FOCO ───────────── */
     {
-      id: 'C', serie: 'regravacao', titulo: 'Dor na hora da relação', duracao: '45 s',
+      id: 'C', serie: 'fora', titulo: 'Dor na hora da relação', duracao: '45 s',
       objetivo: 'Substitui o vídeo antigo sobre dispareunia, sem a promessa que ele fazia. Tom mais baixo e mais lento.',
       cenas: [
         { tempo: '0–7 s', imagem: 'Plano médio, olhar direto, tom baixo', fala: 'Dói na hora da relação? Esse é o assunto que quase ninguém tem coragem de levar pro consultório.', tela: 'Dói na hora da relação?' },
@@ -244,7 +276,7 @@
       legenda: 'Dói na hora da relação? Esse é o assunto que quase ninguém tem coragem de levar ao consultório — e é justamente um assunto de consulta.\n\nOs motivos são diferentes: musculatura tensa que não relaxa, cicatriz de parto ou cirurgia, ressecamento, questões ginecológicas. Cada um pede uma conduta.\n\nA gente conversa primeiro, vestida. O exame só acontece depois que eu explico cada passo e você autoriza — e você pode dizer não a qualquer momento.',
       hashtags: '#fisioterapiapelvica #dispareunia #saudedamulher',
       trafego: {
-        prioridade: 'Só orgânico no começo', objetivo: '—',
+        prioridade: 'Fora do foco: gravar só se houver demanda; se gravar, só orgânico', objetivo: '—',
         publico: 'Se impulsionar: mulheres a partir de 18 anos, com texto clínico',
         anuncioCenas: [
           { como: 'regravar', fala: 'Dor na relação sexual tem causas diferentes — e cada uma pede uma avaliação.', tela: 'Dor na relação: avaliação' },
@@ -259,7 +291,7 @@
       ]
     },
     {
-      id: 'D', serie: 'regravacao', titulo: 'Depois da cirurgia de próstata', duracao: '45 s',
+      id: 'D', serie: 'fora', titulo: 'Depois da cirurgia de próstata', duracao: '45 s',
       objetivo: 'Substitui o vídeo antigo sobre próstata, sem o "eficaz". Fala com o homem e com quem cuida dele.',
       cenas: [
         { tempo: '0–7 s', imagem: 'Plano médio', fala: 'Fez cirurgia de próstata e está perdendo urina? Ou é seu pai, seu marido, que está passando por isso e não fala do assunto?', tela: 'Depois da cirurgia de próstata' },
@@ -270,7 +302,7 @@
       legenda: 'Fez cirurgia de próstata e está perdendo urina? Ou é seu pai ou seu marido que está passando por isso e não toca no assunto?\n\nHomem também tem assoalho pélvico, e é essa musculatura que ajuda a segurar o xixi. Depois da cirurgia ela precisa reaprender a trabalhar, e isso costuma levar meses.\n\nNa consulta eu confiro se a musculatura certa está sendo usada, organizo hábitos de banheiro e acompanho a evolução com medida. Sem promessa de resultado.',
       hashtags: '#fisioterapiapelvica #saudedohomem #prostata',
       trafego: {
-        prioridade: 'Campanha própria, depois das 4 semanas', objetivo: 'Mensagens (WhatsApp)',
+        prioridade: 'Fora do foco: campanha só se chegarem encaminhamentos de urologia', objetivo: 'Mensagens (WhatsApp)',
         publico: 'Homens de 55 a 75 anos e mulheres de 45 a 70 (quem costuma marcar a consulta do marido ou do pai), Conceição do Mato Dentro + 25 km',
         anuncioCenas: [
           { como: 'regravar', fala: 'Depois da cirurgia de próstata, a musculatura do assoalho pélvico precisa reaprender a trabalhar.', tela: 'Depois da cirurgia de próstata' },
@@ -285,7 +317,7 @@
       ]
     },
     {
-      id: 'E', serie: 'regravacao', titulo: 'Perna inchada: quando é caso de correr', duracao: '45 s',
+      id: 'E', serie: 'fora', titulo: 'Perna inchada: quando é caso de correr', duracao: '45 s',
       objetivo: 'Substitui os dois vídeos antigos de inchaço. Vira utilidade pública, não oferta de drenagem.',
       cenas: [
         { tempo: '0–6 s', imagem: 'Plano médio', fala: 'Perna inchada no fim do dia todo mundo já teve. Mas tem um tipo de inchaço que não é pra esperar passar.', tela: 'Nem todo inchaço é igual' },
@@ -296,7 +328,7 @@
       legenda: 'Perna inchada no fim do dia quase todo mundo já teve. Mas existe um tipo de inchaço que não é para esperar passar.\n\nInchaço que aparece de repente, em uma perna só, com dor, calor ou pele vermelha: procure um médico no mesmo dia. Não é caso de massagem.\n\nDescartada a urgência, a gente conversa sobre a sua rotina, eu avalio, oriento e acompanho junto com quem fez o diagnóstico.',
       hashtags: '#fisioterapia #inchaco #saude',
       trafego: {
-        prioridade: 'Não impulsionar', objetivo: '—',
+        prioridade: 'Fora do foco: não gravar por enquanto', objetivo: '—',
         publico: 'Conteúdo de utilidade pública, fora do foco pélvico',
         anuncioCenas: null,
         anuncio: null
