@@ -29,10 +29,15 @@ teste('códigos únicos', () => {
   assert.equal(new Set(ids).size, ids.length);
 });
 
+const textosAnuncio = (r) => {
+  const v = R.versaoAnuncio(r);
+  return (v ? v.map(c => c.fala + '\n' + c.tela).join('\n') : '') + '\n' +
+    (r.trafego.anuncio ? r.trafego.anuncio.titulo + '\n' + r.trafego.anuncio.texto : '');
+};
+
 teste('nenhuma palavra proibida nas falas, na tela, na legenda ou no anúncio', () => {
   for (const r of R.LISTA) {
-    const tudo = textosDoPost(r) + '\n' + (r.trafego.anuncio ? r.trafego.anuncio.texto + ' ' + r.trafego.anuncio.titulo : '') + ' ' + r.trafego.aberturaAnuncio;
-    const m = tudo.match(PROIBIDAS);
+    const m = (textosDoPost(r) + '\n' + textosAnuncio(r)).match(PROIBIDAS);
     assert.ok(!m, r.id + ' contém "' + (m && m[0]) + '"');
   }
 });
@@ -44,13 +49,40 @@ teste('nenhum percentual ou nome de estudo na fala ou na legenda', () => {
   }
 });
 
-teste('anúncio não pergunta nem afirma a condição de quem vê (atributos pessoais da Meta)', () => {
+/* O \b do JavaScript não enxerga letra acentuada ("você" nunca casava com
+   /\bvocê\b/), por isso as fronteiras de palavra usam \p{L}. */
+const PESSOA = /(?<!\p{L})(você|voce|seu|sua|seus|suas|te)(?!\p{L})/iu;
+const CONDICAO = /(escap|xixi|urin|grávida|gravidez|gesta|trimestre|(?<!\p{L})dor(?!\p{L})|dói|próstata|relação|incontin|urgênc|perd[ea]|aguentar|acontecendo)/iu;
+const frases = (t) => t.split(/(?<=[.!?])\s+|\n/).filter(Boolean);
+
+teste('toda peça com anúncio tem versão de anúncio cena a cena', () => {
+  for (const r of R.LISTA) {
+    if (!r.trafego.anuncio) { assert.equal(r.trafego.anuncioCenas, null, r.id); continue; }
+    const a = r.trafego.anuncioCenas;
+    assert.ok(Array.isArray(a) && a.length === r.cenas.length, r.id + ': anuncioCenas com tamanho diferente das cenas');
+  }
+});
+
+teste('versão de anúncio não pergunta nem afirma a condição de quem vê ou da família (atributos pessoais da Meta)', () => {
   for (const r of R.LISTA) {
     if (!r.trafego.anuncio) continue;
-    const t = [r.trafego.anuncio.titulo, r.trafego.anuncio.texto, r.trafego.aberturaAnuncio].join(' ');
-    assert.ok(!t.includes('?'), r.id + ': anúncio com pergunta');
-    assert.ok(!/\bvocê\b|\bseu\b|\bsua\b|\bte\b/i.test(t), r.id + ': anúncio dirigido à pessoa');
+    for (const c of R.versaoAnuncio(r)) {
+      for (const t of [c.fala, c.tela]) {
+        assert.ok(!t.includes('?'), r.id + ' ' + c.tempo + ': pergunta no anúncio — "' + t + '"');
+        for (const f of frases(t)) {
+          assert.ok(!(PESSOA.test(f) && CONDICAO.test(f)), r.id + ' ' + c.tempo + ': fala da condição de quem vê — "' + f + '"');
+        }
+      }
+    }
+    const texto = r.trafego.anuncio.titulo + ' ' + r.trafego.anuncio.texto;
+    assert.ok(!texto.includes('?') && !PESSOA.test(texto), r.id + ': texto do anúncio dirigido à pessoa');
   }
+});
+
+teste('a guarda de atributos pessoais pega as falas do post (prova de que ela funciona)', () => {
+  const A = R.LISTA.find(r => r.id === 'A');
+  const pegas = frases(A.cenas[3].fala).filter(f => PESSOA.test(f) && CONDICAO.test(f));
+  assert.ok(pegas.length > 0, 'a regra não reconheceu o fecho do post A');
 });
 
 teste('legenda final leva nome, CREFITO e os dois Instagrams', () => {

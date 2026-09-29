@@ -11,8 +11,11 @@
    Anúncio pago: a política de atributos pessoais da Meta proíbe texto que
    pergunte ou insinue a condição de saúde de quem vê ("Do you have
    diabetes?" é o exemplo dela). Por isso cada roteiro tem:
-     - aberturaAnuncio: primeira fala neutra, gravada na mesma sessão,
-       para a versão impulsionada;
+     - anuncioCenas: a versão do vídeo para anúncio, cena a cena. null =
+       igual ao post; 'regravar' = fala neutra gravada na mesma sessão
+       (sempre a abertura e o fecho); 'cortar' = mesma gravação, aparada
+       na edição; 'tela' = só troca o texto na tela. A regra vale para o
+       vídeo inteiro, não só para a primeira fala;
      - anuncio.texto / anuncio.titulo: falam do serviço, não da pessoa.
    ════════════════════════════════════════════════════════════════ */
 (function (raiz) {
@@ -47,7 +50,7 @@
     'Nenhuma palavra da lista de "nunca dizer"',
     'Nenhum número, nome de estudo ou "segundo a ciência" na fala',
     'Nenhum quadro com a marca da clínica antiga',
-    'Para anúncio: usar a abertura neutra e o texto de anúncio desta página'
+    'Para anúncio: montar a versão de anúncio desta página (abertura, fecho e textos de tela neutros) no Gerenciador de Anúncios — nunca impulsionar o post com a legenda original'
   ];
 
   R.GRAVACAO = [
@@ -55,7 +58,10 @@
     'Vertical 1080×1920, plano médio, olhos no terço de cima.',
     'Luz de frente (janela ou softbox), nunca de costas para a luz.',
     'Microfone de lapela sempre.',
-    'Grave as DUAS aberturas de cada roteiro: a do post e a neutra, para anúncio.',
+    'Grave também a abertura e o fecho neutros de cada roteiro (as falas marcadas "regravar" na versão de anúncio). O meio do vídeo é o mesmo nas duas versões.',
+    'Legenda embutida na edição (muita gente assiste sem som) e exportação sem marca d’água do aplicativo — vídeo com marca d’água sai das recomendações do Instagram.',
+    'Selo, legenda e textos fora das bordas: deixe livres 14% no topo, 35% embaixo e 6% de cada lado, onde ficam os botões do Reels.',
+    'Cartela final curta: texto cobrindo a maior parte da tela também tira o vídeo das recomendações.',
     'Salve o projeto de edição junto do vídeo final — sem ele, corrigir depois exige regravar.'
   ];
 
@@ -80,7 +86,12 @@
       trafego: {
         prioridade: 'Semana 2', objetivo: 'Mensagens (WhatsApp)',
         publico: 'Mulheres de 20 a 45 anos, Conceição do Mato Dentro + 25 km',
-        aberturaAnuncio: 'Na gravidez, escapar um pouco de urina ao tossir ou rir é comum — e tem avaliação.',
+        anuncioCenas: [
+          { como: 'regravar', fala: 'Na gravidez, escapar um pouco de urina ao tossir ou rir é comum — e tem avaliação.', tela: 'Escape de urina na gestação' },
+          { como: 'cortar', fala: 'O bebê cresce, o peso todo vai pra frente e a musculatura lá embaixo, que segura a bexiga, passa a trabalhar muito mais. Aí, numa tossida, escapa. Acontece bastante.', tela: 'Por que acontece', nota: 'Termina em "Acontece bastante."' },
+          null,
+          { como: 'regravar', fala: 'Escape de urina na gestação tem avaliação. Agende pelo WhatsApp da clínica.', tela: 'Fisioterapia pélvica na gestação' }
+        ],
         anuncio: { titulo: 'Fisioterapia pélvica na gestação', texto: 'Avaliação do assoalho pélvico na gravidez, com um plano de exercícios que cabe na rotina. Atendimento com hora marcada na Clínica Veracis, em Conceição do Mato Dentro.' }
       },
       lastro: [
@@ -100,9 +111,14 @@
       legenda: '"É assim mesmo, é da gravidez." Você já ouviu isso?\n\nDor nas costas e peso na pelve aparecem porque o corpo muda muito rápido, e algumas partes passam a trabalhar dobrado. Isso tem explicação e tem o que fazer.\n\nNa consulta eu olho respiração, postura e os movimentos que doem, e a partir daí a gente ajusta a rotina e escolhe os exercícios certos para o seu trimestre.',
       hashtags: '#fisioterapiapelvica #gravidez #dornascostas #gestante',
       trafego: {
-        prioridade: 'Reforço (semana 3), se for o que mais trouxer conversa', objetivo: 'Mensagens (WhatsApp)',
+        prioridade: 'Só orgânico nas 4 primeiras semanas (não entra no teste)', objetivo: 'Mensagens (WhatsApp)',
         publico: 'Mulheres de 20 a 45 anos, Conceição do Mato Dentro + 25 km',
-        aberturaAnuncio: 'Dor nas costas e peso na pelve na gravidez têm explicação — e têm o que fazer.',
+        anuncioCenas: [
+          { como: 'regravar', fala: 'Dor nas costas e peso na pelve na gravidez têm explicação — e têm o que fazer.', tela: 'Dor nas costas na gestação' },
+          { como: 'regravar', fala: 'Na gestação o corpo muda muito rápido: a barriga puxa pra frente, a postura se ajusta pra compensar, e algumas partes passam a trabalhar dobrado. É isso que dói. E essa dor tem explicação.', tela: 'O corpo muda rápido' },
+          { como: 'regravar', fala: 'Na consulta eu vejo a respiração, o jeito de sentar, de levantar da cama, o que dói em qual movimento. Daí saem os ajustes do dia a dia e os exercícios certos pra cada trimestre.', tela: 'O que eu avalio' },
+          { como: 'regravar', fala: 'Dor na gestação tem avaliação. Agende pelo WhatsApp da clínica.', tela: 'Fisioterapia pélvica na gestação' }
+        ],
         anuncio: { titulo: 'Gestação com menos dor', texto: 'Avaliação de postura, respiração e movimento na gestação, com exercícios escolhidos para cada trimestre. Hora marcada na Clínica Veracis, Conceição do Mato Dentro.' }
       },
       lastro: []
@@ -122,7 +138,13 @@
       trafego: {
         prioridade: 'Semana 1', objetivo: 'Mensagens (WhatsApp)',
         publico: 'Mulheres de 20 a 60 anos, Conceição do Mato Dentro + 25 km',
-        aberturaAnuncio: 'Como é uma primeira consulta de fisioterapia pélvica, passo a passo.',
+        anuncioCenas: [
+          null,
+          { como: 'cortar', fala: 'Primeiro a gente senta e conversa. Vestida, sem pressa.', tela: '1 · A gente conversa', nota: 'Termina em "sem pressa."' },
+          null,
+          null,
+          null
+        ],
         anuncio: { titulo: 'Como é a primeira consulta', texto: 'Conversa sem pressa, exame só com autorização da paciente e um plano escrito ao final. Fisioterapia pélvica com hora marcada na Clínica Veracis, Conceição do Mato Dentro.' }
       },
       lastro: [
@@ -141,9 +163,14 @@
       legenda: 'Dá pra se preparar antes do parto para ter menos problema de xixi depois.\n\nQuem trabalha a musculatura do assoalho pélvico durante a gestação costuma se queixar menos de escape de urina no fim da gravidez e nos primeiros meses com o bebê. Não é promessa: é músculo trabalhado com orientação.\n\nO detalhe é que, sozinha, a maioria aperta a barriga ou prende a respiração — e o músculo que precisava trabalhar fica parado. Por isso conferimos juntas antes de virar rotina.',
       hashtags: '#fisioterapiapelvica #gravidez #posparto #gestante',
       trafego: {
-        prioridade: 'Reforço (semana 3), se for o que mais trouxer conversa', objetivo: 'Mensagens (WhatsApp)',
+        prioridade: 'Só orgânico nas 4 primeiras semanas (não entra no teste)', objetivo: 'Mensagens (WhatsApp)',
         publico: 'Mulheres de 20 a 45 anos, Conceição do Mato Dentro + 25 km',
-        aberturaAnuncio: 'Preparar o assoalho pélvico na gestação ajuda depois do parto.',
+        anuncioCenas: [
+          { como: 'regravar', fala: 'Preparar o assoalho pélvico na gestação ajuda depois do parto.', tela: 'Preparo antes do parto' },
+          null,
+          null,
+          { como: 'regravar', fala: 'Preparo do assoalho pélvico na gestação tem avaliação. Agende pelo WhatsApp da clínica.', tela: 'Fisioterapia pélvica na gestação' }
+        ],
         anuncio: { titulo: 'Preparo do assoalho pélvico', texto: 'Treino do assoalho pélvico na gestação, conferido em consulta antes de virar rotina em casa. Hora marcada na Clínica Veracis, Conceição do Mato Dentro.' }
       },
       lastro: [
@@ -167,7 +194,12 @@
       trafego: {
         prioridade: 'Semana 1', objetivo: 'Mensagens (WhatsApp)',
         publico: 'Mulheres de 25 a 60 anos, Conceição do Mato Dentro + 25 km',
-        aberturaAnuncio: 'Escape de urina ao tossir, rir ou fazer exercício tem nome — e tem avaliação.',
+        anuncioCenas: [
+          { como: 'regravar', fala: 'Escape de urina ao tossir, rir ou fazer exercício tem nome — e tem avaliação.', tela: 'Escape de urina no esforço' },
+          { como: 'cortar', fala: 'A pressão dentro da barriga aumenta e empurra a bexiga pra baixo. Quem segura isso é uma musculatura lá embaixo, o assoalho pélvico. Se ela não dá conta naquele momento, escapa.', tela: 'Por que escapa', nota: 'Começa em "a pressão dentro da barriga" e termina em "escapa."' },
+          null,
+          { como: 'regravar', fala: 'Escape de urina no esforço tem avaliação. Agende pelo WhatsApp da clínica.', tela: 'Fisioterapia pélvica em Conceição' }
+        ],
         anuncio: { titulo: 'Fisioterapia pélvica em Conceição', texto: 'Avaliação da musculatura do assoalho pélvico e treino orientado para escape de urina no esforço. Hora marcada na Clínica Veracis, Conceição do Mato Dentro.' }
       },
       lastro: [
@@ -188,7 +220,12 @@
       trafego: {
         prioridade: 'Semana 2', objetivo: 'Mensagens (WhatsApp)',
         publico: 'Mulheres de 35 a 70 anos, Conceição do Mato Dentro + 25 km',
-        aberturaAnuncio: 'Vontade de urinar que chega de repente tem nome, tem explicação — e não é da idade.',
+        anuncioCenas: [
+          { como: 'regravar', fala: 'Vontade de urinar que chega de repente tem nome, tem explicação — e não é da idade.', tela: 'Vontade que chega de repente' },
+          { como: 'tela', tela: 'Tem nome e tem explicação' },
+          null,
+          { como: 'regravar', fala: 'Urgência para urinar tem avaliação. Agende pelo WhatsApp da clínica.', tela: 'Reeducação da bexiga' }
+        ],
         anuncio: { titulo: 'Reeducação da bexiga', texto: 'Diário da bexiga, treino da musculatura e estratégias para a urgência urinária. Fisioterapia pélvica com hora marcada na Clínica Veracis, Conceição do Mato Dentro.' }
       },
       lastro: [
@@ -209,7 +246,12 @@
       trafego: {
         prioridade: 'Só orgânico no começo', objetivo: '—',
         publico: 'Se impulsionar: mulheres a partir de 18 anos, com texto clínico',
-        aberturaAnuncio: 'Dor na relação sexual tem causas diferentes — e cada uma pede uma avaliação.',
+        anuncioCenas: [
+          { como: 'regravar', fala: 'Dor na relação sexual tem causas diferentes — e cada uma pede uma avaliação.', tela: 'Dor na relação: avaliação' },
+          null,
+          null,
+          { como: 'regravar', fala: 'Dor na relação tem avaliação, com conversa antes de qualquer exame. Agende pelo WhatsApp da clínica.', tela: 'Dor na relação: avaliação' }
+        ],
         anuncio: { titulo: 'Dor na relação: avaliação', texto: 'Avaliação fisioterapêutica da dor na relação sexual, com conversa antes de qualquer exame e consentimento em cada etapa. Clínica Veracis, Conceição do Mato Dentro.' }
       },
       lastro: [
@@ -230,7 +272,12 @@
       trafego: {
         prioridade: 'Campanha própria, depois das 4 semanas', objetivo: 'Mensagens (WhatsApp)',
         publico: 'Homens de 55 a 75 anos e mulheres de 45 a 70 (quem costuma marcar a consulta do marido ou do pai), Conceição do Mato Dentro + 25 km',
-        aberturaAnuncio: 'Depois da cirurgia de próstata, a musculatura do assoalho pélvico precisa reaprender a trabalhar.',
+        anuncioCenas: [
+          { como: 'regravar', fala: 'Depois da cirurgia de próstata, a musculatura do assoalho pélvico precisa reaprender a trabalhar.', tela: 'Depois da cirurgia de próstata' },
+          null,
+          null,
+          { como: 'regravar', fala: 'Fisioterapia depois da cirurgia de próstata tem avaliação. Agende pelo WhatsApp da clínica.', tela: 'Fisioterapia após cirurgia de próstata' }
+        ],
         anuncio: { titulo: 'Fisioterapia após cirurgia de próstata', texto: 'Treino orientado do assoalho pélvico masculino, com acompanhamento e medida da evolução. Hora marcada na Clínica Veracis, Conceição do Mato Dentro.' }
       },
       lastro: [
@@ -251,7 +298,7 @@
       trafego: {
         prioridade: 'Não impulsionar', objetivo: '—',
         publico: 'Conteúdo de utilidade pública, fora do foco pélvico',
-        aberturaAnuncio: '—',
+        anuncioCenas: null,
         anuncio: null
       },
       lastro: [
@@ -264,6 +311,16 @@
   R.DESCARTADOS = [
     { titulo: 'Canetas emagrecedoras e flacidez', motivo: 'O original afirma que um recurso devolve firmeza e estimula colágeno, sem fonte que sustente, e o tema é estético e fora do eixo pélvico. Só volta com referência citada.' }
   ];
+
+  /* Versão de anúncio: as cenas do post com as trocas de anuncioCenas. */
+  R.versaoAnuncio = function (r) {
+    if (!r.trafego.anuncioCenas) return null;
+    return r.cenas.map(function (c, i) {
+      var t = r.trafego.anuncioCenas[i];
+      if (!t) return { tempo: c.tempo, imagem: c.imagem, fala: c.fala, tela: c.tela, como: 'igual' };
+      return { tempo: c.tempo, imagem: c.imagem, fala: t.fala || c.fala, tela: t.tela || c.tela, como: t.como, nota: t.nota || '' };
+    });
+  };
 
   /* Link do WhatsApp com mensagem pronta e o código do vídeo: ajuda a
      saber qual anúncio trouxe o contato, sem a mensagem citar a queixa. */

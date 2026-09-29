@@ -77,8 +77,7 @@
     var tf = el('div', 'caixa trafego');
     tf.appendChild(el('h3', null, 'No tráfego pago'));
     var dl = el('dl');
-    [['Quando', r.trafego.prioridade], ['Objetivo', r.trafego.objetivo], ['Público', r.trafego.publico],
-     ['Abertura para o anúncio', r.trafego.aberturaAnuncio]].forEach(function (p) {
+    [['Quando', r.trafego.prioridade], ['Objetivo', r.trafego.objetivo], ['Público', r.trafego.publico]].forEach(function (p) {
       dl.appendChild(el('dt', null, p[0])); dl.appendChild(el('dd', null, p[1]));
     });
     if (r.trafego.anuncio) {
@@ -86,6 +85,25 @@
       dl.appendChild(el('dt', null, 'Texto do anúncio')); dl.appendChild(el('dd', null, r.trafego.anuncio.texto));
     }
     tf.appendChild(dl);
+    var va = R.versaoAnuncio(r);
+    if (va) {
+      tf.appendChild(el('h3', null, 'Vídeo do anúncio'));
+      tf.appendChild(el('p', 'apoio', 'O que muda em relação ao post. "Igual ao post" usa a mesma gravação; "regravar" é gravado na mesma sessão; "cortar" é só aparar na edição.'));
+      var COMO = { igual: 'Igual ao post', regravar: 'Regravar', cortar: 'Cortar na edição', tela: 'Só trocar o texto na tela' };
+      var tw2 = el('div', 'tabela'), tb2 = el('table', 'cenas anuncio'), th2 = el('thead'), trh = el('tr');
+      ['Tempo', 'O que fazer', 'Fala', 'Texto na tela'].forEach(function (h) { trh.appendChild(el('th', null, h)); });
+      th2.appendChild(trh); tb2.appendChild(th2);
+      var corpo2 = el('tbody');
+      va.forEach(function (c) {
+        var tr = el('tr', c.como === 'igual' ? 'igual' : 'muda');
+        [['Tempo', c.tempo, ''], ['O que fazer', COMO[c.como] + (c.nota ? ' — ' + c.nota : ''), 'como'],
+         ['Fala', c.como === 'igual' || c.como === 'tela' ? '(mesma fala do post)' : c.fala, 'fala'], ['Texto na tela', c.tela, '']].forEach(function (x) {
+          var td = el('td', x[2], x[1]); td.setAttribute('data-rotulo', x[0]); tr.appendChild(td);
+        });
+        corpo2.appendChild(tr);
+      });
+      tb2.appendChild(corpo2); tw2.appendChild(tb2); tf.appendChild(tw2);
+    }
     if (r.trafego.anuncio) {
       var bts = el('div', 'linha-botoes');
       bts.appendChild(botaoCopiar('Texto do anúncio', r.trafego.anuncio.texto + '\n\n' + R.SELO));

@@ -66,3 +66,6 @@ details li{ margin-bottom:6px; word-break:break-word; }
 .nunca{ color:#A33A2E; font-weight:600; }
 #toast{ position:fixed; left:50%; bottom:18px; transform:translateX(-50%); background:var(--cafe); color:#fff; padding:10px 16px;
   border-radius:10px; font-size:14px; display:none; z-index:20; }
+.trafego h3{ margin-top:14px; }
+.cenas.anuncio tr.igual td{ color:var(--tenue); }
+.cenas.anuncio tr.muda td.como{ font-weight:700; color:var(--deep); }
