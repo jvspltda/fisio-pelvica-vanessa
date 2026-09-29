@@ -65,12 +65,13 @@
     'Salve o projeto de edição junto do vídeo final — sem ele, corrigir depois exige regravar.'
   ];
 
-  /* Foco revisto em 2026-09-29: gestação/pós-parto e perda de urina.
-     Os outros temas continuam atendidos, mas saem da vitrine. */
+  /* Séries revistas em 2026-09-29: gestação/pós-parto e perda de urina
+     lideram o calendário e o teste de anúncios; dor na relação, próstata
+     (pós-cirúrgico) e perna inchada continuam ativos, em seguida. */
   R.SERIES = [
     { id: 'gestantes', nome: 'Gestação e pós-parto', descricao: 'Foco principal.' },
     { id: 'incontinencia', nome: 'Perda de urina', descricao: 'Foco principal. Substituem os Reels antigos de incontinência e urgência.' },
-    { id: 'fora', nome: 'Fora do foco', descricao: 'Temas atendidos, mas fora da vitrine por enquanto: gravar só se houver demanda.' }
+    { id: 'outros', nome: 'Dor na relação, próstata e inchaço', descricao: 'Substituem os Reels antigos desses temas. Entram no calendário depois das 4 primeiras semanas.' }
   ];
 
   R.LISTA = [
@@ -263,9 +264,9 @@
         ['"isso tem nome"', 'International Continence Society, definição de urgency (2017): "A compelling need to urinate which is difficult to defer". https://www.ics.org/committees/standardisation/terminologydiscussions/urgency (acesso em 2026-09-20)']
       ]
     },
-    /* ───────────── FORA DO FOCO ───────────── */
+    /* ───────────── DOR NA RELAÇÃO, PRÓSTATA E INCHAÇO ───────────── */
     {
-      id: 'C', serie: 'fora', titulo: 'Dor na hora da relação', duracao: '45 s',
+      id: 'C', serie: 'outros', titulo: 'Dor na hora da relação', duracao: '45 s',
       objetivo: 'Substitui o vídeo antigo sobre dispareunia, sem a promessa que ele fazia. Tom mais baixo e mais lento.',
       cenas: [
         { tempo: '0–7 s', imagem: 'Plano médio, olhar direto, tom baixo', fala: 'Dói na hora da relação? Esse é o assunto que quase ninguém tem coragem de levar pro consultório.', tela: 'Dói na hora da relação?' },
@@ -276,7 +277,7 @@
       legenda: 'Dói na hora da relação? Esse é o assunto que quase ninguém tem coragem de levar ao consultório — e é justamente um assunto de consulta.\n\nOs motivos são diferentes: musculatura tensa que não relaxa, cicatriz de parto ou cirurgia, ressecamento, questões ginecológicas. Cada um pede uma conduta.\n\nA gente conversa primeiro, vestida. O exame só acontece depois que eu explico cada passo e você autoriza — e você pode dizer não a qualquer momento.',
       hashtags: '#fisioterapiapelvica #dispareunia #saudedamulher',
       trafego: {
-        prioridade: 'Fora do foco: gravar só se houver demanda; se gravar, só orgânico', objetivo: '—',
+        prioridade: 'Só orgânico no começo (tema de saúde sexual tem restrição de público na Meta)', objetivo: '—',
         publico: 'Se impulsionar: mulheres a partir de 18 anos, com texto clínico',
         anuncioCenas: [
           { como: 'regravar', fala: 'Dor na relação sexual tem causas diferentes — e cada uma pede uma avaliação.', tela: 'Dor na relação: avaliação' },
@@ -291,7 +292,7 @@
       ]
     },
     {
-      id: 'D', serie: 'fora', titulo: 'Depois da cirurgia de próstata', duracao: '45 s',
+      id: 'D', serie: 'outros', titulo: 'Depois da cirurgia de próstata', duracao: '45 s',
       objetivo: 'Substitui o vídeo antigo sobre próstata, sem o "eficaz". Fala com o homem e com quem cuida dele.',
       cenas: [
         { tempo: '0–7 s', imagem: 'Plano médio', fala: 'Fez cirurgia de próstata e está perdendo urina? Ou é seu pai, seu marido, que está passando por isso e não fala do assunto?', tela: 'Depois da cirurgia de próstata' },
@@ -302,7 +303,7 @@
       legenda: 'Fez cirurgia de próstata e está perdendo urina? Ou é seu pai ou seu marido que está passando por isso e não toca no assunto?\n\nHomem também tem assoalho pélvico, e é essa musculatura que ajuda a segurar o xixi. Depois da cirurgia ela precisa reaprender a trabalhar, e isso costuma levar meses.\n\nNa consulta eu confiro se a musculatura certa está sendo usada, organizo hábitos de banheiro e acompanho a evolução com medida. Sem promessa de resultado.',
       hashtags: '#fisioterapiapelvica #saudedohomem #prostata',
       trafego: {
-        prioridade: 'Fora do foco: campanha só se chegarem encaminhamentos de urologia', objetivo: 'Mensagens (WhatsApp)',
+        prioridade: 'Campanha própria, depois das 4 semanas', objetivo: 'Mensagens (WhatsApp)',
         publico: 'Homens de 55 a 75 anos e mulheres de 45 a 70 (quem costuma marcar a consulta do marido ou do pai), Conceição do Mato Dentro + 25 km',
         anuncioCenas: [
           { como: 'regravar', fala: 'Depois da cirurgia de próstata, a musculatura do assoalho pélvico precisa reaprender a trabalhar.', tela: 'Depois da cirurgia de próstata' },
@@ -317,7 +318,7 @@
       ]
     },
     {
-      id: 'E', serie: 'fora', titulo: 'Perna inchada: quando é caso de correr', duracao: '45 s',
+      id: 'E', serie: 'outros', titulo: 'Perna inchada: quando é caso de correr', duracao: '45 s',
       objetivo: 'Substitui os dois vídeos antigos de inchaço. Vira utilidade pública, não oferta de drenagem.',
       cenas: [
         { tempo: '0–6 s', imagem: 'Plano médio', fala: 'Perna inchada no fim do dia todo mundo já teve. Mas tem um tipo de inchaço que não é pra esperar passar.', tela: 'Nem todo inchaço é igual' },
@@ -328,7 +329,7 @@
       legenda: 'Perna inchada no fim do dia quase todo mundo já teve. Mas existe um tipo de inchaço que não é para esperar passar.\n\nInchaço que aparece de repente, em uma perna só, com dor, calor ou pele vermelha: procure um médico no mesmo dia. Não é caso de massagem.\n\nDescartada a urgência, a gente conversa sobre a sua rotina, eu avalio, oriento e acompanho junto com quem fez o diagnóstico.',
       hashtags: '#fisioterapia #inchaco #saude',
       trafego: {
-        prioridade: 'Fora do foco: não gravar por enquanto', objetivo: '—',
+        prioridade: 'Só orgânico: utilidade pública, não impulsionar', objetivo: '—',
         publico: 'Conteúdo de utilidade pública, fora do foco pélvico',
         anuncioCenas: null,
         anuncio: null
