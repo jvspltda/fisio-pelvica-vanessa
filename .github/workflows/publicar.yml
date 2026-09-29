@@ -43,6 +43,7 @@ jobs:
           node tests/storage.test.mjs
           node tests/cofre.test.mjs
           node tests/roteiros.test.mjs
+          node tests/exercicios.test.mjs
 
       - name: Compilar o Tailwind da avaliação
         run: npx --yes tailwindcss@3 -c tailwind.config.js -i css/tailwind.src.css -o css/tailwind.css --minify
@@ -62,6 +63,7 @@ jobs:
           cp build/ficha-studocu-pb.html   _site/impressos/ficha-avaliacao-pb.html
           cp build/cartilhas-pacientes.html _site/impressos/cartilhas.html
           cp build/carta-profissionais.html _site/impressos/carta-profissionais.html
+          cp build/exercicios.html          _site/impressos/exercicios.html
 
       - uses: actions/upload-pages-artifact@v3
         with:

@@ -310,7 +310,137 @@ const cartilhas = documento('Cartilhas — Vanessa Fernandes', paginasCartilhas,
   `<label for="b-nome">Paciente</label>
    <input id="b-nome" type="text" placeholder="Nome da paciente (opcional)" autocomplete="off">`, escolha));
 
+/* ---------- 3. Exercicios para casa, montados pela Vanessa ----------
+   Biblioteca em js/exercicios.js, ilustracoes em assets/exercicios/.
+   A folha e montada e paginada no navegador (tools/exercicios-cliente.js);
+   o nome da paciente segue a regra do impressos-cliente: nunca salvo. */
+const CSS_EXERCICIOS = `
+.corpo{ flex:1; min-height:0; overflow:hidden; display:flex; flex-direction:column; }
+.corpo > .agenda{ margin-top:auto; }
+.abertura h1{ margin-bottom:0.6mm; }
+.abertura .sub{ margin-bottom:2mm; }
+.quando{ font-weight:600; margin:0 0 1.6mm; text-align:left; }
+.recado{ font-style:italic; border-left:1.4mm solid var(--rosegold); padding:0.3mm 0 0.3mm 3.2mm; margin:0 0 2mm; text-align:left; }
+.sempre{ background:var(--areia); border-radius:3pt; padding:2.4mm 4mm 1.2mm; margin:0 0 3mm; }
+.sempre b{ font-size:8pt; letter-spacing:.07em; text-transform:uppercase; color:var(--deep); }
+.sempre ul{ margin:1mm 0 0; }
+.sempre li{ text-align:left; margin-bottom:0.4mm; }
+.ex{ display:grid; column-gap:5mm; align-items:start; padding:2.6mm 0; border-top:0.6pt solid #E6DCD4; break-inside:avoid; }
+.ex-deitada{ grid-template-columns:74mm 1fr; }
+.ex-em-pe{ grid-template-columns:44mm 1fr; }
+.ex-livre{ grid-template-columns:1fr; }
+.ex img{ display:block; width:100%; border-radius:2pt; }
+.ex-deitada img{ height:49.3mm; object-fit:cover; }
+.ex-em-pe img{ height:66mm; object-fit:cover; }
+.ex h2{ display:flex; align-items:center; gap:2.2mm; margin:0 0 1.2mm; border:0; padding:0; text-transform:none;
+  letter-spacing:0; font-family:'Playfair Display',Georgia,serif; font-size:13pt; color:var(--deep); }
+.ex h2 .n{ flex:none; width:6.4mm; height:6.4mm; border-radius:50%; background:var(--terracota); color:#fff;
+  font-family:'Plus Jakarta Sans','Segoe UI',Arial,sans-serif; font-size:9pt; display:inline-flex; align-items:center; justify-content:center; }
+.ex .param{ display:inline-block; background:#F3E6E1; color:var(--deep); font-weight:700; font-size:9.2pt;
+  border-radius:2pt; padding:0.8mm 2.4mm; margin:0 0 1.6mm; text-align:left; }
+.ex .desc{ margin:0; }
+.rodape [data-folha]{ display:block; }
+`;
+const CSS_EDITOR = `
+@media print{ #editor{ display:none !important; } }
+@media screen{
+  .montagem{ display:block; }
+  @media (min-width:1240px){
+    .montagem{ display:grid; grid-template-columns:420px 1fr; align-items:start; }
+    #editor{ position:sticky; top:62px; max-height:calc(100vh - 62px); overflow:auto; }
+  }
+}
+#editor{ background:#fff; border-right:1px solid #E6DCD4; padding:14px 16px 24px; font-family:'Plus Jakarta Sans','Segoe UI',Arial,sans-serif; font-size:14px; }
+#editor h2{ font-family:'Playfair Display',Georgia,serif; font-size:20px; color:var(--deep); margin:0 0 4px; border:0; text-transform:none; letter-spacing:0; }
+#editor h3{ font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--deep); margin:18px 0 8px; }
+#editor .apoio{ color:var(--tenue); font-size:13px; margin:0; text-align:left; }
+.biblioteca{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+.miniatura{ display:flex; flex-direction:column; gap:4px; align-items:stretch; padding:6px; border:1px solid #D9CCC3; border-radius:10px;
+  background:#fff; cursor:pointer; font:inherit; font-size:12px; font-weight:600; color:var(--deep); text-align:left; line-height:1.25; }
+.miniatura:hover, .miniatura:focus-visible{ border-color:var(--terracota); outline:none; }
+.miniatura img{ width:100%; aspect-ratio:3/2; object-fit:contain; background:#F1E3D3; border-radius:6px; }
+.miniatura.livre .mais{ aspect-ratio:3/2; display:flex; align-items:center; justify-content:center; font-size:30px; background:var(--areia); border-radius:6px; }
+.item{ border:1px solid #E6DCD4; border-radius:10px; padding:10px; margin-bottom:10px; background:#FFFCFA; }
+.item-cab{ display:flex; align-items:center; gap:8px; }
+.item-cab .num{ flex:none; width:24px; height:24px; border-radius:50%; background:var(--terracota); color:#fff; font-weight:700; font-size:13px;
+  display:inline-flex; align-items:center; justify-content:center; }
+.item-cab img{ width:44px; height:30px; object-fit:contain; background:#F1E3D3; border-radius:4px; flex:none; }
+.item-cab input{ flex:1; min-width:0; font:inherit; font-weight:600; padding:6px 8px; border:1px solid #C9BDB4; border-radius:8px; }
+.acoes{ display:flex; gap:4px; flex:none; }
+.acoes button{ width:30px; height:30px; border:1px solid #D9CCC3; border-radius:8px; background:#fff; cursor:pointer; font-size:14px; color:var(--deep); }
+.acoes button:disabled{ opacity:.35; cursor:default; }
+.acoes .tirar{ color:#A33; }
+.nums{ display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin:8px 0; }
+.campo{ display:flex; flex-direction:column; gap:3px; font-size:11.5px; color:var(--tenue); }
+.campo input, .campo textarea, #editor select, #editor input[type=text]{ font:inherit; font-size:14px; color:var(--cafe); padding:6px 8px; border:1px solid #C9BDB4; border-radius:8px; width:100%; }
+.campo textarea{ resize:vertical; line-height:1.45; }
+.item-rod{ display:flex; justify-content:space-between; align-items:center; margin-top:4px; }
+.contador{ font-size:11.5px; color:var(--tenue); }
+#editor button.discreto{ border:0; background:none; color:var(--deep); text-decoration:underline; cursor:pointer; font:inherit; font-size:12px; padding:2px; }
+#editor .linha{ display:flex; gap:6px; align-items:center; margin-bottom:6px; }
+#editor .linha button, #e-limpar{ flex:none; font:inherit; font-size:13px; font-weight:600; padding:7px 10px; border-radius:8px; cursor:pointer;
+  border:1px solid var(--terracota); background:#fff; color:var(--deep); }
+#editor .vazio{ color:var(--tenue); font-style:italic; }
+#e-folhas{ font-weight:700; color:var(--deep); margin:14px 0 4px; }
+#e-aviso{ font-size:13px; color:var(--tenue); min-height:1.2em; margin:0; }
+`;
+
+const EXERCICIOS_JS = readFileSync(join(raiz, 'js/exercicios.js'), 'utf8');
+const EXERCICIOS_CLIENTE = readFileSync(join(raiz, 'tools/exercicios-cliente.js'), 'utf8');
+
+const exercicios = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Exercícios para casa — Vanessa Fernandes</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap">
+<link rel="stylesheet" href="../css/navegacao.css">
+<style>${CSS}${CSS_BARRA}${CSS_EXERCICIOS}${CSS_EDITOR}</style></head><body>
+${barra('exercicios', `<label for="b-nome">Paciente</label>
+   <input id="b-nome" type="text" placeholder="Nome da paciente (não fica salvo)" autocomplete="off">
+   <label><input id="b-data" type="checkbox" checked> Data de hoje</label>`)}
+<div class="montagem">
+  <aside id="editor" aria-label="Montar a sequência">
+    <h2>Exercícios para casa</h2>
+    <p class="apoio">Monte a sequência da paciente: escolha as figuras, a ordem, os números e o texto de cada exercício.
+    A folha ao lado se ajusta sozinha. A sequência fica guardada neste computador; o nome da paciente, não.</p>
+
+    <h3>1 · Escolha os exercícios</h3>
+    <div id="e-biblioteca" class="biblioteca"></div>
+
+    <h3>2 · Ajuste cada um</h3>
+    <div id="e-lista"></div>
+
+    <h3>3 · Para a sequência toda</h3>
+    <div class="nums" style="grid-template-columns:1fr 3fr">
+      <label class="campo"><span>Vezes por dia</span><input id="e-vezes" type="text" inputmode="numeric" maxlength="4" placeholder="—"></label>
+      <label class="campo"><span>Recado para a paciente (opcional)</span><textarea id="e-recado" rows="2" placeholder="Ex.: comece deitada e só passe para em pé na semana que vem."></textarea></label>
+    </div>
+
+    <h3>Modelos</h3>
+    <p class="apoio" style="margin-bottom:8px">Guarde sequências que você usa sempre, como "Pós-parto — fase 1". Sem nome de paciente.</p>
+    <div class="linha"><select id="e-modelos" aria-label="Modelos salvos"></select><button id="e-carregar" type="button">Carregar</button></div>
+    <div class="linha"><input id="e-nome-modelo" type="text" maxlength="50" placeholder="Nome do modelo" aria-label="Nome do modelo"><button id="e-salvar" type="button">Salvar</button></div>
+    <div class="linha"><button id="e-apagar" type="button">Apagar modelo</button><button id="e-limpar" type="button">Começar do zero</button></div>
+
+    <p id="e-folhas"></p>
+    <p id="e-aviso" role="status"></p>
+  </aside>
+  <div class="folhas" id="folhas"></div>
+</div>
+<template id="t-pagina"><section class="pagina">
+  ${cabecalho('<span data-nome-vazio>Exercícios<br>para casa</span>' +
+    '<span data-nome-cheio hidden>Exercícios para<br><span data-nome-alvo></span></span>')}
+  <div class="corpo"></div>
+  <div class="rodape">Vanessa Fernandes · Fisioterapeuta · ${esc(Ficha.CREFITO)} · @vanessa.fernands<span data-folha></span></div>
+</section></template>
+<template id="t-agenda">${AGENDA}</template>
+<script>${EXERCICIOS_JS}</script>
+<script>${EXERCICIOS_CLIENTE}</script>
+<script>${SCRIPT}</script></body></html>`;
+
 mkdirSync(join(raiz, 'build'), { recursive: true });
+writeFileSync(join(raiz, 'build/exercicios.html'), exercicios, 'utf8');
+console.log('  build/exercicios.html gerado ·', require(join(raiz, 'js/exercicios.js')).BIBLIOTECA.length, 'figuras');
 writeFileSync(join(raiz, 'build/carta-profissionais.html'), carta, 'utf8');
 writeFileSync(join(raiz, 'build/cartilhas-pacientes.html'), cartilhas, 'utf8');
 console.log('  build/carta-profissionais.html gerado');

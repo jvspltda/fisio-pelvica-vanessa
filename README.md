@@ -194,6 +194,16 @@ chrome --headless --print-to-pdf=Ficha.pdf --no-pdf-header-footer build/ficha-st
 O gerador lê `js/ficha.js` e `js/scores.js`: mudou um campo na aplicação, o papel
 acompanha. Não há transcrição manual a dessincronizar.
 
+### Exercícios para casa
+
+`impressos/exercicios.html` monta a folha de exercícios da paciente: a Vanessa escolhe as
+figuras (biblioteca em `js/exercicios.js`, ilustrações em `assets/exercicios/`), a ordem,
+séries, repetições, tempo de segurar e de descansar, e o texto de cada exercício. A folha A4 é
+paginada ao vivo e nenhum exercício fica partido entre duas folhas. A sequência e os modelos
+("Pós-parto — fase 1") ficam no navegador de quem usa; o nome da paciente não é salvo.
+Gerada por `tools/gerar-materiais-impressos.mjs`, com o montador em `tools/exercicios-cliente.js`.
+Teste: `node tests/exercicios.test.mjs`.
+
 #### Modo caneta × modo compacto
 
 O padrão é o **modo caneta**, dimensionado para ser preenchido à mão:
