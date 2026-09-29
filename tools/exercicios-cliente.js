@@ -64,11 +64,19 @@
       return { id: it.id, titulo: it.titulo, descricao: it.descricao, params: it.params };
     }) };
   }
-  var tGravar;
+  var tGravar = null;
+  function gravarRascunhoJa() {
+    if (tGravar === null) return;
+    clearTimeout(tGravar); tGravar = null;
+    gravar(CHAVE_RASCUNHO, paraGuardar(estado));
+  }
   function salvarRascunho() {
     clearTimeout(tGravar);
-    tGravar = setTimeout(function () { gravar(CHAVE_RASCUNHO, paraGuardar(estado)); }, 300);
+    tGravar = setTimeout(function () { tGravar = null; gravar(CHAVE_RASCUNHO, paraGuardar(estado)); }, 300);
   }
+  /* fechou a aba logo depois de digitar: grava o que ainda estava na espera */
+  window.addEventListener('pagehide', gravarRascunhoJa);
+  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') gravarRascunhoJa(); });
 
   function novoItem(id) {
     var b = daBiblioteca(id);
@@ -138,11 +146,13 @@
       tit.addEventListener('input', function () { it.titulo = tit.value; mudouTexto(); });
       cab.appendChild(tit);
       var acoes = el('div', 'acoes');
-      var sobe = botao('↑', '', function () { mover(i, -1); }, 'Subir'); sobe.disabled = i === 0;
-      var desce = botao('↓', '', function () { mover(i, 1); }, 'Descer'); desce.disabled = i === estado.itens.length - 1;
+      var sobe = botao('↑', 'sobe', function () { mover(i, -1); }, 'Subir'); sobe.disabled = i === 0;
+      var desce = botao('↓', 'desce', function () { mover(i, 1); }, 'Descer'); desce.disabled = i === estado.itens.length - 1;
       acoes.appendChild(sobe); acoes.appendChild(desce);
       acoes.appendChild(botao('✕', 'tirar', function () {
-        estado.itens.splice(i, 1); mudouEstrutura('Exercício retirado.');
+        estado.itens.splice(i, 1);
+        foco = { item: Math.min(i, estado.itens.length - 1), seletor: '.tirar' };
+        mudouEstrutura('Exercício retirado.');
       }, 'Tirar da sequência'));
       cab.appendChild(acoes);
       c.appendChild(cab);
@@ -178,7 +188,21 @@
     var j = i + d;
     if (j < 0 || j >= estado.itens.length) return;
     var t = estado.itens[i]; estado.itens[i] = estado.itens[j]; estado.itens[j] = t;
+    /* o foco acompanha o exercício que mudou de lugar; na ponta, vai para a outra seta */
+    var sel = d < 0 ? (j === 0 ? '.desce' : '.sobe') : (j === estado.itens.length - 1 ? '.sobe' : '.desce');
+    foco = { item: j, seletor: sel };
     mudouEstrutura();
+  }
+
+  /* depois de remontar a lista, devolve o foco ao botão certo (teclado) */
+  var foco = null;
+  function devolverFoco() {
+    if (!foco) return;
+    var itens = document.querySelectorAll('#e-lista .item');
+    var alvo = itens[foco.item] && itens[foco.item].querySelector(foco.seletor);
+    if (alvo && alvo.disabled) alvo = itens[foco.item].querySelector('input');
+    if (alvo) alvo.focus();
+    foco = null;
   }
 
   function montarGerais() {
@@ -200,16 +224,22 @@
   }
   $('e-carregar').addEventListener('click', function () {
     var n = $('e-modelos').value; if (!n) { avisar('Escolha um modelo na lista.'); return; }
-    estado = limpo(modelos()[n]); $('e-nome-modelo').value = n;
+    var m = modelos();
+    if (!Object.prototype.hasOwnProperty.call(m, n)) { montarModelos(); avisar('Esse modelo não existe mais.'); return; }
+    estado = limpo(m[n]); $('e-nome-modelo').value = n;
     montarGerais(); mudouEstrutura('Modelo "' + n + '" carregado.');
   });
   $('e-salvar').addEventListener('click', function () {
     var n = $('e-nome-modelo').value.trim();
     if (!n) { avisar('Dê um nome ao modelo, por exemplo "Pós-parto — fase 1".'); $('e-nome-modelo').focus(); return; }
     if (!estado.itens.length) { avisar('A sequência está vazia.'); return; }
-    var m = modelos(); m[n] = paraGuardar(estado);
+    /* "__proto__" e parecidos não viram chave comum de objeto: o modelo sumiria */
+    if (/^(__proto__|constructor|prototype)$/.test(n)) { avisar('Escolha outro nome para o modelo.'); return; }
+    var m = modelos(); var existia = Object.prototype.hasOwnProperty.call(m, n);
+    m[n] = paraGuardar(estado);
     if (!gravar(CHAVE_MODELOS, m)) { avisar('Este navegador não deixou salvar. O modelo não foi guardado.'); return; }
-    montarModelos(); $('e-modelos').value = n; avisar('Modelo "' + n + '" salvo neste computador.');
+    montarModelos(); $('e-modelos').value = n;
+    avisar(existia ? 'Modelo "' + n + '" atualizado.' : 'Modelo "' + n + '" salvo neste computador.');
   });
   $('e-apagar').addEventListener('click', function () {
     var n = $('e-modelos').value; if (!n) { avisar('Escolha na lista o modelo a apagar.'); return; }
@@ -238,7 +268,19 @@
   var folhas = $('folhas');
   var tPagina = $('t-pagina');
   var tAgenda = $('t-agenda');
+  var tAgendaCurta = $('t-agenda-curta');
 
+  /* Nome e data entram na folha ANTES de medir: o nome muda a altura da
+     abertura ("Para … · Entregue em …"). Quem os aplica é o
+     impressos-cliente, que escuta estes mesmos eventos. */
+  var reaplicando = false;
+  function aplicarNomeEData() {
+    reaplicando = true;
+    try {
+      var nome = $('b-nome'); if (nome) nome.dispatchEvent(new Event('input'));
+      var data = $('b-data'); if (data) data.dispatchEvent(new Event('change'));
+    } finally { reaplicando = false; }
+  }
   function novaPagina() {
     var p = tPagina.content.firstElementChild.cloneNode(true);
     folhas.appendChild(p);
@@ -296,8 +338,10 @@
 
   function renderFolhas() {
     folhas.textContent = '';
+    clearTimeout(tRender); tRender = null;
     var corpo = novaPagina();
     corpo.appendChild(blocoAbertura());
+    aplicarNomeEData();
     estado.itens.forEach(function (it, i) {
       var b = blocoExercicio(it, i);
       corpo.appendChild(b);
@@ -307,19 +351,26 @@
         corpo.appendChild(b);
       }
     });
+    /* Quadro de agendamento no pé da última folha. Ordem de tentativa:
+       1) o quadro completo; 2) a versão de uma linha, para não abrir uma
+       folha nova só por causa dele; 3) folha nova com o quadro completo,
+       levando junto o último exercício — o quadro nunca fica sozinho. */
     var ag = tAgenda.content.firstElementChild.cloneNode(true);
     corpo.appendChild(ag);
     if (transborda(corpo) && corpo.children.length > 1) {
-      /* o quadro de agendamento não fica sozinho numa folha: leva junto o
-         último exercício, se a folha anterior ainda tiver outro */
       corpo.removeChild(ag);
-      var ultimo = corpo.lastElementChild;
-      var levar = ultimo && ultimo.classList.contains('ex') &&
-                  ultimo.previousElementSibling && ultimo.previousElementSibling.classList.contains('ex');
-      if (levar) corpo.removeChild(ultimo);
-      corpo = novaPagina();
-      if (levar) corpo.appendChild(ultimo);
-      corpo.appendChild(ag);
+      var curta = tAgendaCurta.content.firstElementChild.cloneNode(true);
+      corpo.appendChild(curta);
+      if (transborda(corpo)) {
+        corpo.removeChild(curta);
+        var ultimo = corpo.lastElementChild;
+        var levar = ultimo && ultimo.classList.contains('ex') &&
+                    ultimo.previousElementSibling && ultimo.previousElementSibling.classList.contains('ex');
+        if (levar) corpo.removeChild(ultimo);
+        corpo = novaPagina();
+        if (levar) corpo.appendChild(ultimo);
+        corpo.appendChild(ag);
+      }
     }
     var n = folhas.querySelectorAll('.pagina').length;
     folhas.querySelectorAll('.pagina').forEach(function (p, i) {
@@ -329,12 +380,12 @@
     $('e-folhas').textContent = estado.itens.length
       ? estado.itens.length + (estado.itens.length === 1 ? ' exercício' : ' exercícios') + ' · ' + n + (n === 1 ? ' folha A4' : ' folhas A4')
       : '';
-    /* nome e data na folha nova: quem cuida deles é o impressos-cliente */
-    var nome = $('b-nome'); if (nome) nome.dispatchEvent(new Event('input'));
-    var data = $('b-data'); if (data) data.dispatchEvent(new Event('change'));
+    /* cabeçalho das folhas novas */
+    aplicarNomeEData();
   }
 
-  var tRender;
+  var tRender = null;
+  function renderPendente() { if (tRender !== null) renderFolhas(); }
   function mudouTexto() {
     salvarRascunho();
     clearTimeout(tRender);
@@ -345,7 +396,21 @@
     montarLista();
     renderFolhas();
     avisar(msg || '');
+    devolverFoco();
   }
+
+  /* nome digitado ou data ligada/desligada: repagina (a abertura pode
+     ganhar uma linha). Ignora os eventos que o próprio montador dispara. */
+  function repaginarDepois() { clearTimeout(tRender); tRender = setTimeout(renderFolhas, 150); }
+  var campoNome = $('b-nome'), campoData = $('b-data');
+  if (campoNome) campoNome.addEventListener('input', function () { if (!reaplicando) repaginarDepois(); });
+  if (campoData) campoData.addEventListener('change', function () { if (!reaplicando) repaginarDepois(); });
+
+  /* Imprimir, Enviar PDF ou imagem logo depois de digitar: a folha é
+     refeita na hora, antes do botão agir (fase de captura). */
+  var barraTopo = $('barra');
+  if (barraTopo) barraTopo.addEventListener('click', renderPendente, true);
+  window.addEventListener('beforeprint', renderPendente);
 
   montarBiblioteca();
   montarModelos();

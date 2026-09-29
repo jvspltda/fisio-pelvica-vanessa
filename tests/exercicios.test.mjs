@@ -79,8 +79,8 @@ teste('o montador nunca guarda o nome da paciente', () => {
   /* o que vai para o rascunho e para os modelos sai só de paraGuardar */
   const guardar = c.slice(c.indexOf('function paraGuardar'), c.indexOf('var tGravar'));
   assert.ok(guardar.length > 0 && !/b-nome|nomeAtual/.test(guardar));
-  assert.ok(!/b-nome/.test(c.replace(/var nome = \$\('b-nome'\); if \(nome\) nome\.dispatchEvent\(new Event\('input'\)\);/, '')),
-    'o montador só pode tocar no campo do nome para reaplicá-lo na folha');
+  /* o montador pode disparar e escutar eventos do campo, mas nunca ler o que foi digitado */
+  assert.ok(!/(\$\('b-nome'\)|campoNome|\bnome)\.value/.test(c), 'o montador lê o nome digitado');
 });
 
 teste('folha gerada traz identificação, data e quadro de agendamento', () => {
@@ -90,6 +90,9 @@ teste('folha gerada traz identificação, data e quadro de agendamento', () => {
   assert.ok(h.includes('CREFITO-4: 252806-F'), 'sem CREFITO');
   assert.ok(h.includes('data-data-extenso'), 'sem data');
   assert.ok(h.includes('Como agendar') && h.includes('(31) 3868-1120'), 'sem agendamento');
+  const curta = h.slice(h.indexOf('id="t-agenda-curta"'), h.indexOf('</template>', h.indexOf('id="t-agenda-curta"')));
+  assert.ok(curta.includes('(31) 3868-1120'), 'quadro curto de agendamento sem o telefone');
+  assert.ok(/\[data-folha\]\{[^}]*min-height/.test(h), 'linha do "Folha 1 de 2" não reservada: o rodapé cresceria e cortaria a folha');
 });
 
 console.log('\n  exercicios.test.mjs');

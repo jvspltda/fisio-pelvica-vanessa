@@ -317,6 +317,7 @@ const cartilhas = documento('Cartilhas — Vanessa Fernandes', paginasCartilhas,
 const CSS_EXERCICIOS = `
 .corpo{ flex:1; min-height:0; overflow:hidden; display:flex; flex-direction:column; }
 .corpo > .agenda{ margin-top:auto; }
+.agenda.curta{ padding:1.8mm 4mm; font-size:8.6pt; line-height:1.4; }
 .abertura h1{ margin-bottom:0.6mm; }
 .abertura .sub{ margin-bottom:2mm; }
 .quando{ font-weight:600; margin:0 0 1.6mm; text-align:left; }
@@ -339,7 +340,9 @@ const CSS_EXERCICIOS = `
 .ex .param{ display:inline-block; background:#F3E6E1; color:var(--deep); font-weight:700; font-size:9.2pt;
   border-radius:2pt; padding:0.8mm 2.4mm; margin:0 0 1.6mm; text-align:left; }
 .ex .desc{ margin:0; }
-.rodape [data-folha]{ display:block; }
+/* a linha do "Folha 1 de 2" fica sempre reservada: se so aparecesse depois
+   da paginacao, o rodape cresceria e cortaria o fim da folha */
+.rodape [data-folha]{ display:block; min-height:1.5em; }
 `;
 const CSS_EDITOR = `
 @media print{ #editor{ display:none !important; } }
@@ -434,6 +437,7 @@ ${barra('exercicios', `<label for="b-nome">Paciente</label>
   <div class="rodape">Vanessa Fernandes · Fisioterapeuta · ${esc(Ficha.CREFITO)} · @vanessa.fernands<span data-folha></span></div>
 </section></template>
 <template id="t-agenda">${AGENDA}</template>
+<template id="t-agenda-curta"><div class="agenda curta"><b>Como agendar:</b> WhatsApp ou telefone <b>(31) 3868-1120</b> · Clínica Veracis, Rodovia MG-010, 598, Bela Vista Mall, Conceição do Mato Dentro · @vanessa.fernands e @clinicaveracis</div></template>
 <script>${EXERCICIOS_JS}</script>
 <script>${EXERCICIOS_CLIENTE}</script>
 <script>${SCRIPT}</script></body></html>`;
