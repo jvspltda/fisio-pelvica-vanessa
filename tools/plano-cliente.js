@@ -76,6 +76,12 @@
   window.addEventListener('pagehide', gravarRascunhoJa);
   document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'hidden') gravarRascunhoJa(); });
 
+  /* exercício de bola: marca "Paciente gestante" uma vez; ela desmarca se não for */
+  function sugerirGestante(lista) {
+    if (estado.gestante || !lista.some(function (it) { return P.sugereGestante(E, it); })) return false;
+    estado.gestante = true;
+    return true;
+  }
   function inserirExercicio(it) {
     var pos = P.posicaoExercicio(estado.itens);
     estado.itens.splice(pos, 0, comUid(it));
@@ -210,8 +216,11 @@
         var t = tirarTodos(function (it) { return it.tipo === 'ex' && it.id === b.id; });
         if (t === 'tirou') { mudouEstrutura('"' + b.titulo + '" saiu do plano. Toque de novo para pôr de volta.'); return; }
         if (t === 'ajustada') { avisar('"' + b.titulo + '" está no plano com números ou texto ajustados. Para tirar, use o ✕ na lista ou dois cliques na folha; para repetir, o ⧉.'); return; }
-        inserirExercicio(P.exercicio(E, b.id));
-        mudouEstrutura('"' + b.titulo + '" entrou no plano, junto dos outros exercícios. Toque de novo para tirar.');
+        var novo = P.exercicio(E, b.id);
+        inserirExercicio(novo);
+        var marcou = sugerirGestante([novo]);
+        mudouEstrutura('"' + b.titulo + '" entrou no plano, junto dos outros exercícios. Toque de novo para tirar.' +
+          (marcou ? ' Marquei "Paciente gestante" — desmarque se for pós-parto.' : ''));
       });
       alvo.appendChild(bt);
     }
@@ -423,14 +432,18 @@
     var o = escolhida(); if (!o) return;
     if (o.salvo) { estado = o.estado; estado.itens.forEach(comUid); $('e-nome-modelo').value = o.nome; }
     else { estado = P.vazio(); estado.itens = o.itens().map(comUid); $('e-nome-modelo').value = ''; }
-    montarGerais(); mudouEstrutura('"' + o.nome + '" carregado. Ajuste para a paciente: tire o que não serve, acrescente o que falta.');
+    var marcou = !o.salvo && sugerirGestante(estado.itens);
+    montarGerais(); mudouEstrutura('"' + o.nome + '" carregado. Ajuste para a paciente: tire o que não serve, acrescente o que falta.' +
+      (marcou ? ' Marquei "Paciente gestante" — desmarque se for pós-parto.' : ''));
   });
   $('e-acrescentar').addEventListener('click', function () {
     var o = escolhida(); if (!o) return;
-    o.itens().forEach(function (it) {
+    var vindos = o.itens();
+    vindos.forEach(function (it) {
       if (it.tipo === 'ex') inserirExercicio(it); else estado.itens.push(comUid(it));
     });
-    mudouEstrutura('"' + o.nome + '" acrescentado ao plano.');
+    var marcou = sugerirGestante(vindos);
+    mudouEstrutura('"' + o.nome + '" acrescentado ao plano.' + (marcou ? ' Marquei "Paciente gestante" — desmarque se for pós-parto.' : ''));
   });
   $('e-salvar').addEventListener('click', function () {
     var n = $('e-nome-modelo').value.trim();
@@ -571,8 +584,10 @@
     /* o bloco "faça os exercícios" da cartilha já serve de título */
     function ehPonto(it) { return !!it && it.tipo === 'bloco' && !!it.ref && P.PONTO_EXERCICIOS[it.ref.split('/')[0]] === it.h; }
     function emPe(it) { var x = it && it.tipo === 'ex' && daBiblioteca(it.id); return !!x && x.formato === 'em-pe'; }
+    var notaConflito = P.ondeNotaConflito(E, estado.itens, estado);
     for (var i = 0; i < estado.itens.length; i++) {
       var it = estado.itens[i];
+      if (i === notaConflito) r.push(el('div', 'nota conflito', P.SOLTAR_E_CONTRAIR));
       if (it.tipo === 'bloco') {
         var temTexto = [it.h, it.p, it.nota].some(function (x) { return String(x || '').trim(); }) ||
           (it.l || []).some(function (x) { return String(x).trim(); });

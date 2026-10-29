@@ -43,7 +43,7 @@
                   'Bola bem cheia: sentada, joelhos na altura do quadril ou um pouco abaixo.',
                   'Tapete que não escorrega, descalça ou de tênis, e uma parede ou alguém por perto.',
                   'Devagar e só até onde for confortável. Se doer, pare.'],
-          alerta: 'Pare e procure sua obstetra ou o pronto atendimento se tiver sangramento, perda de líquido, contrações fortes antes da hora, dor forte, tontura, falta de ar, dor no peito, dor de cabeça forte, dor ou inchaço na batata da perna, ou se o bebê mexer bem menos.',
+          alerta: 'Pare e procure sua obstetra ou o pronto atendimento se tiver sangramento, perda de líquido, contrações fortes e regulares antes da hora, dor forte, tontura, falta de ar já antes de começar, fraqueza ou perda de equilíbrio, dor no peito, dor de cabeça forte, dor ou inchaço na batata da perna, ou se o bebê mexer bem menos.',
           alt: 'Antes de começar: liberação da obstetra, bola e apoio certos, devagar. Quando parar.' },
         { tipo: 'exercicio', numero: 1, titulo: 'Círculos com o quadril', figura: 'bola-circulos-quadril.jpg',
           texto: 'Sentada na bola, pés bem apoiados no chão e afastados. Faça círculos lentos com o quadril, para um lado e depois para o outro.',

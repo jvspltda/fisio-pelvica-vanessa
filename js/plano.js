@@ -113,16 +113,17 @@
   /* Perfil da paciente. Não se adivinha pelo tipo de exercício: uma
      gestante pode receber só exercícios de assoalho (deitada!), e uma
      paciente de dor, só exercícios sem a cartilha de dor. Por isso o
-     plano guarda duas marcas que a Vanessa confere no painel; elas se
-     ligam sozinhas quando entra algo desses temas (P.perfilSugerido). */
+     plano guarda duas marcas que a Vanessa confere no painel. As
+     cartilhas de gestação e de dor travam a marca (P.perfilSugerido). */
   P.perfilSugerido = function (E, itens) {
     var t = P.temas(itens);
-    var gestEx = (itens || []).some(function (it) {
-      if (it.tipo !== 'ex') return false;
-      var b = E.BIBLIOTECA.filter(function (x) { return x.id === it.id; })[0];
-      return !!b && b.grupo === 'gestacao';
-    });
-    return { gestante: t.indexOf('gestacao') !== -1 || t.indexOf('alimentos-gestacao') !== -1 || gestEx, soltar: t.indexOf('dor') !== -1 };
+    return { gestante: t.indexOf('gestacao') !== -1 || t.indexOf('alimentos-gestacao') !== -1, soltar: t.indexOf('dor') !== -1 };
+  };
+  /* Exercício de bola sugere gestante, mas não trava: no pós-parto a
+     bola também entra. O painel marca a caixa e a Vanessa desmarca. */
+  P.sugereGestante = function (E, it) {
+    var b = it && it.tipo === 'ex' && E.BIBLIOTECA.filter(function (x) { return x.id === it.id; })[0];
+    return !!b && b.grupo === 'gestacao';
   };
   P.perfil = function (E, itens, marcado) {
     var sug = P.perfilSugerido(E, itens), m = marcado || {};
@@ -134,6 +135,25 @@
      frase desfaz o conflito — sugestão, aguarda o aval da Vanessa. */
   P.SOLTAR_E_CONTRAIR = 'Contrair, só o que combinamos na sessão. No resto do dia, a prioridade é soltar.';
   var TEMAS_CONTRAIR = ['incontinencia', 'urgencia', 'posprostatectomia', 'vesical'];
+
+  /* Foco em soltar, mas o plano também manda contrair (cartilha de força
+     ou "Como fazer" com "contraia"). */
+  P.conflitoSoltar = function (E, itens, marcado) {
+    if (!P.perfil(E, itens, marcado).soltar) return false;
+    return P.temas(itens).some(function (t) { return TEMAS_CONTRAIR.indexOf(t) !== -1; }) ||
+      (itens || []).some(function (it) { return it.tipo === 'ex' && /contra[ií]/i.test(it.descricao || ''); });
+  };
+  /* Sem exercício, o quadro "Em todos os exercícios" não aparece: a frase
+     vai como destaque antes do primeiro bloco que manda apertar. Devolve
+     o índice desse bloco, ou -1. */
+  P.ondeNotaConflito = function (E, itens, marcado) {
+    if (!P.conflitoSoltar(E, itens, marcado) || (itens || []).some(function (it) { return it.tipo === 'ex'; })) return -1;
+    for (var i = 0; i < itens.length; i++) {
+      var it = itens[i];
+      if (it.tipo === 'bloco' && it.ref && TEMAS_CONTRAIR.indexOf(it.ref.split('/')[0]) !== -1) return i;
+    }
+    return -1;
+  };
 
   /* Quadro "Em todos os exercícios", montado pelo perfil:
      - base: soltar (dor) ou contrair (assoalho); só exercícios de bola,
@@ -151,7 +171,7 @@
     var base;
     if (perfil.soltar) {
       base = P.SEMPRE_SOLTAR.slice();
-      if (P.temas(itens).some(function (t) { return TEMAS_CONTRAIR.indexOf(t) !== -1; })) base.push(P.SOLTAR_E_CONTRAIR);
+      if (P.conflitoSoltar(E, itens, marcado)) base.push(P.SOLTAR_E_CONTRAIR);
     } else base = soBola ? G.inicio.slice() : E.SEMPRE.slice(0, -1);
     var seguranca = [];
     if (perfil.gestante) {
@@ -189,6 +209,11 @@
     Object.keys(vistos).forEach(function (h) {
       if (vistos[h] > 1) r.push('"' + itens.filter(function (it) { return it.tipo === 'bloco' && String(it.h || '').trim().toLowerCase() === h; })[0].h + '" aparece ' + vistos[h] + ' vezes. Deixe um só.');
     });
+    var parecidas = ['incontinencia', 'urgencia', 'vesical'].filter(function (x) { return t.indexOf(x) !== -1; });
+    if (t.indexOf('alimentos-bexiga') !== -1 && parecidas.length) {
+      var nomes = parecidas.map(function (x) { return '"' + A.CARTILHAS.filter(function (c) { return c.id === x; })[0].titulo + '"'; }).join(' e ');
+      r.push('"' + A.CARTILHAS.filter(function (c) { return c.id === 'alimentos-bexiga'; })[0].titulo + '" e ' + nomes + ' repetem as orientações de bebida e de água. Deixe um bloco de cada.');
+    }
     if (ex.length > P.LIMITE_EXERCICIOS) r.push(ex.length + ' exercícios é muito para casa. Veja se dá para dividir em fases.');
     if (t.length > 2) r.push('Plano com ' + t.length + ' temas. Veja se tudo é para agora.');
     return r;

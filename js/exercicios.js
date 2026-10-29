@@ -107,9 +107,10 @@
     deitada: 'Da metade da gestação em diante, fique de barriga para cima só por pouco tempo. Sentiu tontura, enjoo ou falta de ar deitada? Vire de lado, espere passar e me avise.',
     /* mesmo texto da cartilha de gestação (js/adherence.js); o teste
        confere que os dois não se separam. Em 2026-10-29 a lista ganhou
-       os sinais da ACOG 804 que faltavam (tontura, falta de ar, dor no
-       peito, dor de cabeça, panturrilha) — aguarda o aval da Vanessa. */
-    sinais: 'Procure sua obstetra ou o pronto atendimento se tiver sangramento, perda de líquido, contrações fortes e regulares antes da hora, dor forte, tontura, falta de ar, dor no peito, dor de cabeça forte, dor ou inchaço na batata da perna, ou se o bebê mexer bem menos que o normal. Nesses casos, não faça os exercícios antes de ser avaliada.'
+       os sinais da ACOG 804 que faltavam (tontura, falta de ar antes do
+       esforço, fraqueza ou perda de equilíbrio, dor no peito, dor de
+       cabeça, panturrilha) — aguarda o aval da Vanessa. */
+    sinais: 'Procure sua obstetra ou o pronto atendimento se tiver sangramento, perda de líquido, contrações fortes e regulares antes da hora, dor forte, tontura, falta de ar já antes de começar, fraqueza ou perda de equilíbrio, dor no peito, dor de cabeça forte, dor ou inchaço na batata da perna, ou se o bebê mexer bem menos que o normal. Nesses casos, não faça os exercícios antes de ser avaliada.'
   };
 
   /* O quadro "Em todos os exercícios" da sequência montada.

@@ -254,7 +254,7 @@
         {
           h: 'Seus exercícios',
           p: 'Faça do jeito que conferimos juntas na sessão, no número e no ritmo combinados. Se ficar em dúvida se está fazendo certo, pare e me mande mensagem — fazer errado todo dia é pior do que não fazer.',
-          nota: 'Procure sua obstetra ou o pronto atendimento se tiver sangramento, perda de líquido, contrações fortes e regulares antes da hora, dor forte, tontura, falta de ar, dor no peito, dor de cabeça forte, dor ou inchaço na batata da perna, ou se o bebê mexer bem menos que o normal. Nesses casos, não faça os exercícios antes de ser avaliada.'
+          nota: 'Procure sua obstetra ou o pronto atendimento se tiver sangramento, perda de líquido, contrações fortes e regulares antes da hora, dor forte, tontura, falta de ar já antes de começar, fraqueza ou perda de equilíbrio, dor no peito, dor de cabeça forte, dor ou inchaço na batata da perna, ou se o bebê mexer bem menos que o normal. Nesses casos, não faça os exercícios antes de ser avaliada.'
         }
       ]
     },
@@ -452,7 +452,7 @@
        Aguardam o aval da Vanessa. */
     {
       id: 'alimentos-bexiga',
-      titulo: 'Alimentação e Bexiga',
+      titulo: 'O que Você Come e Bebe e a Bexiga',
       resumo: 'O que você come e bebe também mexe com a vontade e com os escapes.',
       blocos: [
         {
@@ -477,15 +477,15 @@
           p: 'Pouca água deixa o xixi concentrado, irrita a bexiga e prende o intestino. Beba aos poucos ao longo do dia, até o xixi ficar clarinho — sem exagerar, e menos nas horas antes de dormir.'
         },
         {
-          h: 'Intestino solto ajuda a bexiga',
+          h: 'Intestino funcionando ajuda a bexiga',
           p: 'Intestino preso e força para evacuar sobrecarregam a musculatura que segura o xixi. Fibras e água ajudam: frutas com casca ou bagaço, verduras, legumes, feijão, lentilha, aveia e integrais.',
-          nota: 'Quem monta a sua alimentação é a nutricionista ou o seu médico — aqui estão só os cuidados com a bexiga e o intestino. Com diabetes, problema nos rins ou dieta especial, confira com eles antes de mudar.'
+          nota: 'Quem monta a sua alimentação é a nutricionista ou o seu médico — aqui estão só os cuidados com a bexiga e o intestino. Com diabetes, problema no coração ou nos rins, ou dieta especial, confira com eles antes de mudar.'
         }
       ]
     },
     {
       id: 'alimentos-gestacao',
-      titulo: 'Alimentação, Bexiga e Intestino na Gestação',
+      titulo: 'Bexiga e Intestino na Gestação',
       resumo: 'Cuidados com o que você come e bebe que ajudam a bexiga e o intestino agora.',
       blocos: [
         {
@@ -496,21 +496,21 @@
           h: 'Para o intestino funcionar',
           l: ['Fibras todo dia: frutas com casca ou bagaço, verduras, legumes, feijão e aveia',
               'Água aos poucos ao longo do dia — não beba menos para ir menos ao banheiro; só diminua antes de dormir',
-              'Movimento: caminhar e os exercícios que combinamos',
+              'Movimento, se a obstetra liberou: caminhar e os exercícios que combinamos',
               'Banquinho embaixo dos pés no vaso, e nada de prender o ar para empurrar'],
           nota: 'Intestino ainda preso ou dor para evacuar? Fale com a sua obstetra: às vezes é preciso remédio, receitado por ela.'
         },
         {
           h: 'Café e outras bebidas',
-          p: 'Na gestação, café e outras bebidas com cafeína — chá preto, chá mate, refrigerante de cola, energético — têm limite: combine com a sua obstetra quanto é seguro para você. Elas, a água com gás e os sucos ácidos também agitam a bexiga. Bebida alcoólica não entra na gestação.'
+          p: 'Na gestação, café e outras bebidas com cafeína — chá preto, chá mate, energético — têm limite: combine com a sua obstetra quanto é seguro para você. Elas, a água com gás e os sucos ácidos também agitam a bexiga. Chá de ervas, só com liberação da obstetra. Bebida alcoólica não entra na gestação.'
         },
         {
           h: 'Procure sua obstetra se',
           l: ['arder ou doer para fazer xixi',
               'o xixi ficar turvo, com cheiro forte ou com sangue',
               'der vontade toda hora e sair pouco ou nada',
-              'tiver febre, calafrio ou dor nas costas — nesse caso, no mesmo dia'],
-          nota: 'Quem monta a sua alimentação na gestação é a obstetra ou a nutricionista — aqui estão só os cuidados com a bexiga e o intestino.'
+              'tiver febre, calafrio ou dor forte nas costas na altura da cintura — nesse caso, pronto atendimento no mesmo dia'],
+          nota: 'Quem monta a sua alimentação na gestação é a obstetra ou a nutricionista. Com diabetes da gestação ou pressão alta, confira com elas antes de mudar.'
         }
       ]
     },

@@ -113,7 +113,7 @@ teste('cuidados logo depois da capa, com os mesmos sinais de alerta da cartilha'
     if (i < 0) continue;
     assert.equal(i, 1, c.id + ': cuidados no slide ' + (i + 1) + ' — quem para de arrastar cedo não vê');
     const al = c.slides[i].alerta.toLowerCase();
-    for (const sinal of ['sangramento', 'perda de líquido', 'contrações', 'tontura', 'falta de ar', 'dor no peito', 'dor de cabeça', 'batata da perna', 'bebê'])
+    for (const sinal of ['sangramento', 'perda de líquido', 'contrações fortes e regulares', 'tontura', 'falta de ar já antes de começar', 'perda de equilíbrio', 'dor no peito', 'dor de cabeça', 'batata da perna', 'bebê'])
       assert.ok(al.includes(sinal) && nota.toLowerCase().includes(sinal), c.id + ': sinal "' + sinal + '" fora do slide ou da cartilha');
     assert.ok(c.slides[i].itens.some(t => /obstetra/.test(t) && /restring/.test(t)), c.id + ': sem a restrição da obstetra');
   }

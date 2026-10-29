@@ -62,11 +62,11 @@ teste('quadro "Em todos os exercícios": soltar na dor, contrair no resto, segur
   const inc = P.deCartilha(A, 'incontinencia').concat([P.exercicio(E, 'sentada')]);
   assert.deepEqual(P.sempre(E, inc), E.SEMPRE);
   const dorGest = dor.concat([P.exercicio(E, 'bola-respiracao')]);
-  assert.ok(P.sempre(E, dorGest).includes(E.SEMPRE_GESTACAO.sinais), 'perdeu os sinais de alerta da gestação');
+  assert.ok(P.sempre(E, dorGest, { gestante: true }).includes(E.SEMPRE_GESTACAO.sinais), 'perdeu os sinais de alerta da gestação');
   /* com a cartilha de gestação no plano, o aviso já está no destaque dela: não repete */
   const gest = P.deCartilha(A, 'gestacao').concat([P.exercicio(E, 'bola-balanco')]);
   assert.ok(!P.sempre(E, gest).includes(E.SEMPRE_GESTACAO.sinais), 'aviso repetido no quadro');
-  assert.ok(P.sempre(E, [P.exercicio(E, 'bola-balanco')]).includes(E.SEMPRE_GESTACAO.sinais), 'sem a cartilha, o aviso precisa estar no quadro');
+  assert.ok(P.sempre(E, [P.exercicio(E, 'bola-balanco')], { gestante: true }).includes(E.SEMPRE_GESTACAO.sinais), 'sem a cartilha, o aviso precisa estar no quadro');
   /* as frases de "soltar" vêm da cartilha de dor, já aprovada */
   const dorTxt = JSON.stringify(A.CARTILHAS.find(c => c.id === 'dor'));
   assert.ok(dorTxt.includes('apertar mais piora') && dorTxt.includes('Respiração lenta, com a barriga solta') && dorTxt.includes('é não ensinar o corpo a ter medo'));
@@ -157,7 +157,18 @@ teste('perfil da paciente decide o quadro de cuidados, não o tipo de exercício
   assert.ok(P.sempre(E, mix).includes(P.SOLTAR_E_CONTRAIR));
   /* a marca de perfil é guardada, e um rascunho antigo vem sem marca */
   assert.deepEqual([P.limpo({ gestante: true, soltar: true, itens: [] }, E, A).gestante, P.limpo({ itens: [] }, E, A).soltar], [true, false]);
-  assert.deepEqual(P.perfilSugerido(E, [P.exercicio(E, 'bola-oito')]), { gestante: true, soltar: false });
+  /* bola sugere gestante, mas não trava: pós-parto também usa bola */
+  assert.deepEqual(P.perfilSugerido(E, [P.exercicio(E, 'bola-oito')]), { gestante: false, soltar: false });
+  assert.ok(P.sugereGestante(E, P.exercicio(E, 'bola-oito')) && !P.sugereGestante(E, P.exercicio(E, 'ponte')));
+  assert.ok(!P.sempre(E, [P.exercicio(E, 'bola-oito')], { gestante: false }).includes(G.sinais), 'pós-parto com bola recebeu aviso de gestante');
+  assert.deepEqual(P.perfilSugerido(E, P.deCartilha(A, 'alimentos-gestacao')), { gestante: true, soltar: false });
+  /* soltar × contrair: sem exercício, vira destaque antes do bloco que manda apertar */
+  const semEx = P.deCartilha(A, 'dor').concat(P.deCartilha(A, 'incontinencia'));
+  const idx = P.ondeNotaConflito(E, semEx);
+  assert.ok(idx >= 0 && semEx[idx].ref.startsWith('incontinencia/'), 'frase do conflito sem lugar num plano sem exercício');
+  assert.equal(P.ondeNotaConflito(E, semEx.concat([P.exercicio(E, 'ponte')])), -1, 'com exercício, a frase vai no quadro');
+  /* soltar marcado à mão + "Como fazer" com contraia: a frase entra no quadro */
+  assert.ok(P.sempre(E, [P.exercicio(E, 'ponte')], { soltar: true }).includes(P.SOLTAR_E_CONTRAIR));
 });
 
 teste('avisos do painel: contrair no foco em soltar, próstata no feminino, repetição e excesso', () => {
@@ -169,6 +180,7 @@ teste('avisos do painel: contrair no foco em soltar, próstata no feminino, repe
   const muitos = Array.from({ length: P.LIMITE_EXERCICIOS + 1 }, () => P.exercicio(E, 'ponte'));
   assert.ok(P.avisos(E, A, muitos).some(t => /muito para casa/.test(t)));
   assert.deepEqual(P.avisos(E, A, P.deCartilha(A, 'vesical')), []);
+  assert.ok(P.avisos(E, A, P.deCartilha(A, 'alimentos-bexiga').concat(P.deCartilha(A, 'urgencia'))).some(t => /repetem as orientações de bebida/.test(t)));
 });
 
 console.log('\n  plano.test.mjs');
