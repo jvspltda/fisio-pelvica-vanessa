@@ -86,6 +86,10 @@ teste('"Em todos os exercícios" acompanha a sequência', () => {
   const mista = E.sempre(['ponte', 'bola-balanco']);
   assert.ok(mista.includes(E.SEMPRE[0]) && mista.includes(G.sinais) && mista.includes(G.deitada));
   assert.equal(mista[mista.length - 1], E.SEMPRE[E.SEMPRE.length - 1]);
+  /* sinais de alerta: o mesmo texto da cartilha de gestação */
+  const A = require('../js/adherence.js');
+  const nota = A.CARTILHAS.find(c => c.id === 'gestacao').blocos.map(b => b.nota).filter(Boolean)[0];
+  assert.equal(G.sinais, nota, 'sinais de alerta diferentes da cartilha de gestação');
   const gestacao = new Set(E.BIBLIOTECA.filter(b => b.grupo === 'gestacao').map(b => b.id));
   for (const m of E.MODELOS_PRONTOS.filter(m => m.itens.some(id => gestacao.has(id))))
     assert.ok(E.sempre(m.itens).includes(G.sinais), m.id + ' sem sinais de alerta');

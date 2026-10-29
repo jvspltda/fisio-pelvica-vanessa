@@ -104,7 +104,9 @@
     ],
     bola: 'Na bola, use um tapete que não escorregue e fique perto de uma parede ou de alguém, para ter apoio.',
     deitada: 'Deitada de barriga para cima, sentiu tontura, enjoo ou falta de ar? Vire de lado, espere passar e me avise.',
-    sinais: 'Sangramento, perda de líquido, contrações, dor de cabeça forte ou falta de ar: pare e procure sua equipe do pré-natal.'
+    /* mesmo texto da cartilha de gestação (js/adherence.js), já aprovado
+       pela Vanessa; o teste confere que os dois não se separam */
+    sinais: 'Procure sua obstetra ou o pronto atendimento se tiver sangramento, perda de líquido, contrações fortes e regulares antes da hora, dor forte, ou se o bebê mexer bem menos que o normal. Nesses casos, não faça os exercícios antes de ser avaliada.'
   };
 
   /* O quadro "Em todos os exercícios" da sequência montada.
