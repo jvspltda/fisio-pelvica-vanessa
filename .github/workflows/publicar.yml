@@ -46,7 +46,7 @@ jobs:
           node tools/gerar-ficha-studocu.mjs --pb
           node tools/gerar-materiais-impressos.mjs
 
-      - name: Testes (depois dos geradores: conferem também as páginas geradas)
+      - name: Testes (depois dos geradores, para conferir também as páginas geradas)
         run: |
           node tests/scores.test.mjs
           node tests/storage.test.mjs

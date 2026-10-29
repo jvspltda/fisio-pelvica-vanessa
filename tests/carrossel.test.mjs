@@ -103,6 +103,11 @@ teste('página carrega os scripts na ordem e está no site', () => {
   assert.ok(ordem.every(i => i > 0) && ordem[0] < ordem[1] && ordem[1] < ordem[2], 'ordem dos scripts');
   assert.ok(readFileSync(join(raiz, 'index.html'), 'utf8').includes('href="carrossel.html"'), 'sem atalho na página inicial');
   assert.ok(readFileSync(join(raiz, '.github/workflows/publicar.yml'), 'utf8').includes('carrossel.html'), 'workflow não publica a página');
+  /* nome de etapa com ": " quebra o YAML e a publicação nem começa (aconteceu em 2026-10-29) */
+  const wf = readFileSync(join(raiz, '.github/workflows/publicar.yml'), 'utf8');
+  for (const l of wf.split('
+').filter(l => /^\s*- name: /.test(l)))
+    assert.ok(!/: /.test(l.replace(/^\s*- name: /, '')) || /^\s*- name: (["']).*\s*$/.test(l), 'nome de etapa com ": " sem aspas: ' + l.trim());
 });
 
 teste('cuidados logo depois da capa, com os mesmos sinais de alerta da cartilha', () => {
