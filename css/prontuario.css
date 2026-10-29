@@ -38,7 +38,7 @@ button{ padding:9px 14px; border-radius:8px; border:1px solid var(--terracota); 
 button.pri{ background:var(--terracota); color:#fff; }
 button.perigo{ border-color:var(--perigo); color:var(--perigo); }
 button:disabled{ opacity:.45; cursor:not-allowed; }
-button.link{ border:0; background:none; padding:0; color:var(--deep); text-decoration:underline; font-weight:600; }
+button.link{ border:0; background:none; padding:8px 0; min-height:36px; color:var(--deep); text-decoration:underline; font-weight:600; }
 
 .aviso-cofre{ background:var(--areia); border-left:4px solid var(--terracota); padding:10px 14px; border-radius:6px; font-size:14px; margin-top:14px; }
 .aviso-cofre ul{ margin:6px 0 0; padding-left:18px; }

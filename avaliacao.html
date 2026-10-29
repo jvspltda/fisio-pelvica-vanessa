@@ -27,10 +27,10 @@
 <!-- ══════════════════════════════════════════════════════════════
      CABEÇALHO DE TELA
      ══════════════════════════════════════════════════════════════ -->
-<header class="no-print" style="background:var(--branco);border-bottom:1px solid var(--linha);position:sticky;top:0;z-index:40">
+<header class="no-print vf-cabecalho" style="background:var(--branco);border-bottom:1px solid var(--linha);position:sticky;top:0;z-index:40">
   <div class="vf-container">
 
-    <div style="display:flex;align-items:center;gap:var(--e-3);padding:var(--e-3) 0">
+    <div class="vf-cab-linha" style="display:flex;align-items:center;gap:var(--e-3);padding:var(--e-3) 0">
       <a class="link-inicio" href="index.html" title="Voltar à página inicial">← Início</a>
       <img src="assets/logo.svg" alt="" class="marca-tela"
            style="flex:none;height:42px;width:auto"
@@ -43,12 +43,12 @@
               stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
 
-      <div style="line-height:1.2">
+      <div class="vf-cab-nome" style="line-height:1.2">
         <div class="titulo" style="font-size:var(--t-lg);color:var(--terracota);font-weight:700">Vanessa Fernandes</div>
         <div style="font-size:10px;letter-spacing:.35em;color:var(--cafe);text-transform:uppercase">Fisioterapia Pélvica</div>
       </div>
 
-      <div style="margin-left:auto;display:flex;align-items:center;gap:var(--e-2);flex-wrap:wrap">
+      <div class="vf-cab-acoes" style="margin-left:auto;display:flex;align-items:center;gap:var(--e-2);flex-wrap:wrap">
         <span id="vf-status" style="font-size:var(--t-xs);color:var(--cafe-tenue)" role="status" aria-live="polite"></span>
         <button class="vf-btn" id="btn-novo">Novo atendimento</button>
         <button class="vf-btn" id="btn-salvar">Salvar rascunho</button>

@@ -86,7 +86,9 @@ teste('"Em todos os exercícios" acompanha a sequência', () => {
   const mista = E.sempre(['ponte', 'bola-balanco']);
   assert.ok(mista.includes(E.SEMPRE[0]) && mista.includes(G.sinais) && mista.includes(G.deitada));
   assert.equal(mista[mista.length - 1], E.SEMPRE[E.SEMPRE.length - 1]);
-  for (const m of E.MODELOS_PRONTOS) assert.ok(E.sempre(m.itens).includes(G.sinais), m.id + ' sem sinais de alerta');
+  const gestacao = new Set(E.BIBLIOTECA.filter(b => b.grupo === 'gestacao').map(b => b.id));
+  for (const m of E.MODELOS_PRONTOS.filter(m => m.itens.some(id => gestacao.has(id))))
+    assert.ok(E.sempre(m.itens).includes(G.sinais), m.id + ' sem sinais de alerta');
 });
 
 teste('descrição sugerida cabe no limite e não traz número pronto (os números são da Vanessa)', () => {
@@ -131,6 +133,22 @@ teste('folha gerada traz identificação, data e quadro de agendamento', () => {
   const curta = h.slice(h.indexOf('id="t-agenda-curta"'), h.indexOf('</template>', h.indexOf('id="t-agenda-curta"')));
   assert.ok(curta.includes('(31) 3868-1120'), 'quadro curto de agendamento sem o telefone');
   assert.ok(/\[data-folha\]\{[^}]*min-height/.test(h), 'linha do "Folha 1 de 2" não reservada: o rodapé cresceria e cortaria a folha');
+});
+
+teste('código QR do WhatsApp aponta para o número da clínica, sem falar da queixa', () => {
+  const svg = readFileSync(join(raiz, 'assets/qr-whatsapp.svg'), 'utf8');
+  assert.ok(/viewBox="0 0 \d+ \d+"/.test(svg), 'SVG sem viewBox não escala na folha');
+  const destino = (svg.match(/<title>([^<]+)<\/title>/) || [])[1] || '';
+  const Ficha = require('../js/ficha.js');
+  const tel = (String(Ficha.CONTATO).match(/\(31\) ?3868-1120/) || [''])[0];
+  assert.ok(tel, 'telefone da clínica mudou em Ficha.CONTATO: gere o QR de novo');
+  const numero = '55' + tel.replace(/\D/g, '');
+  assert.ok(destino.startsWith('https://wa.me/' + numero + '?'), 'QR aponta para ' + destino);
+  assert.equal(decodeURIComponent(destino.split('text=')[1] || ''), 'Olá! Quero agendar um horário.');
+  for (const arq of ['build/exercicios.html', 'build/cartilhas-pacientes.html']) {
+    const f = join(raiz, arq);
+    if (existsSync(f)) assert.ok(readFileSync(f, 'utf8').includes('class="qr"'), arq + ' sem o QR no quadro de agendamento');
+  }
 });
 
 console.log('\n  exercicios.test.mjs');

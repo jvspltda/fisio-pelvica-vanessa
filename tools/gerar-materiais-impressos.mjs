@@ -40,6 +40,14 @@ const LOGO_SVG = readFileSync(join(raiz, 'assets/logo.svg'), 'utf8')
 const LOGO = '<img class="logo" alt="" src="data:image/svg+xml;base64,' +
   Buffer.from(LOGO_SVG, 'utf8').toString('base64') + '">';
 
+/* Código QR do WhatsApp da clínica (assets/qr-whatsapp.svg, gerado uma
+   vez com segno e conferido por leitura). Abre a conversa com "Olá! Quero
+   agendar um horário." — nada sobre a queixa da paciente. O destino fica
+   no <title> do SVG e o teste confere que é o número de Ficha.CONTATO. */
+const QR_SVG = readFileSync(join(raiz, 'assets/qr-whatsapp.svg'), 'utf8');
+const QR = '<img class="qr" alt="Código QR do WhatsApp da clínica" src="data:image/svg+xml;base64,' +
+  Buffer.from(QR_SVG, 'utf8').toString('base64') + '">';
+
 /* A folha util e 297 - 2 x 12 mm de margem = 273 mm. Cada .pagina tem
    exatamente essa altura; o que vai ao pe usa margin-top:auto. */
 const CSS = `
@@ -89,6 +97,12 @@ h2{ font-size:9.6pt; font-weight:700; letter-spacing:.07em; text-transform:upper
 .anot{ margin-top:3mm; border:0.6pt solid var(--linha); border-radius:2pt; padding:2.6mm 4mm 1mm; }
 .anot b{ font-size:8pt; letter-spacing:.07em; text-transform:uppercase; color:var(--deep); }
 .anot .l{ border-bottom:0.5pt solid var(--linha); height:7.5mm; }
+.anot-linha{ display:flex; gap:4mm; align-items:stretch; margin-top:3mm; }
+.anot-linha .anot{ flex:1; margin-top:0; }
+.qr-cartao{ flex:none; width:22mm; border:0.6pt solid var(--linha); border-radius:2pt; padding:1.4mm 1.4mm 1mm;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0.6mm;
+  font-size:6.2pt; line-height:1.2; font-weight:700; color:var(--deep); text-align:center; }
+.qr-cartao .qr{ display:block; width:15mm; height:15mm; }
 
 /* quadro de agendamento, ancorado no pe da folha */
 .agenda{ margin-top:auto; background:var(--terracota); color:#fff; border-radius:3pt;
@@ -97,6 +111,8 @@ h2{ font-size:9.6pt; font-weight:700; letter-spacing:.07em; text-transform:upper
 .agenda p{ margin:0 0 0.8mm; font-size:9pt; line-height:1.45; color:#fff; }
 .agenda p:last-child{ margin:0; }
 .agenda b{ color:#fff; }
+.agenda .qr-caixa{ float:right; width:17mm; margin:0.4mm 0 0.6mm 4mm; text-align:center; font-size:6pt; line-height:1.2; color:#fff; }
+.agenda .qr{ display:block; width:17mm; height:17mm; border-radius:1.2pt; margin:0 0 0.6mm; }
 
 /* carta */
 .cab-carta{ display:flex; justify-content:space-between; align-items:flex-start; gap:8mm; margin:0 0 2.5mm; }
@@ -149,6 +165,17 @@ const CSS_BARRA = `
 #barra .escolha{ max-width:1100px; margin:0 auto; padding:0 14px 10px; display:flex; flex-wrap:wrap; gap:6px 14px; font-size:13px; }
 #barra .escolha label{ font-size:12.5px; }
 #b-aviso{ font-size:12.5px; color:var(--tenue); }
+/* celular: presa no topo, a barra cobria até metade da tela (cartilhas,
+   com a lista de folhas). Solta, com os botões numa linha que desliza. */
+@media screen and (max-width:700px){
+  #barra{ position:static; }
+  #barra .in{ gap:8px 10px; padding:8px 12px; }
+  #barra .acoes-barra{ flex-wrap:nowrap; overflow-x:auto; max-width:100%; padding-bottom:2px; }
+  #barra .acoes-barra button{ flex:none; white-space:nowrap; }
+  #barra input[type=text]{ width:100%; max-width:none; }
+  #barra input[type=checkbox]{ width:20px; height:20px; }
+  #barra .escolha label{ min-height:32px; }
+}
 #b-aviso.erro{ color:#A33; }
 `;
 
@@ -156,7 +183,7 @@ const barra = (tipo, extra, escolha) => `<div id="barra" data-tipo="${tipo}">
   <div class="in">
     <a class="link-inicio" href="../index.html">← Início</a>
     <div class="grupo">${extra}</div>
-    <div class="grupo">
+    <div class="grupo acoes-barra">
       <button id="b-imprimir" class="pri" type="button">Imprimir / PDF</button>
       <button id="b-pdf" type="button">Enviar PDF</button>
       <button id="b-img" type="button">Enviar como imagem</button>
@@ -281,6 +308,11 @@ const AGENDA = `<div class="agenda">
   <p>Precisou faltar? Me avise assim que puder, sem problema nenhum — a gente encontra outro horário.
   Na véspera, se você autorizou, chega um lembrete pelo WhatsApp. Instagram: <b>@vanessa.fernands</b> e <b>@clinicaveracis</b>.</p>
 </div>`;
+/* Folha de exercícios: o QR flutua no quadro (a paginação por medida
+   absorve a altura extra). Nas cartilhas ele fica ao lado do quadro de
+   anotação, que tem altura de sobra — o quadro de agendamento continua
+   na mesma altura em todas as folhas. */
+const AGENDA_QR = AGENDA.replace('<div class="agenda">', '<div class="agenda"><div class="qr-caixa">' + QR + 'WhatsApp</div>');
 
 const paginasCartilhas = A.CARTILHAS.map((c) => {
   const blocos = c.blocos.map(b => `<div class="bloco">
@@ -296,8 +328,9 @@ const paginasCartilhas = A.CARTILHAS.map((c) => {
     <p class="sub">${esc(c.resumo)}</p>
     <p class="acolhe">${esc(ACOLHE)}</p>
     ${blocos}
-    <div class="anot"><b>O que combinamos na sessão de ____/____</b>
+    <div class="anot-linha"><div class="anot"><b>O que combinamos na sessão de ____/____</b>
       <div class="l"></div><div class="l"></div></div>
+      <div class="qr-cartao">${QR}<span>Agende pelo<br>WhatsApp</span></div></div>
     <div style="height:3mm"></div>
     ${AGENDA}
     <div class="rodape">Vanessa Fernandes · Fisioterapeuta · ${esc(Ficha.CREFITO)}</div>
@@ -413,7 +446,10 @@ ${barra('exercicios', `<label for="b-nome">Paciente</label>
   <aside id="editor" aria-label="Montar a sequência">
     <h2>Exercícios para casa</h2>
     <p class="apoio">Monte a sequência da paciente: escolha as figuras, a ordem, os números e o texto de cada exercício.
-    A folha ao lado se ajusta sozinha. A sequência fica guardada neste computador; o nome da paciente, não.</p>
+    A folha se ajusta sozinha. A sequência fica guardada neste computador; o nome da paciente, não.</p>
+
+    <h3>Comece por um modelo (opcional)</h3>
+    <div class="linha"><select id="e-modelos" aria-label="Modelos prontos e salvos"></select><button id="e-carregar" type="button">Carregar</button></div>
 
     <h3>1 · Escolha os exercícios</h3>
     <div id="e-biblioteca"></div>
@@ -427,9 +463,9 @@ ${barra('exercicios', `<label for="b-nome">Paciente</label>
       <label class="campo"><span>Recado para a paciente (opcional)</span><textarea id="e-recado" rows="2" placeholder="Ex.: comece deitada e só passe para em pé na semana que vem."></textarea></label>
     </div>
 
-    <h3>Modelos</h3>
-    <p class="apoio" style="margin-bottom:8px">Guarde sequências que você usa sempre, como "Pós-parto — fase 1". Sem nome de paciente.</p>
-    <div class="linha"><select id="e-modelos" aria-label="Modelos salvos"></select><button id="e-carregar" type="button">Carregar</button></div>
+    <h3>Guardar como modelo</h3>
+    <p class="apoio" style="margin-bottom:8px">Guarde sequências que você usa sempre, como "Pós-parto — fase 1". Sem nome de paciente.
+    Para apagar um modelo salvo, escolha-o na lista lá em cima.</p>
     <div class="linha"><input id="e-nome-modelo" type="text" maxlength="50" placeholder="Nome do modelo" aria-label="Nome do modelo"><button id="e-salvar" type="button">Salvar</button></div>
     <div class="linha"><button id="e-apagar" type="button">Apagar modelo</button><button id="e-limpar" type="button">Começar do zero</button></div>
 
@@ -444,7 +480,7 @@ ${barra('exercicios', `<label for="b-nome">Paciente</label>
   <div class="corpo"></div>
   <div class="rodape">Vanessa Fernandes · Fisioterapeuta · ${esc(Ficha.CREFITO)} · @vanessa.fernands<span data-folha></span></div>
 </section></template>
-<template id="t-agenda">${AGENDA}</template>
+<template id="t-agenda">${AGENDA_QR}</template>
 <template id="t-agenda-curta"><div class="agenda curta"><b>Como agendar:</b> WhatsApp ou telefone <b>(31) 3868-1120</b> · Clínica Veracis, Rodovia MG-010, 598, Bela Vista Mall, Conceição do Mato Dentro · @vanessa.fernands e @clinicaveracis</div></template>
 <script>${EXERCICIOS_JS}</script>
 <script>${EXERCICIOS_CLIENTE}</script>

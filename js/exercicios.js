@@ -60,12 +60,17 @@
   ];
 
   /* Sequências que já vêm prontas no montador (não podem ser apagadas).
-     Reproduzem as duas pranchas de 2026-10-29, na mesma ordem. */
+     As duas de gestação reproduzem as pranchas de 2026-10-29, na mesma ordem. */
   E.MODELOS_PRONTOS = [
     { id: 'gestacao-mobilidade', nome: 'Gestação — mobilidade na bola',
       itens: ['bola-circulos', 'bola-balanco', 'bola-oito', 'bola-respiracao', 'bola-agachamento', 'ponte-gestacao'] },
     { id: 'gestacao-deitada', nome: 'Gestação — pernas na bola, deitada',
-      itens: ['bola-elevacao-quadril', 'bola-flexao-joelhos'] }
+      itens: ['bola-elevacao-quadril', 'bola-flexao-joelhos'] },
+    /* Progressão de posição (deitada → sentada → em pé), ponto de partida
+       comum no pós-parto e na perda de urina. Sugestão: precisa do aval
+       da Vanessa, como os textos de "Como fazer". */
+    { id: 'assoalho-progressao', nome: 'Assoalho pélvico — deitada, sentada e em pé',
+      itens: ['joelhos-dobrados', 'pernas-esticadas', 'sentada', 'em-pe'] }
   ];
 
   /* Os campos de número de cada exercício, na ordem em que aparecem. */

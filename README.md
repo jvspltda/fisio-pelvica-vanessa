@@ -205,7 +205,22 @@ A biblioteca tem dois grupos — assoalho pélvico e gestação com bola — e d
 (`Exercicios.MODELOS_PRONTOS`, não se apagam) que reproduzem as pranchas de gestação. O quadro
 "Em todos os exercícios" muda com a sequência (`Exercicios.sempre`): só gestação troca a instrução
 de contração por respiração, ritmo e sinais de alerta; misturada leva as duas. Duas figuras em pé
-seguidas dividem a mesma linha da folha.
+seguidas dividem a mesma linha da folha. Há também um modelo pronto de assoalho pélvico
+(deitada → sentada → em pé), sugestão a ser aprovada pela Vanessa.
+
+### Código QR do WhatsApp
+
+`assets/qr-whatsapp.svg` abre a conversa com a clínica, (31) 3868-1120, com a mensagem
+"Olá! Quero agendar um horário." — nada sobre a queixa. Foi gerado uma vez (segno, correção M)
+e conferido por leitura no PDF a 200 ppp. Nas cartilhas fica ao lado do quadro "O que combinamos",
+para o quadro de agendamento não mudar de altura; na folha de exercícios, dentro do quadro.
+Se o número mudar, gere de novo: o teste de exercícios compara o destino com `Ficha.CONTATO`.
+
+### Bibliotecas externas
+
+O "Enviar PDF" e o "Enviar como imagem" baixam html2canvas e jsPDF do cdnjs só no clique, com
+verificação de integridade (SRI, em `tools/impressos-cliente.js`): se o arquivo servido mudar,
+o navegador recusa e o botão sugere "Imprimir / PDF".
 Gerada por `tools/gerar-materiais-impressos.mjs`, com o montador em `tools/exercicios-cliente.js`.
 Teste: `node tests/exercicios.test.mjs`.
 

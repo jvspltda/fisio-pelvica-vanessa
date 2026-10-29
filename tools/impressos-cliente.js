@@ -23,6 +23,12 @@
 
   var H2C = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
   var JSPDF = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+  /* Integridade (SRI): se o arquivo servido pelo cdnjs mudar, o navegador
+     recusa e o botão cai no aviso de "Use Imprimir / PDF". Hashes
+     conferidos em 2026-10-29 com os publicados pelo próprio cdnjs. */
+  var INTEGRIDADE = {};
+  INTEGRIDADE[H2C] = 'sha512-BNaRQnYJYiPSqHHDb58B0yaPfCu+Wgds8Gp/gU33kqBtgNS4tSPHuGibyoeqMV/TJlSKda6FXzoEyYGjTe+vXA==';
+  INTEGRIDADE[JSPDF] = 'sha512-qZvrmS2ekKPF2mSznTQsxqPgnpkI4DNTlrdUmTzrDgektczlKNRRhy5X5AAOnx5S09ydFYWWNSfcEqDTTHgtNA==';
 
   var barra = document.getElementById('barra');
   if (!barra) return;
@@ -114,6 +120,8 @@
       if (document.querySelector('script[src="' + src + '"]')) return ok();
       var s = document.createElement('script');
       s.src = src;
+      s.integrity = INTEGRIDADE[src];
+      s.crossOrigin = 'anonymous';
       s.onload = ok;
       s.onerror = function () { falha(new Error('Sem internet para montar o arquivo. Use "Imprimir / PDF".')); };
       document.head.appendChild(s);

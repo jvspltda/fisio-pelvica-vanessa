@@ -282,6 +282,18 @@ textarea.vf-campo { resize: vertical; min-height: 62px; line-height: 1.55; }
 .vf-col-total { grid-column: 1 / -1; }
 
 /* ---- Acessibilidade ---- */
+/* Celular: o cabeçalho fixo ocupava quase metade da tela, com os botões
+   empilhados e cortados. Fica uma linha (Início + ações que deslizam para
+   o lado) e as abas. Os estilos inline do cabeçalho pedem !important. */
+@media (max-width: 700px) {
+  .vf-cabecalho .vf-cab-linha { gap: var(--e-2) !important; padding: var(--e-2) 0 !important; }
+  .vf-cabecalho .marca-tela, .vf-cabecalho #logo-vetor, .vf-cabecalho .vf-cab-nome { display: none !important; }
+  .vf-cabecalho .vf-cab-acoes { margin-left: 0 !important; flex: 1 1 0; min-width: 0; flex-wrap: nowrap !important;
+    overflow-x: auto; padding-bottom: 2px; -webkit-overflow-scrolling: touch; }
+  .vf-cabecalho .vf-cab-acoes .vf-btn { flex: none; white-space: nowrap; }
+  .vf-cabecalho #vf-status { display: none; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
 }
