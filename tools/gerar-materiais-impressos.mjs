@@ -454,6 +454,28 @@ const CSS_EDITOR = `
 .item-rod{ flex-wrap:wrap; gap:4px 10px; }
 #editor .marcar{ display:flex; gap:8px; align-items:center; font-size:13px; margin-top:8px; }
 #editor .marcar input{ width:18px; height:18px; flex:none; }
+/* já no plano: ✓ e borda; tocar de novo tira */
+.miniatura.no-plano{ border-color:var(--terracota); background:#FBF3F1; box-shadow:inset 0 0 0 1px var(--terracota); }
+.miniatura .nome::before{ content:'+ '; }
+.miniatura.no-plano .nome::before{ content:'✓ '; color:var(--terracota); }
+#e-orientacoes .bloco-op::before{ content:'+ '; }
+#e-orientacoes .bloco-op.no-plano{ border-color:var(--terracota); background:#FBF3F1; color:var(--deep); font-weight:600; }
+#e-orientacoes .bloco-op.no-plano::before{ content:'✓ '; }
+.acoes .duplicar{ font-size:13px; }
+.item.realce{ box-shadow:0 0 0 3px var(--rosegold); transition:box-shadow .2s; }
+@media screen{
+  .folhas [data-uid]{ cursor:pointer; border-radius:2pt; }
+  .folhas [data-uid]:hover{ outline:1px dashed #D9CCC3; outline-offset:1mm; }
+  .folhas .realce{ outline:2px solid var(--terracota) !important; outline-offset:1mm; }
+}
+#acao-folha{ position:absolute; z-index:30; background:#fff; border:1px solid #D9CCC3; border-radius:10px; padding:10px 12px;
+  box-shadow:0 8px 24px rgba(61,46,40,.18); font-family:'Plus Jakarta Sans','Segoe UI',Arial,sans-serif; max-width:320px; }
+#acao-folha[hidden]{ display:none; }
+#acao-titulo{ margin:0 0 8px; font-size:13px; font-weight:700; color:var(--deep); text-align:left; }
+#acao-folha .linha-acao{ display:flex; gap:6px; }
+#acao-folha button{ font:inherit; font-size:13px; font-weight:600; padding:8px 12px; border-radius:8px; cursor:pointer; border:1px solid var(--terracota); background:#fff; color:var(--deep); min-height:36px; }
+#acao-tirar{ background:var(--terracota) !important; color:#fff !important; }
+@media print{ #acao-folha{ display:none !important; } }
 `;
 
 const EXERCICIOS_JS = readFileSync(join(raiz, 'js/exercicios.js'), 'utf8');
@@ -490,7 +512,8 @@ ${barra('plano', `<label for="b-nome">Paciente</label>
     <div id="e-biblioteca"></div>
 
     <h3>3 · O plano dela</h3>
-    <p class="apoio" style="margin-bottom:8px">Mude a ordem, tire o que não serve e ajuste os textos. A mudança vale só para este plano; a cartilha original não muda.</p>
+    <p class="apoio" style="margin-bottom:8px">Mude a ordem, tire o que não serve e ajuste os textos. A mudança vale só para este plano; a cartilha original não muda.
+    <b>Atalhos:</b> tocar de novo numa figura ou orientação já marcada (✓) tira do plano; dois cliques num bloco da folha abrem "Tirar / Editar".</p>
     <div id="e-lista"></div>
 
     <h3>4 · Para o plano todo</h3>
@@ -512,6 +535,10 @@ ${barra('plano', `<label for="b-nome">Paciente</label>
     <p id="e-aviso" role="status"></p>
   </aside>
   <div class="folhas" id="folhas"></div>
+</div>
+<div id="acao-folha" role="dialog" aria-labelledby="acao-titulo" hidden>
+  <p id="acao-titulo"></p>
+  <div class="linha-acao"><button id="acao-tirar" type="button">Tirar do plano</button><button id="acao-editar" type="button">Editar</button><button id="acao-fechar" type="button" aria-label="Fechar">✕</button></div>
 </div>
 <template id="t-pagina"><section class="pagina">
   ${cabecalho('<span data-nome-vazio>Plano<br>para casa</span>' +

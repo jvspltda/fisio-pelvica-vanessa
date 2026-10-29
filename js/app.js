@@ -1340,6 +1340,13 @@
     c1.appendChild(cab1);
 
     var b1 = el('div', { class: 'vf-card-corpo' });
+    /* O kit aqui é de cartilhas inteiras. Para misturar blocos de várias
+       cartilhas com exercícios e figuras, o caminho é o Plano para casa. */
+    var dicaPlano = el('p', { class: 'no-print', style: 'margin:0 0 var(--e-3);font-size:var(--t-sm);color:var(--cafe-suave)' });
+    dicaPlano.appendChild(document.createTextNode('Quer só alguns blocos de cada cartilha, junto com os exercícios e as figuras? Monte o '));
+    dicaPlano.appendChild(el('a', { href: 'impressos/plano.html', texto: 'Plano para casa' }));
+    dicaPlano.appendChild(document.createTextNode('.'));
+    b1.appendChild(dicaPlano);
     baldeDoCampo['orient_sel'] = 'aderencia';
     var marcadas = Array.isArray(ler('orient_sel')) ? ler('orient_sel') : [];
 

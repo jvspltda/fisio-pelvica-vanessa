@@ -31,11 +31,11 @@ jobs:
       name: github-pages
       url: ${{ steps.deploy.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: 24
 
       - name: Testes do motor de cálculo e do salvamento
         run: |
@@ -45,6 +45,7 @@ jobs:
           node tests/roteiros.test.mjs
           node tests/exercicios.test.mjs
           node tests/plano.test.mjs
+          node tests/carrossel.test.mjs
 
       - name: Compilar o Tailwind da avaliação
         run: npx --yes tailwindcss@3 -c tailwind.config.js -i css/tailwind.src.css -o css/tailwind.css --minify
@@ -58,7 +59,7 @@ jobs:
       - name: Montar o site
         run: |
           mkdir -p _site/impressos
-          cp index.html avaliacao.html materiais.html prontuario.html roteiros.html 404.html _site/
+          cp index.html avaliacao.html materiais.html prontuario.html roteiros.html carrossel.html 404.html _site/
           cp -r css js assets _site/
           cp build/ficha-studocu.html      _site/impressos/ficha-avaliacao.html
           cp build/ficha-studocu-pb.html   _site/impressos/ficha-avaliacao-pb.html
@@ -67,9 +68,9 @@ jobs:
           cp build/plano.html               _site/impressos/plano.html
           cp build/exercicios.html          _site/impressos/exercicios.html
 
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: _site
 
       - id: deploy
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5

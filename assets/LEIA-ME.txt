@@ -17,3 +17,12 @@ exercicios/   As ilustracoes da folha "Exercicios para casa". Lista e grupo
                 Referencias/Exercicios-Bola-Gestacao-*.jpeg, sem o texto
                 embutido (tinha erros). Formato 3:2 ou 2:3, fundo igualado
                 ao das outras; 250 a 450 ppp no tamanho impresso.
+              - mini/: miniaturas (360 px) das mesmas figuras, para o painel
+                do Plano para casa carregar rápido no celular. A folha
+                impressa usa sempre a figura grande.
+
+carrossel/    Quatro figuras de gestação com bola em PNG, com a borda
+              esmaecida até transparente, para o fundo da ilustração sumir
+              no slide do carrossel do Instagram (carrossel.html).
+
+qr-whatsapp.svg  Código QR do WhatsApp da clínica (ver README).

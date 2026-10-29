@@ -217,6 +217,23 @@ vale só para aquele plano — o texto das cartilhas continua vindo de `js/adher
 - `impressos/exercicios.html` só redireciona para o plano. `impressos/cartilhas.html` continua
   com as 9 cartilhas inteiras, uma por folha, para impressão rápida.
 
+### Carrossel do Instagram
+
+`carrossel.html` (área de marketing) desenha os slides de `js/carrossel.js` em 1080 × 1350, o
+formato do feed, com nome, "Fisioterapeuta", CREFITO-4 e a **data da publicação** escolhida na
+página em todo slide. "Baixar as imagens" gera os PNG com html2canvas (via `js/externas.js`, com
+SRI): no celular abre o compartilhar com todas juntas; no computador baixa uma a uma e mostra cada
+imagem com link, caso o navegador barre vários downloads. A legenda pronta e o texto alternativo de
+cada slide ficam na página para copiar. As figuras do slide são versões de borda esmaecida
+(`assets/carrossel/`), para o fundo da ilustração sumir no slide. O primeiro carrossel, bola na
+gestação, é **só orgânico**: o fecho fala com a gestante, o que a política de atributos pessoais da
+Meta não aceita em anúncio. Teste: `tests/carrossel.test.mjs` (identificação, promessas, números,
+limites do Instagram, SRI igual ao dos impressos).
+
+No Plano para casa, um segundo toque numa figura ou orientação já marcada (✓) tira do plano, e dois
+cliques num bloco da folha abrem "Tirar do plano / Editar". O botão ⧉ da lista repete uma peça de
+propósito.
+
 ### Código QR do WhatsApp
 
 `assets/qr-whatsapp.svg` abre a conversa com a clínica, (31) 3868-1120, com a mensagem

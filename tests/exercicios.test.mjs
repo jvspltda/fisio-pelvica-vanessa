@@ -53,6 +53,12 @@ teste('toda figura existe, no formato da folha e com resolução de impressão (
     const razao = deitada ? t.w / t.h : t.h / t.w;
     assert.ok(Math.abs(razao - 1.5) < 0.02, b.imagem + ' fora de 3:2 (a folha cortaria a figura)');
     const ppp = deitada ? t.w / (74 / 25.4) : t.h / (66 / 25.4);
+    /* miniatura do painel do plano: leve e na mesma proporção */
+    const mini = join(raiz, 'assets/exercicios/mini', b.imagem);
+    assert.ok(existsSync(mini), 'falta a miniatura de ' + b.imagem);
+    const tm = tamanhoJpeg(readFileSync(mini));
+    assert.ok(Math.max(tm.w, tm.h) <= 400 && readFileSync(mini).length < 40000, 'miniatura pesada: ' + b.imagem);
+    assert.ok(Math.abs(tm.w / tm.h - t.w / t.h) < 0.02, 'miniatura em outra proporção: ' + b.imagem);
     assert.ok(ppp >= 250, b.imagem + ' com ' + Math.round(ppp) + ' ppp na folha');
   }
 });

@@ -26,6 +26,8 @@
   var CHAVE_RASCUNHO = 'vf-exercicios-rascunho';
   var CHAVE_MODELOS = 'vf-exercicios-modelos';
   var PASTA = '../assets/exercicios/';
+  /* no painel, miniaturas leves (assets/exercicios/mini/); na folha, a figura de impressão */
+  var MINI = PASTA + 'mini/';
   var FOLHAS_DEMAIS = 3;
 
   var $ = function (id) { return document.getElementById(id); };
@@ -80,6 +82,30 @@
     return pos;
   }
 
+  /* tira do plano todas as peças que passam no teste; diz se tirou alguma */
+  function tirarTodos(teste) {
+    var antes = estado.itens.length;
+    estado.itens = estado.itens.filter(function (it) { return !teste(it); });
+    return estado.itens.length < antes;
+  }
+  /* figuras e orientações que já estão no plano ficam marcadas (✓) */
+  function marcarEscolhidos() {
+    var ids = {}, refs = {};
+    estado.itens.forEach(function (it) { if (it.tipo === 'ex') ids[it.id] = true; else if (it.ref) refs[it.ref] = true; });
+    document.querySelectorAll('#e-biblioteca [data-id]').forEach(function (b) {
+      var sim = !!ids[b.getAttribute('data-id')];
+      b.classList.toggle('no-plano', sim); b.setAttribute('aria-pressed', sim ? 'true' : 'false');
+    });
+    document.querySelectorAll('#e-orientacoes [data-ref]').forEach(function (b) {
+      var sim = !!refs[b.getAttribute('data-ref')];
+      b.classList.toggle('no-plano', sim); b.setAttribute('aria-pressed', sim ? 'true' : 'false');
+    });
+    document.querySelectorAll('#e-orientacoes details.tema').forEach(function (d) {
+      var n = d.querySelectorAll('.bloco-op.no-plano').length;
+      d.querySelector('.conta').textContent = n ? n + ' no plano' : String(d.querySelectorAll('.bloco-op').length);
+    });
+  }
+
   /* ---------- editor ---------- */
   var aviso = $('e-aviso');
   function avisar(t) { aviso.textContent = t || ''; }
@@ -119,16 +145,29 @@
       d.appendChild(el('p', 'apoio', c.resumo));
       var g = el('div', 'blocos');
       c.blocos.forEach(function (b, i) {
-        var bt = botao('+ ' + b.h, 'bloco-op', function () {
-          estado.itens.push(comUid(P.orientacao(A, c.id + '/' + i)));
-          mudouEstrutura('"' + b.h + '" entrou no fim do plano.');
+        var ref = c.id + '/' + i;
+        var bt = botao(b.h, 'bloco-op', function () {
+          /* segundo toque no que já está no plano: tira */
+          if (tirarTodos(function (it) { return it.tipo === 'bloco' && it.ref === ref; })) {
+            mudouEstrutura('"' + b.h + '" saiu do plano. Toque de novo para pôr de volta.');
+            return;
+          }
+          estado.itens.push(comUid(P.orientacao(A, ref)));
+          mudouEstrutura('"' + b.h + '" entrou no fim do plano. Toque de novo para tirar.');
         });
+        bt.setAttribute('data-ref', ref);
         bt.title = b.p || (b.l || []).join(' · ') || b.nota || '';
         g.appendChild(bt);
       });
       g.appendChild(botao('Colocar a cartilha inteira', 'discreto', function () {
-        P.deCartilha(A, c.id).forEach(function (it) { estado.itens.push(comUid(it)); });
-        mudouEstrutura('Cartilha "' + c.titulo + '" inteira entrou no fim do plano.');
+        var ja = 0;
+        P.deCartilha(A, c.id).forEach(function (it) {
+          if (estado.itens.some(function (x) { return x.tipo === 'bloco' && x.ref === it.ref; })) { ja++; return; }
+          estado.itens.push(comUid(it));
+        });
+        var total = c.blocos.length;
+        mudouEstrutura(ja === total ? 'A cartilha "' + c.titulo + '" já estava inteira no plano.'
+          : 'Cartilha "' + c.titulo + '" no fim do plano' + (ja ? ' — ' + ja + (ja > 1 ? ' blocos já estavam e não se repetiram.' : ' bloco já estava e não se repetiu.') : '.'));
       }));
       d.appendChild(g);
       alvo.appendChild(d);
@@ -147,12 +186,19 @@
     function miniatura(b) {
       var bt = el('button', 'miniatura');
       bt.type = 'button';
-      var img = el('img'); img.src = PASTA + b.imagem; img.alt = ''; img.loading = 'lazy';
+      var img = el('img'); img.src = MINI + b.imagem; img.alt = ''; img.loading = 'lazy';
       bt.appendChild(img);
-      bt.appendChild(el('span', null, '+ ' + b.titulo));
+      bt.appendChild(el('span', 'nome', b.titulo));
+      bt.setAttribute('data-id', b.id);
       bt.addEventListener('click', function () {
+        /* segundo toque no que já está no plano: tira (para repetir de
+           propósito, use o botão de duplicar na lista) */
+        if (tirarTodos(function (it) { return it.tipo === 'ex' && it.id === b.id; })) {
+          mudouEstrutura('"' + b.titulo + '" saiu do plano. Toque de novo para pôr de volta.');
+          return;
+        }
         inserirExercicio(P.exercicio(E, b.id));
-        mudouEstrutura('"' + b.titulo + '" entrou no plano, junto dos outros exercícios.');
+        mudouEstrutura('"' + b.titulo + '" entrou no plano, junto dos outros exercícios. Toque de novo para tirar.');
       });
       alvo.appendChild(bt);
     }
@@ -179,7 +225,7 @@
     cab.appendChild(el('span', 'num', String(i + 1)));
     if (it.tipo === 'ex') {
       var b = daBiblioteca(it.id);
-      if (b) { var im = el('img'); im.src = PASTA + b.imagem; im.alt = ''; cab.appendChild(im); }
+      if (b) { var im = el('img'); im.src = MINI + b.imagem; im.alt = ''; cab.appendChild(im); }
     }
     var tit = el('input'); tit.type = 'text'; tit.value = titulo; tit.maxLength = it.tipo === 'ex' ? 60 : P.LIMITES.h;
     tit.placeholder = rotulo; tit.setAttribute('aria-label', rotulo + ' ' + (i + 1));
@@ -189,6 +235,12 @@
     var sobe = botao('↑', 'sobe', function () { mover(i, -1); }, 'Subir'); sobe.disabled = i === 0;
     var desce = botao('↓', 'desce', function () { mover(i, 1); }, 'Descer'); desce.disabled = i === estado.itens.length - 1;
     acoes.appendChild(sobe); acoes.appendChild(desce);
+    acoes.appendChild(botao('⧉', 'duplicar', function () {
+      var copia = JSON.parse(JSON.stringify(it)); delete copia.uid;
+      estado.itens.splice(i + 1, 0, comUid(copia));
+      foco = { item: i + 1, seletor: 'input' };
+      mudouEstrutura((it.tipo === 'ex' ? 'Exercício' : 'Orientação') + ' repetido logo abaixo.');
+    }, 'Repetir logo abaixo'));
     acoes.appendChild(botao('✕', 'tirar', function () {
       estado.itens.splice(i, 1);
       foco = { item: Math.min(i, estado.itens.length - 1), seletor: '.tirar' };
@@ -433,6 +485,7 @@
 
   function blocoOrientacao(it) {
     var d = el('div', 'bloco');
+    d.setAttribute('data-uid', it.uid);
     var h = String(it.h || '').trim();
     if (h) d.appendChild(el('h2', null, h));
     var p = String(it.p || '').trim();
@@ -469,6 +522,7 @@
   function blocoExercicio(it, n) {
     var b = daBiblioteca(it.id);
     var c = el('div', 'ex ' + (b ? 'ex-' + b.formato : 'ex-livre'));
+    c.setAttribute('data-uid', it.uid);
     if (b) { var img = el('img'); img.src = PASTA + b.imagem; img.alt = b.titulo; c.appendChild(img); }
     var t = el('div', 'ex-txt');
     var h = el('h2');
@@ -580,8 +634,10 @@
     tRender = setTimeout(renderFolhas, 150);
   }
   function mudouEstrutura(msg) {
+    fecharAcao();
     salvarRascunho();
     montarLista();
+    marcarEscolhidos();
     renderFolhas();
     avisar(msg || '');
     devolverFoco();
@@ -600,11 +656,61 @@
   if (barraTopo) barraTopo.addEventListener('click', renderPendente, true);
   window.addEventListener('beforeprint', renderPendente);
 
+  /* ---------- dois cliques na folha: tirar ou editar ----------
+     Atalho de tela (o menu some na impressão e nas imagens). Pelo
+     teclado, os mesmos botões estão na lista do painel. */
+  var menu = $('acao-folha');
+  var alvoMenu = null;
+  function fecharAcao() { if (menu) menu.hidden = true; alvoMenu = null;
+    document.querySelectorAll('.folhas .realce').forEach(function (x) { x.classList.remove('realce'); }); }
+  function indicePorUid(uid) { for (var i = 0; i < estado.itens.length; i++) if (estado.itens[i].uid === uid) return i; return -1; }
+  folhas.addEventListener('dblclick', function (ev) {
+    var bloco = ev.target.closest && ev.target.closest('[data-uid]');
+    if (!bloco) return;
+    var i = indicePorUid(bloco.getAttribute('data-uid'));
+    if (i < 0) return;
+    ev.preventDefault();
+    if (window.getSelection) window.getSelection().removeAllRanges();
+    fecharAcao();
+    alvoMenu = estado.itens[i].uid;
+    bloco.classList.add('realce');
+    var it = estado.itens[i];
+    $('acao-titulo').textContent = (it.tipo === 'ex' ? 'Exercício: ' + (it.titulo || 'sem nome') : 'Orientação: ' + (it.h || 'sem título'));
+    menu.hidden = false;
+    var x = Math.min(ev.pageX, window.scrollX + document.documentElement.clientWidth - menu.offsetWidth - 8);
+    menu.style.left = Math.max(window.scrollX + 8, x) + 'px';
+    menu.style.top = (ev.pageY + 10) + 'px';
+    $('acao-tirar').focus();
+  });
+  if (menu) {
+    $('acao-tirar').addEventListener('click', function () {
+      var i = indicePorUid(alvoMenu); if (i < 0) { fecharAcao(); return; }
+      var it = estado.itens[i];
+      estado.itens.splice(i, 1);
+      mudouEstrutura('"' + ((it.tipo === 'ex' ? it.titulo : it.h) || 'Peça') + '" saiu do plano.');
+    });
+    $('acao-editar').addEventListener('click', function () {
+      var i = indicePorUid(alvoMenu); fecharAcao();
+      var card = document.querySelectorAll('#e-lista .item')[i];
+      if (!card) return;
+      card.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      card.classList.add('realce');
+      setTimeout(function () { card.classList.remove('realce'); }, 1800);
+      var campo = card.querySelector('textarea') || card.querySelector('input');
+      if (campo) campo.focus({ preventScroll: true });
+    });
+    $('acao-fechar').addEventListener('click', fecharAcao);
+    document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && !menu.hidden) fecharAcao(); });
+    document.addEventListener('mousedown', function (ev) { if (!menu.hidden && !menu.contains(ev.target)) fecharAcao(); });
+    window.addEventListener('beforeprint', fecharAcao);
+  }
+
   montarOrientacoes();
   montarBiblioteca();
   montarModelos();
   montarGerais();
   montarLista();
+  marcarEscolhidos();
   renderFolhas();
   /* a paginação mede o texto: refaz quando a fonte da marca terminar de chegar */
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(renderFolhas);
