@@ -254,7 +254,7 @@
         {
           h: 'Seus exercícios',
           p: 'Faça do jeito que conferimos juntas na sessão, no número e no ritmo combinados. Se ficar em dúvida se está fazendo certo, pare e me mande mensagem — fazer errado todo dia é pior do que não fazer.',
-          nota: 'Procure sua obstetra ou o pronto atendimento se tiver sangramento, perda de líquido, contrações fortes e regulares antes da hora, dor forte, ou se o bebê mexer bem menos que o normal. Nesses casos, não faça os exercícios antes de ser avaliada.'
+          nota: 'Procure sua obstetra ou o pronto atendimento se tiver sangramento, perda de líquido, contrações fortes e regulares antes da hora, dor forte, tontura, falta de ar, dor no peito, dor de cabeça forte, dor ou inchaço na batata da perna, ou se o bebê mexer bem menos que o normal. Nesses casos, não faça os exercícios antes de ser avaliada.'
         }
       ]
     },
@@ -430,6 +430,87 @@
               'Frutas e sucos cítricos, como laranja, limão e tangerina',
               'Bebida alcoólica'],
           nota: 'Não precisa cortar tudo de uma vez. Diminua um de cada vez e observe o que muda para você — cada bexiga reage de um jeito.'
+        }
+      ]
+    },
+    /* Alimentação (2026-10-29), a pedido do usuário. Escopo: só o que mexe
+       com a bexiga e o intestino — quem monta a dieta é a nutricionista ou
+       o médico (Lei 8.234/1991), e as duas cartilhas dizem isso.
+       Lastro, não citar na folha (detalhe em docs/lyra/adscricao-clientela.md, seção 6):
+       - Cleveland Clinic, "Foods and drinks that can irritate your bladder":
+         cafeína (café, chá, energético), refrigerante, adoçante artificial,
+         álcool, ácidos (cítricos, tomate), chocolate; diário de três dias e
+         tirar o que tiver ligação; beber até não ter sede, sem exagerar.
+       - NHS (Surrey and Sussex; Just One Norfolk): intestino preso na
+         gestação — fibras, água, exercício; se incomodar, falar com a
+         obstetra, às vezes é preciso remédio.
+       - NHS (Surrey and Sussex; Somerset): infecção urinária na gestação —
+         ardor, urgência sem conseguir urinar, sangue, xixi turvo ou com
+         cheiro; febre e dor nas costas são urgência.
+       - NHS, "Foods to avoid in pregnancy": a cafeína tem limite na
+         gestação (o número não vai na folha: quem combina é a obstetra).
+       Aguardam o aval da Vanessa. */
+    {
+      id: 'alimentos-bexiga',
+      titulo: 'Alimentação e Bexiga',
+      resumo: 'O que você come e bebe também mexe com a vontade e com os escapes.',
+      blocos: [
+        {
+          h: 'A bexiga sente o que você come e bebe',
+          p: 'Algumas bebidas e alimentos deixam a bexiga mais agitada: a vontade vem mais vezes e mais forte, e os escapes aumentam. Isso muda de pessoa para pessoa — a ideia não é cortar tudo, e sim descobrir o que pesa para você.'
+        },
+        {
+          h: 'Os que mais costumam irritar',
+          l: ['Café, chá preto, chá mate, chá verde, energético e chocolate (por causa da cafeína)',
+              'Refrigerante, inclusive o zero, água com gás e adoçante artificial',
+              'Frutas e sucos ácidos, como laranja, limão e tangerina, e molho de tomate',
+              'Bebida alcoólica']
+        },
+        {
+          h: 'Como descobrir o que pesa para você',
+          l: ['Anote por três dias o que comeu e bebeu e como a bexiga ficou — se já faz o diário da bexiga, anote junto',
+              'Viu uma ligação? Diminua só aquele item e observe o que muda: um de cada vez',
+              'Não precisa abrir mão de tudo o que gosta — às vezes diminuir já basta']
+        },
+        {
+          h: 'Água: não é para beber menos',
+          p: 'Pouca água deixa o xixi concentrado, irrita a bexiga e prende o intestino. Beba aos poucos ao longo do dia, até o xixi ficar clarinho — sem exagerar, e menos nas horas antes de dormir.'
+        },
+        {
+          h: 'Intestino solto ajuda a bexiga',
+          p: 'Intestino preso e força para evacuar sobrecarregam a musculatura que segura o xixi. Fibras e água ajudam: frutas com casca ou bagaço, verduras, legumes, feijão, lentilha, aveia e integrais.',
+          nota: 'Quem monta a sua alimentação é a nutricionista ou o seu médico — aqui estão só os cuidados com a bexiga e o intestino. Com diabetes, problema nos rins ou dieta especial, confira com eles antes de mudar.'
+        }
+      ]
+    },
+    {
+      id: 'alimentos-gestacao',
+      titulo: 'Alimentação, Bexiga e Intestino na Gestação',
+      resumo: 'Cuidados com o que você come e bebe que ajudam a bexiga e o intestino agora.',
+      blocos: [
+        {
+          h: 'Na gestação, bexiga e intestino mudam',
+          p: 'Os hormônios deixam o intestino mais lento e o bebê aperta a bexiga: ir mais vezes ao banheiro e o intestino preso são comuns. Alguns cuidados com o que você come e bebe ajudam.'
+        },
+        {
+          h: 'Para o intestino funcionar',
+          l: ['Fibras todo dia: frutas com casca ou bagaço, verduras, legumes, feijão e aveia',
+              'Água aos poucos ao longo do dia — não beba menos para ir menos ao banheiro; só diminua antes de dormir',
+              'Movimento: caminhar e os exercícios que combinamos',
+              'Banquinho embaixo dos pés no vaso, e nada de prender o ar para empurrar'],
+          nota: 'Intestino ainda preso ou dor para evacuar? Fale com a sua obstetra: às vezes é preciso remédio, receitado por ela.'
+        },
+        {
+          h: 'Café e outras bebidas',
+          p: 'Na gestação, café e outras bebidas com cafeína — chá preto, chá mate, refrigerante de cola, energético — têm limite: combine com a sua obstetra quanto é seguro para você. Elas, a água com gás e os sucos ácidos também agitam a bexiga. Bebida alcoólica não entra na gestação.'
+        },
+        {
+          h: 'Procure sua obstetra se',
+          l: ['arder ou doer para fazer xixi',
+              'o xixi ficar turvo, com cheiro forte ou com sangue',
+              'der vontade toda hora e sair pouco ou nada',
+              'tiver febre, calafrio ou dor nas costas — nesse caso, no mesmo dia'],
+          nota: 'Quem monta a sua alimentação na gestação é a obstetra ou a nutricionista — aqui estão só os cuidados com a bexiga e o intestino.'
         }
       ]
     },

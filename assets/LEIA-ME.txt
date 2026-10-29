@@ -15,7 +15,12 @@ exercicios/   As ilustracoes da folha "Exercicios para casa". Lista e grupo
               - Gestacao com bola (8, prefixo bola- e ponte-gestacao):
                 recortadas em 2026-10-29 das duas pranchas em
                 Referencias/Exercicios-Bola-Gestacao-*.jpeg, sem o texto
-                embutido (tinha erros). Formato 3:2 ou 2:3, fundo igualado
+                embutido (tinha erros). ORIGEM: ilustracoes geradas por IA
+                (confirmado pelo usuario em 2026-10-29). Nao sao fotos nem
+                retratam pacientes. Falta registrar qual ferramenta gerou e
+                conferir os termos de uso dela para uso comercial, antes de
+                usar em anuncio pago.
+                Formato 3:2 ou 2:3, fundo igualado
                 ao das outras; 250 a 450 ppp no tamanho impresso.
               - mini/: miniaturas (360 px) das mesmas figuras, para o painel
                 do Plano para casa carregar rápido no celular. A folha

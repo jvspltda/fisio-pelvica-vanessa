@@ -37,16 +37,6 @@ jobs:
         with:
           node-version: 24
 
-      - name: Testes do motor de cálculo e do salvamento
-        run: |
-          node tests/scores.test.mjs
-          node tests/storage.test.mjs
-          node tests/cofre.test.mjs
-          node tests/roteiros.test.mjs
-          node tests/exercicios.test.mjs
-          node tests/plano.test.mjs
-          node tests/carrossel.test.mjs
-
       - name: Compilar o Tailwind da avaliação
         run: npx --yes tailwindcss@3 -c tailwind.config.js -i css/tailwind.src.css -o css/tailwind.css --minify
 
@@ -55,6 +45,16 @@ jobs:
           node tools/gerar-ficha-studocu.mjs
           node tools/gerar-ficha-studocu.mjs --pb
           node tools/gerar-materiais-impressos.mjs
+
+      - name: Testes (depois dos geradores: conferem também as páginas geradas)
+        run: |
+          node tests/scores.test.mjs
+          node tests/storage.test.mjs
+          node tests/cofre.test.mjs
+          node tests/roteiros.test.mjs
+          node tests/exercicios.test.mjs
+          node tests/plano.test.mjs
+          node tests/carrossel.test.mjs
 
       - name: Montar o site
         run: |

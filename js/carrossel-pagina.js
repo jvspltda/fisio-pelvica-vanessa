@@ -102,7 +102,7 @@
     escalar();
     $('c-titulo').textContent = atual.titulo;
     $('c-organico').hidden = !atual.soOrganico;
-    $('c-legenda').textContent = C.legendaCompleta(atual);
+    $('c-legenda').textContent = C.legendaCompleta(atual, $('c-data').value);
     var alts = $('c-alts'); alts.textContent = '';
     atual.slides.forEach(function (s) { alts.appendChild(el('li', null, s.alt)); });
   }
@@ -118,17 +118,21 @@
     montar();
   });
 
-  $('c-data').value = hoje();
+  /* A data começa vazia: exportar hoje e postar amanhã deixaria a peça
+     com a data errada. Data no passado só gera alerta. */
+  $('c-data').min = '';
   $('c-data').addEventListener('change', function () {
     var t = C.rodape(this.value);
     document.querySelectorAll('.s-id').forEach(function (e) { e.textContent = t; });
+    $('c-legenda').textContent = C.legendaCompleta(atual, this.value);
+    avisar(this.value && this.value < hoje() ? 'Essa data já passou. Confira se é mesmo o dia em que vai postar.' : '');
   });
 
   /* ---------- legenda ---------- */
   var aviso = $('c-aviso');
   function avisar(t, erro) { aviso.textContent = t || ''; aviso.className = erro ? 'erro' : ''; }
   $('c-copiar').addEventListener('click', function () {
-    var txt = C.legendaCompleta(atual);
+    var txt = C.legendaCompleta(atual, $('c-data').value);
     var feito = function () { avisar('Legenda copiada.'); };
     if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(feito, copiarAntigo);
     else copiarAntigo();
@@ -165,6 +169,17 @@
     }
     return arquivos;
   }
+  /* Aberta direto do arquivo, o navegador não deixa transformar as
+     figuras em imagem ("canvas contaminado"): avisa antes, com o link. */
+  var SITE = 'https://jvspltda.github.io/fisio-pelvica-vanessa/carrossel.html';
+  if (location.protocol === 'file:') {
+    var p = el('p', 'erro-local');
+    p.appendChild(document.createTextNode('Para gerar as imagens, abra esta página pelo site: '));
+    var a = el('a', null, SITE); a.href = SITE; p.appendChild(a);
+    p.appendChild(document.createTextNode('. Aberta do arquivo do computador, o navegador bloqueia.'));
+    $('c-baixar').parentNode.after(p);
+    $('c-baixar').disabled = true;
+  }
   $('c-baixar').addEventListener('click', async function () {
     var b = this; b.disabled = true;
     try {
@@ -172,12 +187,25 @@
       if (!arquivos) return;
       if (navigator.canShare && navigator.canShare({ files: arquivos })) {
         try { await navigator.share({ files: arquivos, title: atual.titulo }); avisar('Pronto.'); return; }
-        catch (e) { if (e && e.name === 'AbortError') { avisar(''); return; } }
+        catch (e) {
+          if (e && e.name === 'AbortError') { avisar(''); return; }
+          /* montar 7 imagens leva segundos e a permissão do toque expira:
+             um toque novo, neste botão, abre o compartilhar */
+          if (e && e.name === 'NotAllowedError') {
+            var cb = $('c-compartilhar'); cb.hidden = false;
+            cb.onclick = async function () {
+              try { await navigator.share({ files: arquivos, title: atual.titulo }); avisar('Pronto.'); cb.hidden = true; }
+              catch (e2) { if (!(e2 && e2.name === 'AbortError')) avisar('Não abriu o compartilhar. Baixe as imagens abaixo.', true); }
+            };
+            avisar('Imagens prontas. Toque em "Compartilhar agora".');
+          }
+        }
       }
       /* As imagens ficam na página com um link cada: se o navegador
          barrar os downloads seguidos ("baixar vários arquivos?"), dá para
          baixar uma a uma. */
       var prontas = $('c-prontas'), lista = $('c-prontas-lista');
+      lista.querySelectorAll('a[href^="blob:"]').forEach(function (a) { URL.revokeObjectURL(a.href); });
       lista.textContent = '';
       var links = arquivos.map(function (f) {
         var url = URL.createObjectURL(f);
@@ -194,7 +222,9 @@
       }
       avisar(arquivos.length + ' imagens prontas. Se o navegador perguntar, permita baixar vários arquivos — ou toque em cada uma abaixo.');
     } catch (e) {
-      avisar(e && e.message ? e.message : 'Não deu para montar as imagens.', true);
+      var seg = (e && e.name === 'SecurityError') || /tainted|insecure/i.test(String(e && e.message));
+      avisar(seg ? 'O navegador bloqueou a montagem das imagens. Abra a página pelo site: ' + SITE
+                 : (e && e.message ? e.message : 'Não deu para montar as imagens.'), true);
     } finally { b.disabled = false; }
   });
 

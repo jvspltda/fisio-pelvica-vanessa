@@ -197,7 +197,7 @@ acompanha. Não há transcrição manual a dessincronizar.
 ### Plano para casa (orientações e exercícios juntos)
 
 `impressos/plano.html` monta, num documento só, o que a paciente leva para casa: **orientações**
-(qualquer bloco das 9 cartilhas, de um tema ou de vários, ou escrito pela Vanessa) e
+(qualquer bloco das 11 cartilhas, de um tema ou de vários, ou escrito pela Vanessa) e
 **exercícios** com figura, números e "como fazer". Ela começa por uma cartilha inteira, um
 modelo pronto ou um modelo salvo, e ajusta: tira, acrescenta, muda a ordem e o texto. O que muda
 vale só para aquele plano — o texto das cartilhas continua vindo de `js/adherence.js`. A folha A4
@@ -215,7 +215,7 @@ vale só para aquele plano — o texto das cartilhas continua vindo de `js/adher
 - Rascunho e modelos ficam no navegador de quem usa (as chaves são as da antiga folha de
   exercícios, então os modelos antigos continuam aparecendo); o nome da paciente não é salvo.
 - `impressos/exercicios.html` só redireciona para o plano. `impressos/cartilhas.html` continua
-  com as 9 cartilhas inteiras, uma por folha, para impressão rápida.
+  com as 11 cartilhas inteiras, uma por folha, para impressão rápida.
 
 ### Carrossel do Instagram
 

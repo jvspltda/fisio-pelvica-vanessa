@@ -142,6 +142,22 @@
     if (total > 1) nome += '-' + (i + 1);
     return nome + '.' + ext;
   }
+  /* Cópia que vira arquivo (html2canvas):
+     - sem a sombra da prévia, que ele pinta como um bloco cinza;
+     - sem hifenização automática, que ele desenha como palavra partida
+       ("afastad os"). Se sem hífen a folha não couber mais, ela fica com
+       hífen — melhor uma palavra partida do que texto cortado. */
+  function prepararCopia(doc) {
+    var st = doc.createElement('style');
+    st.textContent = '.pagina, .pagina *{ hyphens:manual !important; -webkit-hyphens:manual !important; }' +
+      '.pagina.com-hifen, .pagina.com-hifen *{ hyphens:auto !important; -webkit-hyphens:auto !important; }';
+    doc.head.appendChild(st);
+    doc.querySelectorAll('.pagina').forEach(function (p) {
+      p.style.boxShadow = 'none';
+      var c = p.querySelector('.corpo');
+      if (p.scrollHeight > p.clientHeight + 1 || (c && c.scrollHeight > c.clientHeight + 1)) p.classList.add('com-hifen');
+    });
+  }
   async function capturar() {
     await carregar(H2C);
     var pags = paginasVisiveis();
@@ -151,7 +167,10 @@
       avisar('Montando folha ' + (i + 1) + ' de ' + pags.length + '…');
       /* exercícios: escala 3 (~290 pontos por polegada no A4), para as figuras
          saírem nítidas também no PDF e na imagem enviados pelo WhatsApp */
-      telas.push(await window.html2canvas(pags[i], { scale: tipo === 'plano' ? 3 : 2, backgroundColor: '#ffffff', useCORS: true, windowWidth: 1280 }));
+      /* a sombra da prévia (box-shadow) o html2canvas pinta como um bloco
+         cinza por cima da folha: sai só na cópia que vira arquivo */
+      telas.push(await window.html2canvas(pags[i], { scale: tipo === 'plano' ? 3 : 2, backgroundColor: '#ffffff', useCORS: true, windowWidth: 1280,
+        onclone: prepararCopia }));
     }
     return telas;
   }
@@ -186,7 +205,25 @@
   /* No celular (e no Chrome/Edge recentes do Windows) o compartilhar
      abre direto a lista de apps, com o WhatsApp. Onde não houver,
      o arquivo é baixado para anexar no WhatsApp Web. */
+  /* Montar várias folhas leva segundos, e o navegador só deixa abrir o
+     compartilhar logo depois de um toque. Se a permissão tiver expirado,
+     aparece "Compartilhar agora", e o toque nele abre a lista de apps. */
+  function botaoCompartilhar(arqs) {
+    var b = document.getElementById('b-compartilhar');
+    if (!b) {
+      b = document.createElement('button'); b.id = 'b-compartilhar'; b.type = 'button'; b.className = 'pri';
+      b.textContent = 'Compartilhar agora';
+      aviso.parentNode.insertBefore(b, aviso);
+    }
+    b.hidden = false;
+    b.onclick = async function () {
+      try { await navigator.share({ files: arqs, title: 'Vanessa Fernandes — Fisioterapia Pélvica' }); avisar('Pronto.'); b.hidden = true; }
+      catch (e) { if (!(e && e.name === 'AbortError')) { b.hidden = true; arqs.forEach(baixar); avisar('Arquivo baixado. Anexe no WhatsApp.'); } }
+    };
+    avisar('Arquivo pronto. Toque em "Compartilhar agora".');
+  }
   async function compartilharOuBaixar(arqs) {
+    var velho = document.getElementById('b-compartilhar'); if (velho) velho.hidden = true;
     if (navigator.canShare && navigator.canShare({ files: arqs })) {
       try {
         await navigator.share({ files: arqs, title: 'Vanessa Fernandes — Fisioterapia Pélvica' });
@@ -194,10 +231,20 @@
         return;
       } catch (e) {
         if (e && e.name === 'AbortError') { avisar(''); return; }
+        if (e && e.name === 'NotAllowedError') { botaoCompartilhar(arqs); return; }
       }
     }
     arqs.forEach(baixar);
     avisar(arqs.length > 1 ? 'Baixados ' + arqs.length + ' arquivos. Anexe no WhatsApp.' : 'Arquivo baixado. Anexe no WhatsApp.');
+  }
+  /* Aberta direto do arquivo (duplo clique), a página não pode
+     transformar as figuras em PDF ou imagem: o navegador bloqueia
+     ("canvas contaminado"). Imprimir continua funcionando. */
+  function mensagemDeErro(e) {
+    var m = String(e && e.message || '');
+    if ((e && e.name === 'SecurityError') || /tainted|insecure/i.test(m) || location.protocol === 'file:')
+      return 'Aberta do arquivo do computador, a página não consegue montar o PDF ou a imagem. Use "Imprimir / PDF", ou abra pelo site: https://jvspltda.github.io/fisio-pelvica-vanessa/';
+    return m || 'Não foi possível gerar o arquivo.';
   }
   function ligar(id, fn) {
     var b = document.getElementById(id);
@@ -206,7 +253,7 @@
       var botoes = barra.querySelectorAll('button');
       botoes.forEach(function (x) { x.disabled = true; });
       try { await fn(); }
-      catch (e) { avisar(e.message || 'Não foi possível gerar o arquivo.', true); }
+      catch (e) { avisar(mensagemDeErro(e), true); }
       finally { botoes.forEach(function (x) { x.disabled = false; }); }
     });
   }

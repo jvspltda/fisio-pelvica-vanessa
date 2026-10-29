@@ -56,7 +56,7 @@
   function limpo(s) { var r = P.limpo(s, E, A); r.itens.forEach(comUid); return r; }
   var estado = limpo(ler(CHAVE_RASCUNHO, null));
   function paraGuardar(s) {
-    return { titulo: s.titulo, vezes: s.vezes, recado: s.recado, anotacao: s.anotacao, itens: s.itens.map(function (it) {
+    return { titulo: s.titulo, vezes: s.vezes, recado: s.recado, anotacao: s.anotacao, gestante: s.gestante, soltar: s.soltar, itens: s.itens.map(function (it) {
       return it.tipo === 'bloco'
         ? { tipo: 'bloco', ref: it.ref, h: it.h, p: it.p, l: it.l, nota: it.nota }
         : { tipo: 'ex', id: it.id, titulo: it.titulo, descricao: it.descricao, params: it.params };
@@ -82,11 +82,26 @@
     return pos;
   }
 
-  /* tira do plano todas as peças que passam no teste; diz se tirou alguma */
+  /* Segundo toque na figura ou na orientação: tira as cópias que estão
+     como vieram. Uma cópia ajustada (números, texto) não some num toque:
+     para ela, o ✕ da lista ou os dois cliques na folha.
+     Devolve 'tirou', 'ajustada' (há cópia ajustada e nada foi tirado) ou ''. */
+  function ajustada(it) {
+    if (it.tipo === 'ex') {
+      var b = daBiblioteca(it.id);
+      return E.PARAMETROS.some(function (x) { return String(it.params[x.id] || '').trim(); }) ||
+        !b || it.titulo !== b.titulo || it.descricao !== b.descricao;
+    }
+    var o = it.ref ? P.bloco(A, it.ref) : null;
+    return !o || it.h !== o.h || it.p !== o.p || it.nota !== o.nota || JSON.stringify(it.l) !== JSON.stringify(o.l);
+  }
   function tirarTodos(teste) {
-    var antes = estado.itens.length;
-    estado.itens = estado.itens.filter(function (it) { return !teste(it); });
-    return estado.itens.length < antes;
+    var achados = estado.itens.filter(teste);
+    if (!achados.length) return '';
+    var intactos = achados.filter(function (it) { return !ajustada(it); });
+    if (!intactos.length) return 'ajustada';
+    estado.itens = estado.itens.filter(function (it) { return intactos.indexOf(it) === -1; });
+    return 'tirou';
   }
   /* figuras e orientações que já estão no plano ficam marcadas (✓) */
   function marcarEscolhidos() {
@@ -148,10 +163,9 @@
         var ref = c.id + '/' + i;
         var bt = botao(b.h, 'bloco-op', function () {
           /* segundo toque no que já está no plano: tira */
-          if (tirarTodos(function (it) { return it.tipo === 'bloco' && it.ref === ref; })) {
-            mudouEstrutura('"' + b.h + '" saiu do plano. Toque de novo para pôr de volta.');
-            return;
-          }
+          var t = tirarTodos(function (it) { return it.tipo === 'bloco' && it.ref === ref; });
+          if (t === 'tirou') { mudouEstrutura('"' + b.h + '" saiu do plano. Toque de novo para pôr de volta.'); return; }
+          if (t === 'ajustada') { avisar('"' + b.h + '" está no plano com texto ajustado. Para tirar, use o ✕ na lista ou dois cliques na folha.'); return; }
           estado.itens.push(comUid(P.orientacao(A, ref)));
           mudouEstrutura('"' + b.h + '" entrou no fim do plano. Toque de novo para tirar.');
         });
@@ -193,10 +207,9 @@
       bt.addEventListener('click', function () {
         /* segundo toque no que já está no plano: tira (para repetir de
            propósito, use o botão de duplicar na lista) */
-        if (tirarTodos(function (it) { return it.tipo === 'ex' && it.id === b.id; })) {
-          mudouEstrutura('"' + b.titulo + '" saiu do plano. Toque de novo para pôr de volta.');
-          return;
-        }
+        var t = tirarTodos(function (it) { return it.tipo === 'ex' && it.id === b.id; });
+        if (t === 'tirou') { mudouEstrutura('"' + b.titulo + '" saiu do plano. Toque de novo para pôr de volta.'); return; }
+        if (t === 'ajustada') { avisar('"' + b.titulo + '" está no plano com números ou texto ajustados. Para tirar, use o ✕ na lista ou dois cliques na folha; para repetir, o ⧉.'); return; }
         inserirExercicio(P.exercicio(E, b.id));
         mudouEstrutura('"' + b.titulo + '" entrou no plano, junto dos outros exercícios. Toque de novo para tirar.');
       });
@@ -341,6 +354,19 @@
     $('e-vezes').value = estado.vezes;
     $('e-recado').value = estado.recado;
     $('e-anotacao').checked = estado.anotacao;
+    montarPerfil();
+  }
+  /* Perfil: a cartilha (ou os exercícios de bola) liga a marca sozinha e
+     ela fica travada enquanto o tema estiver no plano; sem o tema, a
+     Vanessa marca à mão (gestante só com exercícios de assoalho, etc.). */
+  function montarPerfil() {
+    var sug = P.perfilSugerido(E, estado.itens);
+    [['gestante', 'e-gestante'], ['soltar', 'e-soltar']].forEach(function (par) {
+      var cx = $(par[1]);
+      cx.checked = !!(estado[par[0]] || sug[par[0]]);
+      cx.disabled = !!sug[par[0]];
+      cx.parentNode.title = sug[par[0]] ? 'Marcado pelo que está no plano' : '';
+    });
   }
   $('e-titulo').maxLength = P.LIMITES.titulo;
   $('e-titulo').addEventListener('input', function () { estado.titulo = this.value; mudouTexto(); });
@@ -348,6 +374,8 @@
   $('e-recado').maxLength = P.LIMITES.recado;
   $('e-recado').addEventListener('input', function () { estado.recado = this.value; mudouTexto(); });
   $('e-anotacao').addEventListener('change', function () { estado.anotacao = this.checked; mudouTexto(); });
+  $('e-gestante').addEventListener('change', function () { estado.gestante = this.checked; mudouTexto(); });
+  $('e-soltar').addEventListener('change', function () { estado.soltar = this.checked; mudouTexto(); });
 
   /* ---------- começar por / modelos ----------
      Na lista: cartilhas inteiras, sequências prontas de exercícios
@@ -513,7 +541,7 @@
     var sempre = el('div', 'sempre');
     sempre.appendChild(el('b', null, 'Em todos os exercícios'));
     var ul = el('ul');
-    P.sempre(E, estado.itens).forEach(function (s) { ul.appendChild(el('li', null, s)); });
+    P.sempre(E, estado.itens, estado).forEach(function (s) { ul.appendChild(el('li', null, s)); });
     sempre.appendChild(ul);
     d.appendChild(sempre);
     return d;
@@ -546,7 +574,9 @@
     for (var i = 0; i < estado.itens.length; i++) {
       var it = estado.itens[i];
       if (it.tipo === 'bloco') {
-        if (String(it.h || it.p || it.nota || '').trim() || (it.l || []).length) { r.push(blocoOrientacao(it)); anterior = it; }
+        var temTexto = [it.h, it.p, it.nota].some(function (x) { return String(x || '').trim(); }) ||
+          (it.l || []).some(function (x) { return String(x).trim(); });
+        if (temTexto) { r.push(blocoOrientacao(it)); anterior = it; }
         continue;
       }
       if (!comecou) { r.push(blocoInicioExercicios(ehPonto(anterior))); comecou = true; }
@@ -602,8 +632,14 @@
       var ultimo = corpo.lastElementChild;
       var antesDele = ultimo && ultimo.previousElementSibling;
       var levar = ultimo && !ultimo.classList.contains('abertura') && antesDele && !antesDele.classList.contains('abertura');
+      /* se o último vai, o que gruda nele (início dos exercícios) vai junto —
+         desde que a folha não fique só com a abertura */
+      var junto = levar && antesDele.hasAttribute('data-gruda') && antesDele.previousElementSibling &&
+                  !antesDele.previousElementSibling.classList.contains('abertura') ? antesDele : null;
       if (levar) corpo.removeChild(ultimo);
+      if (junto) corpo.removeChild(junto);
       corpo = novaPagina();
+      if (junto) corpo.appendChild(junto);
       if (levar) corpo.appendChild(ultimo);
       corpo.appendChild(modelo(opcoes[0]));
     }
@@ -621,6 +657,9 @@
     partes.push(n + (n === 1 ? ' folha A4' : ' folhas A4'));
     $('e-folhas').textContent = partes.join(' · ');
     $('e-demais').hidden = n <= FOLHAS_DEMAIS;
+    var alertas = $('e-alertas'); alertas.textContent = '';
+    P.avisos(E, A, estado.itens, estado).forEach(function (t) { alertas.appendChild(el('li', null, t)); });
+    alertas.hidden = !alertas.children.length;
     $('e-titulo').placeholder = P.tituloPadrao(A, estado.itens);
     /* cabeçalho das folhas novas */
     aplicarNomeEData();
@@ -638,6 +677,7 @@
     salvarRascunho();
     montarLista();
     marcarEscolhidos();
+    montarPerfil();
     renderFolhas();
     avisar(msg || '');
     devolverFoco();

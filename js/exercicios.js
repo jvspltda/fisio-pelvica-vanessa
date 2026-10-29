@@ -50,11 +50,11 @@
     { id: 'bola-respiracao', grupo: 'gestacao', titulo: 'Respiração sentada na bola', imagem: 'bola-respiracao.jpg', formato: 'em-pe',
       descricao: 'Sentada na bola, pés apoiados e afastados, mãos na barriga. Puxe o ar pelo nariz sentindo a barriga e as costelas se abrirem, e solte devagar pela boca. Se quiser, balance o quadril bem de leve enquanto respira.' },
     { id: 'bola-agachamento', grupo: 'gestacao', titulo: 'Agachamento com a bola na parede', imagem: 'bola-agachamento.jpg', formato: 'em-pe',
-      descricao: 'Em pé, com a bola entre as costas e a parede, pés um pouco à frente do corpo e afastados na largura do quadril. Desça devagar, como se fosse sentar, deixando a bola rolar nas costas. Solte o ar ao subir. Desça só até onde for confortável.' },
+      descricao: 'Em pé, com a bola entre as costas e a parede, pés um pouco à frente do corpo e afastados na largura do quadril. Desça devagar, como se fosse sentar, deixando a bola rolar nas costas. Solte o ar ao subir. Desça só até onde for confortável; se doer na frente da pelve ou na virilha, desça menos e aproxime os pés.' },
     { id: 'ponte-gestacao', grupo: 'gestacao', titulo: 'Ponte', imagem: 'ponte-gestacao.jpg', formato: 'deitada',
       descricao: 'Deitada de barriga para cima, joelhos dobrados e pés apoiados no chão, na largura do quadril. Solte o ar e suba o quadril devagar, sem arquear as costas. Desça devagar, apoiando a coluna aos poucos.' },
     { id: 'bola-elevacao-quadril', grupo: 'gestacao', titulo: 'Elevação do quadril com os pés na bola', imagem: 'bola-elevacao-quadril.jpg', formato: 'deitada',
-      descricao: 'Deitada de barriga para cima, pernas esticadas, calcanhares apoiados na bola e braços ao lado do corpo. Solte o ar e suba o quadril devagar, sem deixar a bola fugir. Desça devagar.' },
+      descricao: 'Deitada de barriga para cima, pernas esticadas, calcanhares apoiados na bola e braços ao lado do corpo. Solte o ar e suba o quadril devagar, sem deixar a bola fugir. Desça devagar. Faça só depois de conferirmos juntas na sessão.' },
     { id: 'bola-flexao-joelhos', grupo: 'gestacao', titulo: 'Dobrar os joelhos puxando a bola', imagem: 'bola-flexao-joelhos.jpg', formato: 'deitada',
       descricao: 'Deitada de barriga para cima, pernas esticadas e pés apoiados na bola. Dobre os joelhos e traga a bola rolando em direção ao quadril, sem tirar as costas do chão. Estique as pernas devagar, levando a bola de volta.' }
   ];
@@ -102,11 +102,14 @@
       'Respire de forma tranquila durante todo o movimento. Nunca prenda a respiração.',
       'Faça devagar e só até onde for confortável.'
     ],
-    bola: 'Na bola, use um tapete que não escorregue e fique perto de uma parede ou de alguém, para ter apoio.',
-    deitada: 'Deitada de barriga para cima, sentiu tontura, enjoo ou falta de ar? Vire de lado, espere passar e me avise.',
-    /* mesmo texto da cartilha de gestação (js/adherence.js), já aprovado
-       pela Vanessa; o teste confere que os dois não se separam */
-    sinais: 'Procure sua obstetra ou o pronto atendimento se tiver sangramento, perda de líquido, contrações fortes e regulares antes da hora, dor forte, ou se o bebê mexer bem menos que o normal. Nesses casos, não faça os exercícios antes de ser avaliada.'
+    restricao: 'Só faça se a sua obstetra não pediu repouso nem restringiu exercício.',
+    bola: 'Bola bem cheia e do tamanho certo: sentada, joelhos na altura do quadril ou um pouco abaixo. Tapete que não escorrega, descalça ou de tênis (nunca de meia), e uma parede ou alguém por perto.',
+    deitada: 'Da metade da gestação em diante, fique de barriga para cima só por pouco tempo. Sentiu tontura, enjoo ou falta de ar deitada? Vire de lado, espere passar e me avise.',
+    /* mesmo texto da cartilha de gestação (js/adherence.js); o teste
+       confere que os dois não se separam. Em 2026-10-29 a lista ganhou
+       os sinais da ACOG 804 que faltavam (tontura, falta de ar, dor no
+       peito, dor de cabeça, panturrilha) — aguarda o aval da Vanessa. */
+    sinais: 'Procure sua obstetra ou o pronto atendimento se tiver sangramento, perda de líquido, contrações fortes e regulares antes da hora, dor forte, tontura, falta de ar, dor no peito, dor de cabeça forte, dor ou inchaço na batata da perna, ou se o bebê mexer bem menos que o normal. Nesses casos, não faça os exercícios antes de ser avaliada.'
   };
 
   /* O quadro "Em todos os exercícios" da sequência montada.
@@ -120,7 +123,7 @@
     var gest = itens.filter(function (b) { return b.grupo === 'gestacao'; });
     if (!gest.length) return E.SEMPRE.slice();
     var G = E.SEMPRE_GESTACAO;
-    var seguranca = [];
+    var seguranca = [G.restricao];
     if (gest.some(function (b) { return /^bola-/.test(b.id); })) seguranca.push(G.bola);
     if (itens.some(function (b) { return b.formato === 'deitada'; })) seguranca.push(G.deitada);
     seguranca.push(G.sinais);

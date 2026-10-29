@@ -28,13 +28,23 @@
       id: 'bola-gestacao',
       titulo: 'Bola de pilates na gestação',
       tema: 'Gestação',
-      /* o fecho fala com a gestante ("a sua gestação"): a política de
-         atributos pessoais da Meta não deixa isso ir para anúncio */
+      /* fala com a gestante ("a sua gestação", "sua obstetra", "mãos na
+         barriga"): a política de atributos pessoais da Meta não deixa isso
+         ir para anúncio. Para anunciar, seria preciso reescrever o fecho,
+         o slide de cuidados e a legenda. */
       soOrganico: true,
       slides: [
         { tipo: 'capa', chamada: 'Gestação', titulo: 'Bola de pilates na gestação',
           texto: 'Movimentos suaves para fazer em casa', figura: 'bola-circulos-quadril.jpg', rodapeExtra: 'Arraste para o lado →',
           alt: 'Ilustração de gestante sentada numa bola de pilates. Título: Bola de pilates na gestação.' },
+        /* logo depois da capa: quem para de arrastar cedo já viu os cuidados */
+        { tipo: 'cuidados', titulo: 'Antes de começar',
+          itens: ['Só faça se a sua obstetra não pediu repouso nem restringiu exercício.',
+                  'Bola bem cheia: sentada, joelhos na altura do quadril ou um pouco abaixo.',
+                  'Tapete que não escorrega, descalça ou de tênis, e uma parede ou alguém por perto.',
+                  'Devagar e só até onde for confortável. Se doer, pare.'],
+          alerta: 'Pare e procure sua obstetra ou o pronto atendimento se tiver sangramento, perda de líquido, contrações fortes antes da hora, dor forte, tontura, falta de ar, dor no peito, dor de cabeça forte, dor ou inchaço na batata da perna, ou se o bebê mexer bem menos.',
+          alt: 'Antes de começar: liberação da obstetra, bola e apoio certos, devagar. Quando parar.' },
         { tipo: 'exercicio', numero: 1, titulo: 'Círculos com o quadril', figura: 'bola-circulos-quadril.jpg',
           texto: 'Sentada na bola, pés bem apoiados no chão e afastados. Faça círculos lentos com o quadril, para um lado e depois para o outro.',
           alt: 'Gestante sentada na bola fazendo círculos com o quadril.' },
@@ -47,19 +57,13 @@
         { tipo: 'exercicio', numero: 4, titulo: 'Respiração sentada na bola', figura: 'bola-respiracao.jpg',
           texto: 'Puxe o ar pelo nariz sentindo a barriga e as costelas se abrirem. Solte devagar pela boca.',
           alt: 'Gestante sentada na bola, olhos fechados, com as mãos na barriga, respirando.' },
-        { tipo: 'cuidados', titulo: 'Antes de começar',
-          itens: ['Tapete que não escorrega e uma parede ou alguém por perto.',
-                  'Pés bem apoiados no chão, o tempo todo.',
-                  'Devagar e só até onde for confortável. Se doer, pare.'],
-          alerta: 'Pare e procure sua obstetra ou o pronto atendimento se tiver sangramento, perda de líquido, contrações fortes antes da hora ou dor forte.',
-          alt: 'Cuidados: tapete firme, apoio por perto, pés no chão, devagar. Quando parar e procurar a obstetra.' },
         { tipo: 'fecho', titulo: 'Cada gestação é de um jeito',
-          texto: 'Quais movimentos fazem sentido para a sua, e em que fase, pede uma avaliação.',
+          texto: 'Quais movimentos fazem sentido para a sua, e em que fase, pede avaliação.',
           alt: 'Cada gestação é de um jeito. Agende pelo WhatsApp (31) 3868-1120, Clínica Veracis.' }
       ],
       legenda: 'A bola de pilates pode ser uma boa companheira na gestação. Separei quatro movimentos suaves para fazer em casa — arrasta para o lado.\n\n' +
-        'Antes de começar: tapete que não escorrega, pés bem apoiados e uma parede ou alguém por perto. Se doer, pare.\n\n' +
-        'Cada gestação é de um jeito. Quais movimentos fazem sentido para a sua, e em que fase, sai da avaliação. Para agendar, é só chamar no WhatsApp (31) 3868-1120.',
+        'Antes de começar: só faça se a sua obstetra não pediu repouso nem restringiu exercício. Bola bem cheia, tapete que não escorrega e uma parede ou alguém por perto. Se doer, pare.\n\n' +
+        'Cada gestação é de um jeito: quais movimentos fazem sentido para a sua, e em que fase, pede avaliação. Para agendar, é só chamar no WhatsApp (31) 3868-1120.',
       hashtags: '#fisioterapiapelvica #gestante #gravidez #boladepilates #conceicaodomatodentro'
     }
   ];
@@ -76,8 +80,13 @@
     var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso || ''));
     return m ? m[3] + '/' + m[2] + '/' + m[1] : '';
   };
-  C.rodape = function (iso) { var d = C.dataCurta(iso); return C.RODAPE + (d ? ' · publicado em ' + d : ''); };
-  C.legendaCompleta = function (c) { return c.legenda + '\n\n' + C.ASSINATURA + '\n\n' + c.hashtags; };
+  /* Sem data escolhida, o rodapé mostra o espaço em branco: a página não
+     gera as imagens assim (a data da publicação é obrigatória na peça). */
+  C.rodape = function (iso) { return C.RODAPE + ' · publicado em ' + (C.dataCurta(iso) || '__/__/____'); };
+  C.legendaCompleta = function (c, iso) {
+    var d = C.dataCurta(iso);
+    return c.legenda + '\n\n' + C.ASSINATURA + (d ? '\nPublicado em ' + d : '') + '\n\n' + c.hashtags;
+  };
 
   raiz.Carrossel = C;
   if (typeof module !== 'undefined') module.exports = C;

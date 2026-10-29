@@ -428,13 +428,16 @@ const CSS_EDITOR = `
 .campo textarea{ resize:vertical; line-height:1.45; }
 .item-rod{ display:flex; justify-content:space-between; align-items:center; margin-top:4px; }
 .contador{ font-size:11.5px; color:var(--tenue); }
-#editor button.discreto{ border:0; background:none; color:var(--deep); text-decoration:underline; cursor:pointer; font:inherit; font-size:12px; padding:2px; }
+#editor button.discreto{ border:0; background:none; color:var(--deep); text-decoration:underline; cursor:pointer; font:inherit; font-size:12px; padding:6px 2px; min-height:32px; }
 #editor .linha{ display:flex; gap:6px; align-items:center; margin-bottom:6px; }
 #editor .linha button, #e-limpar{ flex:none; font:inherit; font-size:13px; font-weight:600; padding:7px 10px; border-radius:8px; cursor:pointer;
   border:1px solid var(--terracota); background:#fff; color:var(--deep); }
 #editor .vazio{ color:var(--tenue); font-style:italic; }
 #e-folhas{ font-weight:700; color:var(--deep); margin:14px 0 4px; }
 #e-aviso{ font-size:13px; color:var(--tenue); min-height:1.2em; margin:0; }
+#e-alertas{ margin:6px 0 0; padding:8px 10px 8px 26px; background:#FFF4E5; color:#8A4A12; border-radius:8px; font-size:13px; }
+#e-alertas li{ margin-bottom:3px; text-align:left; }
+#editor .marcar input:disabled{ opacity:.7; }
 #e-demais{ font-size:13px; color:#8A4A12; background:#FFF4E5; border-radius:8px; padding:8px 10px; margin:6px 0 0; }
 #editor .ordem{ font-size:12.5px; color:var(--cafe); background:var(--areia); border-radius:8px; padding:8px 10px; margin:8px 0 0; text-align:left; }
 #e-orientacoes .nova-orientacao{ width:100%; text-align:left; font:inherit; font-size:13px; font-weight:600; padding:8px 10px; margin-bottom:8px;
@@ -523,6 +526,9 @@ ${barra('plano', `<label for="b-nome">Paciente</label>
       <label class="campo"><span>Recado para a paciente (opcional)</span><textarea id="e-recado" rows="2" placeholder="Ex.: comece deitada e só passe para em pé na semana que vem."></textarea></label>
     </div>
     <label class="marcar"><input id="e-anotacao" type="checkbox" checked> Quadro "O que combinamos na sessão", com o código QR do WhatsApp</label>
+    <p class="apoio" style="margin:12px 0 4px"><b>Para quem é</b> — muda o quadro de cuidados da folha:</p>
+    <label class="marcar"><input id="e-gestante" type="checkbox"> Paciente gestante (restrição da obstetra, bola, barriga para cima e sinais de alerta)</label>
+    <label class="marcar"><input id="e-soltar" type="checkbox"> Foco em soltar — dor na relação ou dor pélvica (no lugar de "contraia")</label>
 
     <h3>Guardar como modelo</h3>
     <p class="apoio" style="margin-bottom:8px">Guarde planos que você usa sempre, como "Pós-parto — fase 1". Sem nome de paciente.
@@ -531,6 +537,7 @@ ${barra('plano', `<label for="b-nome">Paciente</label>
     <div class="linha"><button id="e-apagar" type="button">Apagar modelo</button><button id="e-limpar" type="button">Começar do zero</button></div>
 
     <p id="e-folhas"></p>
+    <ul id="e-alertas" hidden></ul>
     <p id="e-demais" hidden>Plano com mais de três folhas: veja se dá para tirar alguma coisa. Folha demais costuma ficar sem ler.</p>
     <p id="e-aviso" role="status"></p>
   </aside>

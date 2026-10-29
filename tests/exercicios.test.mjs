@@ -135,7 +135,7 @@ teste('o montador nunca guarda o nome da paciente', () => {
 
 teste('folha gerada traz identificação, data e quadro de agendamento', () => {
   const arq = join(raiz, 'build/plano.html');
-  if (!existsSync(arq)) return;           // na publicação, o gerador roda depois dos testes
+  if (!existsSync(arq)) { assert.ok(!process.env.CI, 'build/ ausente: na publicação os geradores rodam antes dos testes'); return; }
   const h = readFileSync(arq, 'utf8');
   assert.ok(h.includes('CREFITO-4: 252806-F'), 'sem CREFITO');
   assert.ok(h.includes('data-data-extenso'), 'sem data');
@@ -157,7 +157,7 @@ teste('código QR do WhatsApp aponta para o número da clínica, sem falar da qu
   assert.equal(decodeURIComponent(destino.split('text=')[1] || ''), 'Olá! Quero agendar um horário.');
   for (const arq of ['build/plano.html', 'build/cartilhas-pacientes.html']) {
     const f = join(raiz, arq);
-    if (existsSync(f)) assert.ok(readFileSync(f, 'utf8').includes('class="qr"'), arq + ' sem o QR no quadro de agendamento');
+    assert.ok(existsSync(f) || !process.env.CI, 'falta ' + arq); if (existsSync(f)) assert.ok(readFileSync(f, 'utf8').includes('class="qr"'), arq + ' sem o QR no quadro de agendamento');
   }
 });
 

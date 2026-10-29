@@ -105,6 +105,28 @@ teste('página carrega os scripts na ordem e está no site', () => {
   assert.ok(readFileSync(join(raiz, '.github/workflows/publicar.yml'), 'utf8').includes('carrossel.html'), 'workflow não publica a página');
 });
 
+teste('cuidados logo depois da capa, com os mesmos sinais de alerta da cartilha', () => {
+  const A = require('../js/adherence.js');
+  const nota = A.CARTILHAS.find(c => c.id === 'gestacao').blocos.map(b => b.nota).filter(Boolean)[0];
+  for (const c of C.LISTA) {
+    const i = c.slides.findIndex(s => s.tipo === 'cuidados');
+    if (i < 0) continue;
+    assert.equal(i, 1, c.id + ': cuidados no slide ' + (i + 1) + ' — quem para de arrastar cedo não vê');
+    const al = c.slides[i].alerta.toLowerCase();
+    for (const sinal of ['sangramento', 'perda de líquido', 'contrações', 'tontura', 'falta de ar', 'dor no peito', 'dor de cabeça', 'batata da perna', 'bebê'])
+      assert.ok(al.includes(sinal) && nota.toLowerCase().includes(sinal), c.id + ': sinal "' + sinal + '" fora do slide ou da cartilha');
+    assert.ok(c.slides[i].itens.some(t => /obstetra/.test(t) && /restring/.test(t)), c.id + ': sem a restrição da obstetra');
+  }
+});
+
+teste('data: em branco até ser escolhida, e vai também na legenda', () => {
+  assert.ok(C.rodape('').endsWith('publicado em __/__/____'));
+  assert.ok(C.legendaCompleta(C.LISTA[0], '2026-11-03').includes('Publicado em 03/11/2026'));
+  assert.ok(!C.legendaCompleta(C.LISTA[0], '').includes('Publicado em'));
+  const js = readFileSync(join(raiz, 'js/carrossel-pagina.js'), 'utf8');
+  assert.ok(!/c-data'\)\.value = hoje\(\)/.test(js), 'a data não pode vir preenchida com hoje');
+});
+
 console.log('\n  carrossel.test.mjs');
 console.log('  ' + '─'.repeat(46));
 if (falhou === 0) console.log('  ✓ ' + passou + ' testes — todos passaram');

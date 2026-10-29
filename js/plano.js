@@ -110,27 +110,94 @@
     return itens.length;
   };
 
-  /* Quadro "Em todos os exercícios": o de js/exercicios.js, mas com a
-     cartilha de dor no plano a instrução de contrair dá lugar à de soltar
-     (mantendo os avisos de segurança da gestação, se houver). */
-  P.sempre = function (E, itens) {
-    var ids = (itens || []).filter(function (it) { return it.tipo === 'ex'; }).map(function (it) { return it.id; });
-    var base = E.sempre(ids);
-    var G = E.SEMPRE_GESTACAO;
-    if (P.temas(itens).indexOf('dor') !== -1) {
-      var seguranca = base.filter(function (s) { return s === G.bola || s === G.deitada || s === G.sinais; });
-      base = P.SEMPRE_SOLTAR.concat(seguranca, [E.SEMPRE[E.SEMPRE.length - 1]]);
+  /* Perfil da paciente. Não se adivinha pelo tipo de exercício: uma
+     gestante pode receber só exercícios de assoalho (deitada!), e uma
+     paciente de dor, só exercícios sem a cartilha de dor. Por isso o
+     plano guarda duas marcas que a Vanessa confere no painel; elas se
+     ligam sozinhas quando entra algo desses temas (P.perfilSugerido). */
+  P.perfilSugerido = function (E, itens) {
+    var t = P.temas(itens);
+    var gestEx = (itens || []).some(function (it) {
+      if (it.tipo !== 'ex') return false;
+      var b = E.BIBLIOTECA.filter(function (x) { return x.id === it.id; })[0];
+      return !!b && b.grupo === 'gestacao';
+    });
+    return { gestante: t.indexOf('gestacao') !== -1 || t.indexOf('alimentos-gestacao') !== -1 || gestEx, soltar: t.indexOf('dor') !== -1 };
+  };
+  P.perfil = function (E, itens, marcado) {
+    var sug = P.perfilSugerido(E, itens), m = marcado || {};
+    return { gestante: !!(m.gestante || sug.gestante), soltar: !!(m.soltar || sug.soltar) };
+  };
+
+  /* Dor junto com um tema de treino de força (perda de urina, urgência,
+     próstata): a folha diria "soltar" e "aperte antes do esforço". Esta
+     frase desfaz o conflito — sugestão, aguarda o aval da Vanessa. */
+  P.SOLTAR_E_CONTRAIR = 'Contrair, só o que combinamos na sessão. No resto do dia, a prioridade é soltar.';
+  var TEMAS_CONTRAIR = ['incontinencia', 'urgencia', 'posprostatectomia', 'vesical'];
+
+  /* Quadro "Em todos os exercícios", montado pelo perfil:
+     - base: soltar (dor) ou contrair (assoalho); só exercícios de bola,
+       sem foco em soltar → respiração e ritmo;
+     - gestante: restrição da obstetra, bola, barriga para cima, sinais;
+     - fecho: "Sentiu dor ou ficou em dúvida…".
+     O aviso que a cartilha já trouxe ANTES dos exercícios não se repete. */
+  P.sempre = function (E, itens, marcado) {
+    itens = itens || [];
+    var G = E.SEMPRE_GESTACAO, perfil = P.perfil(E, itens, marcado);
+    var ex = itens.filter(function (it) { return it.tipo === 'ex'; });
+    var doLivro = ex.map(function (it) { return E.BIBLIOTECA.filter(function (b) { return b.id === it.id; })[0]; }).filter(Boolean);
+    var soBola = doLivro.length > 0 && doLivro.length === ex.length && doLivro.every(function (b) { return b.grupo === 'gestacao'; });
+    var fim = E.SEMPRE[E.SEMPRE.length - 1];
+    var base;
+    if (perfil.soltar) {
+      base = P.SEMPRE_SOLTAR.slice();
+      if (P.temas(itens).some(function (t) { return TEMAS_CONTRAIR.indexOf(t) !== -1; })) base.push(P.SOLTAR_E_CONTRAIR);
+    } else base = soBola ? G.inicio.slice() : E.SEMPRE.slice(0, -1);
+    var seguranca = [];
+    if (perfil.gestante) {
+      seguranca.push(G.restricao);
+      if (doLivro.some(function (b) { return /^bola-/.test(b.id); })) seguranca.push(G.bola);
+      if (doLivro.some(function (b) { return b.formato === 'deitada'; })) seguranca.push(G.deitada);
+      seguranca.push(G.sinais);
     }
-    /* o aviso que já está no plano (destaque da cartilha de gestação)
-       não se repete no quadro */
-    var notas = (itens || []).filter(function (it) { return it.tipo === 'bloco'; }).map(function (it) { return String(it.nota || '').trim(); });
-    return base.filter(function (s) { return notas.indexOf(s) === -1; });
+    var r = base.concat(seguranca.filter(function (x) { return base.indexOf(x) === -1; }), [fim]);
+    var primeiro = -1;
+    for (var k = 0; k < itens.length; k++) if (itens[k].tipo === 'ex') { primeiro = k; break; }
+    var notasAntes = itens.slice(0, primeiro < 0 ? itens.length : primeiro)
+      .filter(function (it) { return it.tipo === 'bloco'; }).map(function (it) { return String(it.nota || '').trim(); });
+    return r.filter(function (x) { return notasAntes.indexOf(x) === -1; });
+  };
+
+  /* Avisos para a Vanessa no painel (não vão para a folha). */
+  P.LIMITE_EXERCICIOS = 8;
+  P.avisos = function (E, A, itens, marcado) {
+    itens = itens || [];
+    var r = [], perfil = P.perfil(E, itens, marcado), t = P.temas(itens);
+    var ex = itens.filter(function (it) { return it.tipo === 'ex'; });
+    if (perfil.soltar) {
+      var n = ex.filter(function (it) { return /contra[ií]/i.test(it.descricao || ''); }).length;
+      if (n) r.push('Plano com foco em soltar, mas ' + (n === 1 ? 'um exercício fala' : n + ' exercícios falam') + ' em contrair. Revise o "Como fazer".');
+    }
+    if (t.indexOf('posprostatectomia') !== -1 && ex.length)
+      r.push('Plano de próstata: os textos e as figuras dos exercícios estão no feminino. Ajuste para o paciente.');
+    var vistos = {};
+    itens.forEach(function (it) {
+      if (it.tipo !== 'bloco') return;
+      var h = String(it.h || '').trim().toLowerCase();
+      if (h) vistos[h] = (vistos[h] || 0) + 1;
+    });
+    Object.keys(vistos).forEach(function (h) {
+      if (vistos[h] > 1) r.push('"' + itens.filter(function (it) { return it.tipo === 'bloco' && String(it.h || '').trim().toLowerCase() === h; })[0].h + '" aparece ' + vistos[h] + ' vezes. Deixe um só.');
+    });
+    if (ex.length > P.LIMITE_EXERCICIOS) r.push(ex.length + ' exercícios é muito para casa. Veja se dá para dividir em fases.');
+    if (t.length > 2) r.push('Plano com ' + t.length + ' temas. Veja se tudo é para agora.');
+    return r;
   };
 
   /* ---------- estado guardado ----------
      Rascunhos e modelos antigos (só exercícios, sem "tipo") continuam
      valendo: cada item sem tipo é um exercício. */
-  P.vazio = function () { return { titulo: '', vezes: '', recado: '', anotacao: true, itens: [] }; };
+  P.vazio = function () { return { titulo: '', vezes: '', recado: '', anotacao: true, gestante: false, soltar: false, itens: [] }; };
   P.limpo = function (s, E, A) {
     var r = P.vazio();
     if (!s || !Array.isArray(s.itens)) return r;
@@ -139,6 +206,8 @@
     r.vezes = texto(s.vezes, 4);
     r.recado = texto(s.recado, L.recado);
     r.anotacao = s.anotacao !== false;
+    r.gestante = s.gestante === true;
+    r.soltar = s.soltar === true;
     var temId = function (id) { return id === 'livre' || E.BIBLIOTECA.some(function (b) { return b.id === id; }); };
     s.itens.forEach(function (it) {
       if (!it || typeof it !== 'object') return;

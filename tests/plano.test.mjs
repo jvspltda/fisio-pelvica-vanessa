@@ -110,11 +110,20 @@ teste('o montador nunca guarda o nome da paciente', () => {
   const guardar = c.slice(c.indexOf('function paraGuardar'), c.indexOf('var tGravar'));
   assert.ok(guardar.length > 0 && !/b-nome|nomeAtual/.test(guardar));
   assert.ok(!/(\$\('b-nome'\)|campoNome|\bnome)\.value/.test(c), 'o montador lê o nome digitado');
+  /* toda menção ao campo do nome só dispara ou escuta evento */
+  const codigo = c.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '');   // sem comentários
+  for (const linha of codigo.split('\n').filter(l => /b-nome|campoNome|(?<![.\w])nome\./.test(l))) {   // "p.nome" é o nome de um modelo, não o da paciente
+    const ok = /dispatchEvent|addEventListener|= \$\('b-nome'\)|var nome = \$\('b-nome'\)/.test(linha);
+    assert.ok(ok, 'uso suspeito do campo do nome: ' + linha.trim());
+  }
+  /* e nada do que vai para o navegador sai de outro lugar que não paraGuardar */
+  const gravacoes = c.match(/gravar\(CHAVE_[A-Z]+, [^)]*\)/g) || [];
+  assert.ok(gravacoes.length && gravacoes.every(g => /paraGuardar\(estado\)|, m\)$/.test(g)), 'gravação fora de paraGuardar: ' + gravacoes.join(' | '));
 });
 
 teste('página gerada: identificação, agendamento com e sem QR, e o endereço antigo leva ao plano', () => {
   const arq = join(raiz, 'build/plano.html');
-  if (!existsSync(arq)) return;           // na publicação, o gerador roda depois dos testes
+  if (!existsSync(arq)) { assert.ok(!process.env.CI, 'build/ ausente: na publicação os geradores rodam antes dos testes'); return; }
   const h = readFileSync(arq, 'utf8');
   assert.ok(h.includes('CREFITO-4: 252806-F'), 'sem CREFITO');
   assert.ok(h.includes('data-data-extenso'), 'sem data');
@@ -124,6 +133,42 @@ teste('página gerada: identificação, agendamento com e sem QR, e o endereço 
   assert.ok(h.includes('window.Adherence') || h.includes('raiz.Adherence'), 'cartilhas não embutidas');
   const velho = readFileSync(join(raiz, 'build/exercicios.html'), 'utf8');
   assert.ok(/http-equiv="refresh" content="0; url=plano.html"/.test(velho), 'exercicios.html não leva ao plano');
+});
+
+teste('perfil da paciente decide o quadro de cuidados, não o tipo de exercício', () => {
+  const G = E.SEMPRE_GESTACAO;
+  const assoalho = E.MODELOS_PRONTOS.find(m => m.id === 'assoalho-progressao').itens.map(id => P.exercicio(E, id));
+  /* gestante com exercícios de assoalho deitada: antes saía sem nenhum cuidado de gestação */
+  const g = P.sempre(E, assoalho, { gestante: true });
+  for (const x of [G.restricao, G.deitada, G.sinais]) assert.ok(g.includes(x), 'gestante sem: ' + x.slice(0, 40));
+  assert.ok(!g.includes(G.bola), 'cuidado de bola sem exercício de bola');
+  assert.ok(!P.sempre(E, assoalho).includes(G.sinais), 'sem marca nem tema, não é gestante');
+  /* blocos da gestação, mas sem o bloco que traz o aviso: o quadro precisa trazer */
+  const semAviso = P.deCartilha(A, 'gestacao').filter(b => !b.nota).concat(assoalho);
+  assert.ok(P.sempre(E, semAviso).includes(G.sinais), 'cartilha de gestação parcial ficou sem sinais');
+  /* aviso que vem DEPOIS dos exercícios não conta: o quadro repete */
+  const avisoDepois = assoalho.concat(P.deCartilha(A, 'gestacao'));
+  assert.ok(P.sempre(E, avisoDepois).includes(G.sinais), 'aviso depois dos exercícios suprimido do quadro');
+  /* dor marcada à mão, sem a cartilha: nada de "contraia" */
+  const d = P.sempre(E, [P.exercicio(E, 'ponte')], { soltar: true });
+  assert.ok(!d.some(x => /contraia/i.test(x)));
+  /* dor + perda de urina: a frase que desfaz o conflito */
+  const mix = P.deCartilha(A, 'dor').concat(P.deCartilha(A, 'incontinencia'), [P.exercicio(E, 'sentada')]);
+  assert.ok(P.sempre(E, mix).includes(P.SOLTAR_E_CONTRAIR));
+  /* a marca de perfil é guardada, e um rascunho antigo vem sem marca */
+  assert.deepEqual([P.limpo({ gestante: true, soltar: true, itens: [] }, E, A).gestante, P.limpo({ itens: [] }, E, A).soltar], [true, false]);
+  assert.deepEqual(P.perfilSugerido(E, [P.exercicio(E, 'bola-oito')]), { gestante: true, soltar: false });
+});
+
+teste('avisos do painel: contrair no foco em soltar, próstata no feminino, repetição e excesso', () => {
+  const dor = P.deCartilha(A, 'dor').concat([P.exercicio(E, 'ponte')]);
+  assert.ok(P.avisos(E, A, dor).some(t => /contrair/.test(t)));
+  assert.ok(P.avisos(E, A, P.deCartilha(A, 'posprostatectomia').concat([P.exercicio(E, 'sentada')])).some(t => /feminino/.test(t)));
+  const rep = P.deCartilha(A, 'incontinencia').concat(P.deCartilha(A, 'posprostatectomia'));
+  assert.ok(P.avisos(E, A, rep).some(t => /Aperte antes do esforço/.test(t) && /2 vezes/.test(t)), 'bloco repetido sem aviso');
+  const muitos = Array.from({ length: P.LIMITE_EXERCICIOS + 1 }, () => P.exercicio(E, 'ponte'));
+  assert.ok(P.avisos(E, A, muitos).some(t => /muito para casa/.test(t)));
+  assert.deepEqual(P.avisos(E, A, P.deCartilha(A, 'vesical')), []);
 });
 
 console.log('\n  plano.test.mjs');
