@@ -314,6 +314,10 @@ const AGENDA = `<div class="agenda">
    na mesma altura em todas as folhas. */
 const AGENDA_QR = AGENDA.replace('<div class="agenda">', '<div class="agenda"><div class="qr-caixa">' + QR + 'WhatsApp</div>');
 
+const ANOTACAO = `<div class="anot-linha"><div class="anot"><b>O que combinamos na sessão de ____/____</b>
+      <div class="l"></div><div class="l"></div></div>
+      <div class="qr-cartao">${QR}<span>Agende pelo<br>WhatsApp</span></div></div>`;
+
 const paginasCartilhas = A.CARTILHAS.map((c) => {
   const blocos = c.blocos.map(b => `<div class="bloco">
     <h2>${esc(b.h)}</h2>
@@ -328,9 +332,7 @@ const paginasCartilhas = A.CARTILHAS.map((c) => {
     <p class="sub">${esc(c.resumo)}</p>
     <p class="acolhe">${esc(ACOLHE)}</p>
     ${blocos}
-    <div class="anot-linha"><div class="anot"><b>O que combinamos na sessão de ____/____</b>
-      <div class="l"></div><div class="l"></div></div>
-      <div class="qr-cartao">${QR}<span>Agende pelo<br>WhatsApp</span></div></div>
+    ${ANOTACAO}
     <div style="height:3mm"></div>
     ${AGENDA}
     <div class="rodape">Vanessa Fernandes · Fisioterapeuta · ${esc(Ficha.CREFITO)}</div>
@@ -343,10 +345,12 @@ const cartilhas = documento('Cartilhas — Vanessa Fernandes', paginasCartilhas,
   `<label for="b-nome">Paciente</label>
    <input id="b-nome" type="text" placeholder="Nome da paciente (opcional)" autocomplete="off">`, escolha));
 
-/* ---------- 3. Exercicios para casa, montados pela Vanessa ----------
-   Biblioteca em js/exercicios.js, ilustracoes em assets/exercicios/.
-   A folha e montada e paginada no navegador (tools/exercicios-cliente.js);
-   o nome da paciente segue a regra do impressos-cliente: nunca salvo. */
+/* ---------- 3. Plano para casa: orientacoes e exercicios juntos ----------
+   Orientacoes: os blocos das cartilhas (js/adherence.js). Exercicios: a
+   biblioteca de js/exercicios.js, ilustracoes em assets/exercicios/.
+   Regras do plano em js/plano.js; a folha e montada e paginada no
+   navegador (tools/plano-cliente.js). O nome da paciente segue a regra
+   do impressos-cliente: nunca salvo. */
 const CSS_EXERCICIOS = `
 .corpo{ flex:1; min-height:0; overflow:hidden; display:flex; flex-direction:column; }
 .corpo > .agenda{ margin-top:auto; }
@@ -373,7 +377,7 @@ const CSS_EXERCICIOS = `
 .ex .param{ display:inline-block; background:#F3E6E1; color:var(--deep); font-weight:700; font-size:9.2pt;
   border-radius:2pt; padding:0.8mm 2.4mm; margin:0 0 1.6mm; text-align:left; }
 .ex .desc{ margin:0; }
-/* duas figuras em pe seguidas dividem a linha (tools/exercicios-cliente.js) */
+/* duas figuras em pe seguidas dividem a linha (tools/plano-cliente.js) */
 .par{ display:grid; grid-template-columns:1fr 1fr; column-gap:5mm; border-top:0.6pt solid #E6DCD4; break-inside:avoid; }
 .par .ex{ border-top:0; grid-template-columns:36mm 1fr; column-gap:3.5mm; }
 .par .ex-em-pe img{ height:54mm; }
@@ -382,6 +386,10 @@ const CSS_EXERCICIOS = `
 /* a linha do "Folha 1 de 2" fica sempre reservada: se so aparecesse depois
    da paginacao, o rodape cresceria e cortaria o fim da folha */
 .rodape [data-folha]{ display:block; min-height:1.5em; }
+.corpo > .bloco{ padding-bottom:0.6mm; }
+.ex-inicio{ break-inside:avoid; }
+.ex-inicio h2{ margin-top:3.2mm; }
+.corpo > .anot-linha{ margin-bottom:3mm; }
 `;
 const CSS_EDITOR = `
 @media print{ #editor{ display:none !important; } }
@@ -427,68 +435,113 @@ const CSS_EDITOR = `
 #editor .vazio{ color:var(--tenue); font-style:italic; }
 #e-folhas{ font-weight:700; color:var(--deep); margin:14px 0 4px; }
 #e-aviso{ font-size:13px; color:var(--tenue); min-height:1.2em; margin:0; }
+#e-demais{ font-size:13px; color:#8A4A12; background:#FFF4E5; border-radius:8px; padding:8px 10px; margin:6px 0 0; }
+#editor .ordem{ font-size:12.5px; color:var(--cafe); background:var(--areia); border-radius:8px; padding:8px 10px; margin:8px 0 0; text-align:left; }
+#e-orientacoes .nova-orientacao{ width:100%; text-align:left; font:inherit; font-size:13px; font-weight:600; padding:8px 10px; margin-bottom:8px;
+  border:1px dashed var(--terracota); border-radius:8px; background:#fff; color:var(--deep); cursor:pointer; }
+#e-orientacoes details.tema{ border:1px solid #E6DCD4; border-radius:10px; margin-bottom:6px; background:#fff; }
+#e-orientacoes summary{ cursor:pointer; padding:8px 10px; font-weight:600; color:var(--deep); display:flex; justify-content:space-between; gap:8px; }
+#e-orientacoes summary .conta{ color:var(--tenue); font-weight:400; font-size:12px; }
+#e-orientacoes details .apoio{ padding:0 10px; font-size:12px; }
+#e-orientacoes .blocos{ display:flex; flex-wrap:wrap; gap:6px; padding:8px 10px 10px; }
+#e-orientacoes .bloco-op{ font:inherit; font-size:12.5px; padding:6px 9px; border:1px solid #D9CCC3; border-radius:999px; background:#FFFCFA; color:var(--cafe); cursor:pointer; text-align:left; }
+#e-orientacoes .bloco-op:hover, #e-orientacoes .bloco-op:focus-visible{ border-color:var(--terracota); outline:none; }
+.item .tag{ font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; margin:0 0 6px; text-align:left; }
+.item .tag.bloco{ color:var(--tenue); }
+.item .tag.ex{ color:var(--terracota); }
+.item.orientacao{ background:#fff; }
+.item .campo{ margin-top:6px; }
+.item-rod{ flex-wrap:wrap; gap:4px 10px; }
+#editor .marcar{ display:flex; gap:8px; align-items:center; font-size:13px; margin-top:8px; }
+#editor .marcar input{ width:18px; height:18px; flex:none; }
 `;
 
 const EXERCICIOS_JS = readFileSync(join(raiz, 'js/exercicios.js'), 'utf8');
-const EXERCICIOS_CLIENTE = readFileSync(join(raiz, 'tools/exercicios-cliente.js'), 'utf8');
+const PLANO_JS = readFileSync(join(raiz, 'js/plano.js'), 'utf8');
+const ADHERENCE_JS = readFileSync(join(raiz, 'js/adherence.js'), 'utf8');
+const PLANO_CLIENTE = readFileSync(join(raiz, 'tools/plano-cliente.js'), 'utf8');
 
-const exercicios = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+const plano = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Exercícios para casa — Vanessa Fernandes</title>
+<title>Plano para casa — Vanessa Fernandes</title>
 <link rel="icon" href="data:,">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap">
 <link rel="stylesheet" href="../css/navegacao.css">
 <style>${CSS}${CSS_BARRA}${CSS_EXERCICIOS}${CSS_EDITOR}</style></head><body>
-${barra('exercicios', `<label for="b-nome">Paciente</label>
+${barra('plano', `<label for="b-nome">Paciente</label>
    <input id="b-nome" type="text" placeholder="Nome da paciente (não fica salvo)" autocomplete="off">
    <label><input id="b-data" type="checkbox" checked> Data de hoje</label>`)}
 <div class="montagem">
-  <aside id="editor" aria-label="Montar a sequência">
-    <h2>Exercícios para casa</h2>
-    <p class="apoio">Monte a sequência da paciente: escolha as figuras, a ordem, os números e o texto de cada exercício.
-    A folha se ajusta sozinha. A sequência fica guardada neste computador; o nome da paciente, não.</p>
+  <aside id="editor" aria-label="Montar o plano">
+    <h2>Plano para casa</h2>
+    <p class="apoio">Orientações das cartilhas e exercícios num documento só, montado para a paciente.
+    A folha se ajusta sozinha. O plano fica guardado neste computador; o nome da paciente, não.</p>
+    <p class="ordem">Ordem que ajuda a paciente: <b>entender</b> o que acontece → <b>fazer</b> os exercícios → <b>hábitos</b> do dia a dia → <b>quando me procurar</b>. Menos folhas são mais lidas.</p>
 
-    <h3>Comece por um modelo (opcional)</h3>
-    <div class="linha"><select id="e-modelos" aria-label="Modelos prontos e salvos"></select><button id="e-carregar" type="button">Carregar</button></div>
+    <h3>Comece por (opcional)</h3>
+    <div class="linha"><select id="e-comeco" aria-label="Cartilhas, exercícios prontos e modelos salvos"></select></div>
+    <div class="linha"><button id="e-comecar" type="button">Começar com este</button><button id="e-acrescentar" type="button">Acrescentar ao plano</button></div>
 
-    <h3>1 · Escolha os exercícios</h3>
+    <h3>1 · Orientações</h3>
+    <p class="apoio" style="margin-bottom:8px">Toque num tema e escolha os blocos que servem para ela — de uma cartilha ou de várias.</p>
+    <div id="e-orientacoes"></div>
+
+    <h3>2 · Exercícios</h3>
     <div id="e-biblioteca"></div>
 
-    <h3>2 · Ajuste cada um</h3>
+    <h3>3 · O plano dela</h3>
+    <p class="apoio" style="margin-bottom:8px">Mude a ordem, tire o que não serve e ajuste os textos. A mudança vale só para este plano; a cartilha original não muda.</p>
     <div id="e-lista"></div>
 
-    <h3>3 · Para a sequência toda</h3>
+    <h3>4 · Para o plano todo</h3>
+    <label class="campo"><span>Título (opcional)</span><input id="e-titulo" type="text"></label>
     <div class="nums" style="grid-template-columns:1fr 3fr">
-      <label class="campo"><span>Vezes por dia</span><input id="e-vezes" type="text" inputmode="numeric" maxlength="4" placeholder="—"></label>
+      <label class="campo"><span>Exercícios: vezes por dia</span><input id="e-vezes" type="text" inputmode="numeric" maxlength="4" placeholder="—"></label>
       <label class="campo"><span>Recado para a paciente (opcional)</span><textarea id="e-recado" rows="2" placeholder="Ex.: comece deitada e só passe para em pé na semana que vem."></textarea></label>
     </div>
+    <label class="marcar"><input id="e-anotacao" type="checkbox" checked> Quadro "O que combinamos na sessão", com o código QR do WhatsApp</label>
 
     <h3>Guardar como modelo</h3>
-    <p class="apoio" style="margin-bottom:8px">Guarde sequências que você usa sempre, como "Pós-parto — fase 1". Sem nome de paciente.
+    <p class="apoio" style="margin-bottom:8px">Guarde planos que você usa sempre, como "Pós-parto — fase 1". Sem nome de paciente.
     Para apagar um modelo salvo, escolha-o na lista lá em cima.</p>
     <div class="linha"><input id="e-nome-modelo" type="text" maxlength="50" placeholder="Nome do modelo" aria-label="Nome do modelo"><button id="e-salvar" type="button">Salvar</button></div>
     <div class="linha"><button id="e-apagar" type="button">Apagar modelo</button><button id="e-limpar" type="button">Começar do zero</button></div>
 
     <p id="e-folhas"></p>
+    <p id="e-demais" hidden>Plano com mais de três folhas: veja se dá para tirar alguma coisa. Folha demais costuma ficar sem ler.</p>
     <p id="e-aviso" role="status"></p>
   </aside>
   <div class="folhas" id="folhas"></div>
 </div>
 <template id="t-pagina"><section class="pagina">
-  ${cabecalho('<span data-nome-vazio>Exercícios<br>para casa</span>' +
-    '<span data-nome-cheio hidden>Exercícios para<br><span data-nome-alvo></span></span>')}
+  ${cabecalho('<span data-nome-vazio>Plano<br>para casa</span>' +
+    '<span data-nome-cheio hidden>Plano para<br><span data-nome-alvo></span></span>')}
   <div class="corpo"></div>
-  <div class="rodape">Vanessa Fernandes · Fisioterapeuta · ${esc(Ficha.CREFITO)} · @vanessa.fernands<span data-folha></span></div>
+  <div class="rodape">Vanessa Fernandes · Fisioterapeuta · ${esc(Ficha.CREFITO)} · @vanessa.fernands · @clinicaveracis<span data-folha></span></div>
 </section></template>
-<template id="t-agenda">${AGENDA_QR}</template>
+<template id="t-agenda">${AGENDA}</template>
+<template id="t-agenda-qr">${AGENDA_QR}</template>
+<template id="t-anotacao">${ANOTACAO}</template>
+<template id="t-acolhe">${esc(ACOLHE)}</template>
 <template id="t-agenda-curta"><div class="agenda curta"><b>Como agendar:</b> WhatsApp ou telefone <b>(31) 3868-1120</b> · Clínica Veracis, Rodovia MG-010, 598, Bela Vista Mall, Conceição do Mato Dentro · @vanessa.fernands e @clinicaveracis</div></template>
+<script>${ADHERENCE_JS}</script>
 <script>${EXERCICIOS_JS}</script>
-<script>${EXERCICIOS_CLIENTE}</script>
+<script>${PLANO_JS}</script>
+<script>${PLANO_CLIENTE}</script>
 <script>${SCRIPT}</script></body></html>`;
 
+/* O endereco antigo da folha de exercicios leva ao plano (favoritos e
+   links ja enviados continuam funcionando; rascunho e modelos sao os mesmos). */
+const exerciciosRedireciona = `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
+<meta http-equiv="refresh" content="0; url=plano.html"><link rel="icon" href="data:,">
+<title>Plano para casa — Vanessa Fernandes</title></head>
+<body><p>A folha de exercícios agora faz parte do <a href="plano.html">Plano para casa</a>.</p></body></html>`;
+
 mkdirSync(join(raiz, 'build'), { recursive: true });
-writeFileSync(join(raiz, 'build/exercicios.html'), exercicios, 'utf8');
-console.log('  build/exercicios.html gerado ·', require(join(raiz, 'js/exercicios.js')).BIBLIOTECA.length, 'figuras');
+writeFileSync(join(raiz, 'build/plano.html'), plano, 'utf8');
+writeFileSync(join(raiz, 'build/exercicios.html'), exerciciosRedireciona, 'utf8');
+console.log('  build/plano.html gerado ·', A.CARTILHAS.reduce((n, c) => n + c.blocos.length, 0), 'orientações ·',
+  require(join(raiz, 'js/exercicios.js')).BIBLIOTECA.length, 'figuras');
 writeFileSync(join(raiz, 'build/carta-profissionais.html'), carta, 'utf8');
 writeFileSync(join(raiz, 'build/cartilhas-pacientes.html'), cartilhas, 'utf8');
 console.log('  build/carta-profissionais.html gerado');

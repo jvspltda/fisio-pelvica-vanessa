@@ -18,7 +18,7 @@ não nos CDNs.
 ### Estrutura
 
 ```
-index.html               Página inicial (atalhos para tudo)
+index.html               Página inicial: dia a dia e marketing
 avaliacao.html           Suíte de avaliação: abas e folha de impressão
 css/tokens.css           Design tokens e componentes — fonte de verdade visual
 css/print.css            Folha exclusiva de impressão A4 timbrada
@@ -194,26 +194,35 @@ chrome --headless --print-to-pdf=Ficha.pdf --no-pdf-header-footer build/ficha-st
 O gerador lê `js/ficha.js` e `js/scores.js`: mudou um campo na aplicação, o papel
 acompanha. Não há transcrição manual a dessincronizar.
 
-### Exercícios para casa
+### Plano para casa (orientações e exercícios juntos)
 
-`impressos/exercicios.html` monta a folha de exercícios da paciente: a Vanessa escolhe as
-figuras (biblioteca em `js/exercicios.js`, ilustrações em `assets/exercicios/`), a ordem,
-séries, repetições, tempo de segurar e de descansar, e o texto de cada exercício. A folha A4 é
-paginada ao vivo e nenhum exercício fica partido entre duas folhas. A sequência e os modelos
-("Pós-parto — fase 1") ficam no navegador de quem usa; o nome da paciente não é salvo.
-A biblioteca tem dois grupos — assoalho pélvico e gestação com bola — e dois modelos prontos
-(`Exercicios.MODELOS_PRONTOS`, não se apagam) que reproduzem as pranchas de gestação. O quadro
-"Em todos os exercícios" muda com a sequência (`Exercicios.sempre`): só gestação troca a instrução
-de contração por respiração, ritmo e sinais de alerta; misturada leva as duas. Duas figuras em pé
-seguidas dividem a mesma linha da folha. Há também um modelo pronto de assoalho pélvico
-(deitada → sentada → em pé), sugestão a ser aprovada pela Vanessa.
+`impressos/plano.html` monta, num documento só, o que a paciente leva para casa: **orientações**
+(qualquer bloco das 9 cartilhas, de um tema ou de vários, ou escrito pela Vanessa) e
+**exercícios** com figura, números e "como fazer". Ela começa por uma cartilha inteira, um
+modelo pronto ou um modelo salvo, e ajusta: tira, acrescenta, muda a ordem e o texto. O que muda
+vale só para aquele plano — o texto das cartilhas continua vindo de `js/adherence.js`. A folha A4
+é paginada ao vivo, sem orientação ou exercício partido, com um único quadro de agendamento.
+
+- Regras em `js/plano.js` (sem DOM), página em `tools/plano-cliente.js`, teste em
+  `tests/plano.test.mjs`. Gerado por `tools/gerar-materiais-impressos.mjs`.
+- O exercício novo entra logo depois do bloco "faça os exercícios" da cartilha
+  (`Plano.PONTO_EXERCICIOS`) ou junto dos outros exercícios.
+- O quadro "Em todos os exercícios" segue o plano (`Plano.sempre`): com a cartilha de dor, a
+  instrução de contrair dá lugar à de soltar (frases da própria cartilha); com gestação, entram
+  respiração, apoio na bola e sinais de alerta — sem repetir o aviso que a cartilha já trouxe.
+- Biblioteca de figuras em `js/exercicios.js` (assoalho pélvico e gestação com bola), com três
+  sequências prontas (`Exercicios.MODELOS_PRONTOS`). Duas figuras em pé seguidas dividem a linha.
+- Rascunho e modelos ficam no navegador de quem usa (as chaves são as da antiga folha de
+  exercícios, então os modelos antigos continuam aparecendo); o nome da paciente não é salvo.
+- `impressos/exercicios.html` só redireciona para o plano. `impressos/cartilhas.html` continua
+  com as 9 cartilhas inteiras, uma por folha, para impressão rápida.
 
 ### Código QR do WhatsApp
 
 `assets/qr-whatsapp.svg` abre a conversa com a clínica, (31) 3868-1120, com a mensagem
 "Olá! Quero agendar um horário." — nada sobre a queixa. Foi gerado uma vez (segno, correção M)
-e conferido por leitura no PDF a 200 ppp. Nas cartilhas fica ao lado do quadro "O que combinamos",
-para o quadro de agendamento não mudar de altura; na folha de exercícios, dentro do quadro.
+e conferido por leitura no PDF a 200 ppp. Fica ao lado do quadro "O que combinamos" (cartilhas e
+plano), para o quadro de agendamento não mudar de altura; sem esse quadro, vai no agendamento.
 Se o número mudar, gere de novo: o teste de exercícios compara o destino com `Ficha.CONTATO`.
 
 ### Bibliotecas externas
@@ -221,8 +230,6 @@ Se o número mudar, gere de novo: o teste de exercícios compara o destino com `
 O "Enviar PDF" e o "Enviar como imagem" baixam html2canvas e jsPDF do cdnjs só no clique, com
 verificação de integridade (SRI, em `tools/impressos-cliente.js`): se o arquivo servido mudar,
 o navegador recusa e o botão sugere "Imprimir / PDF".
-Gerada por `tools/gerar-materiais-impressos.mjs`, com o montador em `tools/exercicios-cliente.js`.
-Teste: `node tests/exercicios.test.mjs`.
 
 #### Modo caneta × modo compacto
 

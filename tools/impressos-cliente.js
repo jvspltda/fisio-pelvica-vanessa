@@ -32,7 +32,7 @@
 
   var barra = document.getElementById('barra');
   if (!barra) return;
-  var tipo = barra.getAttribute('data-tipo');          // cartilhas | carta | ficha | exercicios
+  var tipo = barra.getAttribute('data-tipo');          // cartilhas | carta | ficha | plano
   var campoNome = document.getElementById('b-nome');
   var campoTrat = document.getElementById('b-trat');
   var aviso = document.getElementById('b-aviso');
@@ -136,7 +136,7 @@
   }
   function nomeArquivo(ext, i, total) {
     var base = { cartilhas: 'orientacoes', carta: 'carta-apresentacao', ficha: 'ficha-avaliacao',
-                 exercicios: 'exercicios-em-casa' }[tipo] || 'material';
+                 plano: 'plano-para-casa' }[tipo] || 'material';
     var quem = slug(nomeAtual().replace(/^(Dr\(a\)\.|Dr\.|Dra\.|Enf\.)\s*/, ''));
     var nome = 'vanessa-fernandes-' + base + (quem ? '-' + quem : '');
     if (total > 1) nome += '-' + (i + 1);
@@ -151,7 +151,7 @@
       avisar('Montando folha ' + (i + 1) + ' de ' + pags.length + '…');
       /* exercícios: escala 3 (~290 pontos por polegada no A4), para as figuras
          saírem nítidas também no PDF e na imagem enviados pelo WhatsApp */
-      telas.push(await window.html2canvas(pags[i], { scale: tipo === 'exercicios' ? 3 : 2, backgroundColor: '#ffffff', useCORS: true, windowWidth: 1280 }));
+      telas.push(await window.html2canvas(pags[i], { scale: tipo === 'plano' ? 3 : 2, backgroundColor: '#ffffff', useCORS: true, windowWidth: 1280 }));
     }
     return telas;
   }

@@ -118,7 +118,7 @@ teste('resumo dos números: só o que foi preenchido, com singular e plural', ()
 });
 
 teste('o montador nunca guarda o nome da paciente', () => {
-  const c = readFileSync(join(raiz, 'tools/exercicios-cliente.js'), 'utf8');
+  const c = readFileSync(join(raiz, 'tools/plano-cliente.js'), 'utf8');
   assert.ok(!/localStorage\.setItem\([^)]*nome/i.test(c));
   /* o que vai para o rascunho e para os modelos sai só de paraGuardar */
   const guardar = c.slice(c.indexOf('function paraGuardar'), c.indexOf('var tGravar'));
@@ -128,7 +128,7 @@ teste('o montador nunca guarda o nome da paciente', () => {
 });
 
 teste('folha gerada traz identificação, data e quadro de agendamento', () => {
-  const arq = join(raiz, 'build/exercicios.html');
+  const arq = join(raiz, 'build/plano.html');
   if (!existsSync(arq)) return;           // na publicação, o gerador roda depois dos testes
   const h = readFileSync(arq, 'utf8');
   assert.ok(h.includes('CREFITO-4: 252806-F'), 'sem CREFITO');
@@ -149,7 +149,7 @@ teste('código QR do WhatsApp aponta para o número da clínica, sem falar da qu
   const numero = '55' + tel.replace(/\D/g, '');
   assert.ok(destino.startsWith('https://wa.me/' + numero + '?'), 'QR aponta para ' + destino);
   assert.equal(decodeURIComponent(destino.split('text=')[1] || ''), 'Olá! Quero agendar um horário.');
-  for (const arq of ['build/exercicios.html', 'build/cartilhas-pacientes.html']) {
+  for (const arq of ['build/plano.html', 'build/cartilhas-pacientes.html']) {
     const f = join(raiz, arq);
     if (existsSync(f)) assert.ok(readFileSync(f, 'utf8').includes('class="qr"'), arq + ' sem o QR no quadro de agendamento');
   }
