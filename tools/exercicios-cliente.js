@@ -104,8 +104,15 @@
   }
 
   function montarBiblioteca() {
-    var alvo = $('e-biblioteca');
-    E.BIBLIOTECA.forEach(function (b) {
+    var raizBib = $('e-biblioteca');
+    var alvo = null;
+    E.GRUPOS.forEach(function (g) {
+      raizBib.appendChild(el('p', 'grupo', g.titulo));
+      alvo = el('div', 'biblioteca');
+      raizBib.appendChild(alvo);
+      E.BIBLIOTECA.filter(function (b) { return b.grupo === g.id; }).forEach(miniatura);
+    });
+    function miniatura(b) {
       var bt = el('button', 'miniatura');
       bt.type = 'button';
       var img = el('img'); img.src = PASTA + b.imagem; img.alt = ''; img.loading = 'lazy';
@@ -116,7 +123,7 @@
         mudouEstrutura('"' + b.titulo + '" entrou na sequência.');
       });
       alvo.appendChild(bt);
-    });
+    }
     var livre = el('button', 'miniatura livre');
     livre.type = 'button';
     livre.appendChild(el('span', 'mais', '+'));
@@ -125,6 +132,9 @@
       estado.itens.push(novoItem('livre'));
       mudouEstrutura('Exercício sem imagem entrou na sequência. Dê um nome a ele.');
     });
+    raizBib.appendChild(el('p', 'grupo', 'Outro'));
+    alvo = el('div', 'biblioteca');
+    raizBib.appendChild(alvo);
     alvo.appendChild(livre);
   }
 
@@ -213,17 +223,39 @@
   $('e-recado').maxLength = E.LIMITE_RECADO;
   $('e-recado').addEventListener('input', function () { estado.recado = this.value; mudouTexto(); });
 
-  /* ---------- modelos ---------- */
+  /* ---------- modelos ----------
+     Os prontos (E.MODELOS_PRONTOS) vêm no código e não se apagam; o valor
+     deles na lista leva o prefixo "pronto:" para nunca colidir com um
+     modelo que a Vanessa salvou com o mesmo nome. */
+  var PRONTO = 'pronto:';
   function modelos() { var m = ler(CHAVE_MODELOS, {}); return (m && typeof m === 'object') ? m : {}; }
+  function pronto(valor) {
+    if (valor.indexOf(PRONTO) !== 0) return null;
+    var id = valor.slice(PRONTO.length);
+    for (var i = 0; i < E.MODELOS_PRONTOS.length; i++) if (E.MODELOS_PRONTOS[i].id === id) return E.MODELOS_PRONTOS[i];
+    return null;
+  }
   function montarModelos() {
     var sel = $('e-modelos'); sel.textContent = '';
     var nomes = Object.keys(modelos()).sort(function (a, b) { return a.localeCompare(b, 'pt-BR'); });
-    sel.appendChild(el('option', null, nomes.length ? 'Escolha um modelo…' : 'Nenhum modelo salvo'));
+    sel.appendChild(el('option', null, 'Escolha um modelo…'));
     sel.options[0].value = '';
-    nomes.forEach(function (n) { var o = el('option', null, n); o.value = n; sel.appendChild(o); });
+    var gp = el('optgroup'); gp.label = 'Prontos';
+    E.MODELOS_PRONTOS.forEach(function (p) { var o = el('option', null, p.nome); o.value = PRONTO + p.id; gp.appendChild(o); });
+    sel.appendChild(gp);
+    var gs = el('optgroup'); gs.label = nomes.length ? 'Salvos neste computador' : 'Salvos neste computador (nenhum)';
+    nomes.forEach(function (n) { var o = el('option', null, n); o.value = n; gs.appendChild(o); });
+    sel.appendChild(gs);
   }
   $('e-carregar').addEventListener('click', function () {
     var n = $('e-modelos').value; if (!n) { avisar('Escolha um modelo na lista.'); return; }
+    var p = pronto(n);
+    if (p) {
+      estado = limpo({ itens: p.itens.map(novoItem) });
+      $('e-nome-modelo').value = '';
+      montarGerais(); mudouEstrutura('Modelo "' + p.nome + '" carregado. Ajuste os números e o texto para a paciente.');
+      return;
+    }
     var m = modelos();
     if (!Object.prototype.hasOwnProperty.call(m, n)) { montarModelos(); avisar('Esse modelo não existe mais.'); return; }
     estado = limpo(m[n]); $('e-nome-modelo').value = n;
@@ -243,6 +275,7 @@
   });
   $('e-apagar').addEventListener('click', function () {
     var n = $('e-modelos').value; if (!n) { avisar('Escolha na lista o modelo a apagar.'); return; }
+    if (pronto(n)) { avisar('Os modelos prontos não se apagam. Carregue, ajuste e salve com outro nome.'); return; }
     var b = $('e-apagar');
     if (b.getAttribute('data-confirma') !== n) {
       b.setAttribute('data-confirma', n); b.textContent = 'Toque de novo para apagar';
@@ -313,7 +346,7 @@
     var sempre = el('div', 'sempre');
     sempre.appendChild(el('b', null, 'Em todos os exercícios'));
     var ul = el('ul');
-    E.SEMPRE.forEach(function (s) { ul.appendChild(el('li', null, s)); });
+    E.sempre(estado.itens.map(function (it) { return it.id; })).forEach(function (s) { ul.appendChild(el('li', null, s)); });
     sempre.appendChild(ul);
     d.appendChild(sempre);
     return d;
@@ -342,15 +375,24 @@
     var corpo = novaPagina();
     corpo.appendChild(blocoAbertura());
     aplicarNomeEData();
-    estado.itens.forEach(function (it, i) {
-      var b = blocoExercicio(it, i);
+    /* Duas figuras em pé seguidas dividem a mesma linha: sozinha, cada
+       uma ocupa a largura toda com o texto curto ao lado. */
+    function emPe(it) { var x = daBiblioteca(it && it.id); return !!x && x.formato === 'em-pe'; }
+    for (var i = 0; i < estado.itens.length; i++) {
+      var b = blocoExercicio(estado.itens[i], i);
+      if (emPe(estado.itens[i]) && emPe(estado.itens[i + 1])) {
+        var par = el('div', 'par');
+        par.appendChild(b);
+        par.appendChild(blocoExercicio(estado.itens[i + 1], i + 1));
+        b = par; i++;
+      }
       corpo.appendChild(b);
       if (transborda(corpo) && corpo.children.length > 1) {
         corpo.removeChild(b);
         corpo = novaPagina();
         corpo.appendChild(b);
       }
-    });
+    }
     /* Quadro de agendamento no pé da última folha. Ordem de tentativa:
        1) o quadro completo; 2) a versão de uma linha, para não abrir uma
        folha nova só por causa dele; 3) folha nova com o quadro completo,
@@ -364,8 +406,8 @@
       if (transborda(corpo)) {
         corpo.removeChild(curta);
         var ultimo = corpo.lastElementChild;
-        var levar = ultimo && ultimo.classList.contains('ex') &&
-                    ultimo.previousElementSibling && ultimo.previousElementSibling.classList.contains('ex');
+        var exercicio = function (n) { return !!n && (n.classList.contains('ex') || n.classList.contains('par')); };
+        var levar = exercicio(ultimo) && exercicio(ultimo.previousElementSibling);
         if (levar) corpo.removeChild(ultimo);
         corpo = novaPagina();
         if (levar) corpo.appendChild(ultimo);

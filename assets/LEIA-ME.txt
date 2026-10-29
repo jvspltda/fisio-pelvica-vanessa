@@ -8,8 +8,12 @@ eva.jpg       Escala Visual Analogica 0-10 da ficha original
               (Referencias/ficha-original-studocu.pdf). Instrumento clinico
               padrao, reaproveitado sem alteracao.
 
-exercicios/   As cinco ilustracoes da folha "Exercicios para casa", extraidas
-              em resolucao original da cartilha da Vanessa
-              (Referencias/Cartilha-Exercicios-original.pdf). A lista de
-              exercicios que usa cada figura esta em js/exercicios.js.
-              Nenhuma e foto de paciente.
+exercicios/   As ilustracoes da folha "Exercicios para casa". Lista e grupo
+              de cada uma em js/exercicios.js. Nenhuma e foto de paciente.
+              - Assoalho pelvico (5): extraidas em resolucao original da
+                cartilha da Vanessa (Referencias/Cartilha-Exercicios-original.pdf).
+              - Gestacao com bola (8, prefixo bola- e ponte-gestacao):
+                recortadas em 2026-10-29 das duas pranchas em
+                Referencias/Exercicios-Bola-Gestacao-*.jpeg, sem o texto
+                embutido (tinha erros). Formato 3:2 ou 2:3, fundo igualado
+                ao das outras; 250 a 450 ppp no tamanho impresso.

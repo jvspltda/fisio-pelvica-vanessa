@@ -201,6 +201,11 @@ figuras (biblioteca em `js/exercicios.js`, ilustrações em `assets/exercicios/`
 séries, repetições, tempo de segurar e de descansar, e o texto de cada exercício. A folha A4 é
 paginada ao vivo e nenhum exercício fica partido entre duas folhas. A sequência e os modelos
 ("Pós-parto — fase 1") ficam no navegador de quem usa; o nome da paciente não é salvo.
+A biblioteca tem dois grupos — assoalho pélvico e gestação com bola — e dois modelos prontos
+(`Exercicios.MODELOS_PRONTOS`, não se apagam) que reproduzem as pranchas de gestação. O quadro
+"Em todos os exercícios" muda com a sequência (`Exercicios.sempre`): só gestação troca a instrução
+de contração por respiração, ritmo e sinais de alerta; misturada leva as duas. Duas figuras em pé
+seguidas dividem a mesma linha da folha.
 Gerada por `tools/gerar-materiais-impressos.mjs`, com o montador em `tools/exercicios-cliente.js`.
 Teste: `node tests/exercicios.test.mjs`.
 

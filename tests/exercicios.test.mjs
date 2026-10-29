@@ -41,16 +41,52 @@ teste('biblioteca com código, título, figura, formato e descrição', () => {
   }
 });
 
-teste('toda figura existe e tem resolução de impressão (lado maior ≥ 1500 px)', () => {
+teste('toda figura existe, no formato da folha e com resolução de impressão (≥ 250 ppp)', () => {
+  /* tamanho impresso: .ex-deitada img 74 mm de largura, .ex-em-pe img 66 mm de altura */
   for (const b of E.BIBLIOTECA) {
     const arq = join(raiz, 'assets/exercicios', b.imagem);
     assert.ok(existsSync(arq), 'falta ' + b.imagem);
     const t = tamanhoJpeg(readFileSync(arq));
     assert.ok(t, 'não é JPEG: ' + b.imagem);
-    assert.ok(Math.max(t.w, t.h) >= 1500, b.imagem + ' com ' + t.w + '×' + t.h);
     const deitada = t.w > t.h;
     assert.equal(b.formato === 'deitada', deitada, b.imagem + ': formato não bate com a figura');
+    const razao = deitada ? t.w / t.h : t.h / t.w;
+    assert.ok(Math.abs(razao - 1.5) < 0.02, b.imagem + ' fora de 3:2 (a folha cortaria a figura)');
+    const ppp = deitada ? t.w / (74 / 25.4) : t.h / (66 / 25.4);
+    assert.ok(ppp >= 250, b.imagem + ' com ' + Math.round(ppp) + ' ppp na folha');
   }
+});
+
+teste('todo exercício pertence a um grupo, e todo grupo tem exercício', () => {
+  const grupos = E.GRUPOS.map(g => g.id);
+  for (const b of E.BIBLIOTECA) assert.ok(grupos.includes(b.grupo), b.id + ' sem grupo conhecido');
+  for (const g of grupos) assert.ok(E.BIBLIOTECA.some(b => b.grupo === g), 'grupo vazio: ' + g);
+});
+
+teste('modelos prontos só usam exercícios da biblioteca', () => {
+  const ids = new Set(E.BIBLIOTECA.map(b => b.id));
+  const nomes = new Set();
+  for (const m of E.MODELOS_PRONTOS) {
+    assert.ok(m.id && m.nome && m.itens.length, 'modelo incompleto');
+    assert.ok(!nomes.has(m.id), 'modelo repetido: ' + m.id); nomes.add(m.id);
+    for (const id of m.itens) assert.ok(ids.has(id), m.id + ' usa exercício inexistente: ' + id);
+  }
+});
+
+teste('"Em todos os exercícios" acompanha a sequência', () => {
+  const G = E.SEMPRE_GESTACAO;
+  assert.deepEqual(E.sempre([]), E.SEMPRE);
+  assert.deepEqual(E.sempre(['ponte', 'em-pe']), E.SEMPRE);
+  /* só gestação: sem a instrução de contrair o assoalho, com os sinais de alerta */
+  const sentada = E.sempre(['bola-circulos', 'bola-respiracao']);
+  assert.ok(!sentada.some(s => /contra[ií]/i.test(s)), 'instrução de contração numa sequência só de gestação');
+  assert.ok(sentada.includes(G.bola) && sentada.includes(G.sinais) && !sentada.includes(G.deitada));
+  assert.ok(E.sempre(['bola-flexao-joelhos']).includes(G.deitada), 'exercício deitado sem o aviso de virar de lado');
+  /* misturada: as de contração continuam, mais as de segurança, e a de dúvida fecha */
+  const mista = E.sempre(['ponte', 'bola-balanco']);
+  assert.ok(mista.includes(E.SEMPRE[0]) && mista.includes(G.sinais) && mista.includes(G.deitada));
+  assert.equal(mista[mista.length - 1], E.SEMPRE[E.SEMPRE.length - 1]);
+  for (const m of E.MODELOS_PRONTOS) assert.ok(E.sempre(m.itens).includes(G.sinais), m.id + ' sem sinais de alerta');
 });
 
 teste('descrição sugerida cabe no limite e não traz número pronto (os números são da Vanessa)', () => {
@@ -62,7 +98,9 @@ teste('descrição sugerida cabe no limite e não traz número pronto (os númer
 
 teste('nenhuma promessa nos textos da folha', () => {
   const PROIBIDAS = /(?<!\p{L})(garant\p{L}*|infal[íi]vel|a solução|eficaz|curar?|resultado garantido|não é normal)(?!\p{L})/iu;
-  const tudo = E.BIBLIOTECA.map(b => b.titulo + ' ' + b.descricao).concat(E.SEMPRE).join('\n');
+  const G = E.SEMPRE_GESTACAO;
+  const tudo = E.BIBLIOTECA.map(b => b.titulo + ' ' + b.descricao).concat(E.SEMPRE, G.inicio, G.bola, G.deitada, G.sinais,
+    E.MODELOS_PRONTOS.map(m => m.nome)).join('\n');
   const m = tudo.match(PROIBIDAS);
   assert.ok(!m, 'contém "' + (m && m[0]) + '"');
 });

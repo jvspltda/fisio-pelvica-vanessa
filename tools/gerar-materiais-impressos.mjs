@@ -340,6 +340,12 @@ const CSS_EXERCICIOS = `
 .ex .param{ display:inline-block; background:#F3E6E1; color:var(--deep); font-weight:700; font-size:9.2pt;
   border-radius:2pt; padding:0.8mm 2.4mm; margin:0 0 1.6mm; text-align:left; }
 .ex .desc{ margin:0; }
+/* duas figuras em pe seguidas dividem a linha (tools/exercicios-cliente.js) */
+.par{ display:grid; grid-template-columns:1fr 1fr; column-gap:5mm; border-top:0.6pt solid #E6DCD4; break-inside:avoid; }
+.par .ex{ border-top:0; grid-template-columns:36mm 1fr; column-gap:3.5mm; }
+.par .ex-em-pe img{ height:54mm; }
+.par .ex h2{ font-size:12pt; align-items:flex-start; }
+.par .ex .desc{ text-align:left; hyphens:auto; }
 /* a linha do "Folha 1 de 2" fica sempre reservada: se so aparecesse depois
    da paginacao, o rodape cresceria e cortaria o fim da folha */
 .rodape [data-folha]{ display:block; min-height:1.5em; }
@@ -358,6 +364,8 @@ const CSS_EDITOR = `
 #editor h3{ font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--deep); margin:18px 0 8px; }
 #editor .apoio{ color:var(--tenue); font-size:13px; margin:0; text-align:left; }
 .biblioteca{ display:grid; grid-template-columns:repeat(3,1fr); gap:8px; }
+#e-biblioteca .grupo{ font-size:12px; font-weight:700; color:var(--tenue); margin:12px 0 6px; text-align:left; }
+#e-biblioteca .grupo:first-child{ margin-top:0; }
 .miniatura{ display:flex; flex-direction:column; gap:4px; align-items:stretch; padding:6px; border:1px solid #D9CCC3; border-radius:10px;
   background:#fff; cursor:pointer; font:inherit; font-size:12px; font-weight:600; color:var(--deep); text-align:left; line-height:1.25; }
 .miniatura:hover, .miniatura:focus-visible{ border-color:var(--terracota); outline:none; }
@@ -408,7 +416,7 @@ ${barra('exercicios', `<label for="b-nome">Paciente</label>
     A folha ao lado se ajusta sozinha. A sequência fica guardada neste computador; o nome da paciente, não.</p>
 
     <h3>1 · Escolha os exercícios</h3>
-    <div id="e-biblioteca" class="biblioteca"></div>
+    <div id="e-biblioteca"></div>
 
     <h3>2 · Ajuste cada um</h3>
     <div id="e-lista"></div>
