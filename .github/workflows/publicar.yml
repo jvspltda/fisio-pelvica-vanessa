@@ -55,6 +55,7 @@ jobs:
           node tests/exercicios.test.mjs
           node tests/plano.test.mjs
           node tests/aprovar.test.mjs
+          node tests/inicio.test.mjs
 
       - name: Montar o site
         run: |
