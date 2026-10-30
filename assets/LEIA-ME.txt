@@ -26,8 +26,4 @@ exercicios/   As ilustracoes da folha "Exercicios para casa". Lista e grupo
                 do Plano para casa carregar rápido no celular. A folha
                 impressa usa sempre a figura grande.
 
-carrossel/    Quatro figuras de gestação com bola em PNG, com a borda
-              esmaecida até transparente, para o fundo da ilustração sumir
-              no slide do carrossel do Instagram (carrossel.html).
-
 qr-whatsapp.svg  Código QR do WhatsApp da clínica (ver README).

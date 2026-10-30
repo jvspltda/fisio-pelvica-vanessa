@@ -2,7 +2,7 @@
    js/aprovar.js — O que espera o aval da Vanessa (conteúdo, sem DOM).
 
    A página aprovar.html mostra cada item com o texto ATUAL, lido dos
-   próprios módulos (cartilhas, exercícios, plano, carrossel, roteiros):
+   próprios módulos (cartilhas, exercícios, plano, roteiros):
    o que ela aprova é exatamente o que sai para a paciente ou para o
    Instagram. Ela marca "Aprovo" ou "Quero mudar" e devolve as respostas
    pelo WhatsApp.
@@ -25,22 +25,8 @@
     });
   }
 
-  /* m = { A: Adherence, E: Exercicios, P: Plano, C: Carrossel, R: Roteiros } */
+  /* m = { A: Adherence, E: Exercicios, P: Plano, R: Roteiros } */
   AP.LISTA = [
-    {
-      id: 'carrossel-bola', desde: '2026-10-29', grupo: 'Instagram',
-      titulo: 'Carrossel "Bola de pilates na gestação"',
-      porque: 'Peça nova para o feed: 7 slides e a legenda. Só para post normal, sem "Impulsionar".',
-      onde: [{ rotulo: 'Ver os slides', href: 'carrossel.html' }],
-      trechos: function (m) {
-        var c = m.C.LISTA.filter(function (x) { return x.id === 'bola-gestacao'; })[0];
-        return c.slides.map(function (s, i) {
-          return { rotulo: 'Slide ' + (i + 1) + (s.titulo ? ' — ' + s.titulo : ''),
-            texto: [s.chamada && s.tipo !== 'capa' ? s.chamada : '', s.texto].filter(Boolean).join(' '),
-            lista: s.itens, nota: s.alerta };
-        }).concat([{ rotulo: 'Legenda', texto: c.legenda }]);
-      }
-    },
     {
       id: 'roteiro-p1', desde: '2026-09-29', grupo: 'Instagram',
       titulo: 'Roteiro de Reel P1 "Escape de xixi depois do parto"',
@@ -71,7 +57,7 @@
       titulo: 'Sinais de alerta da gestação, ampliados',
       porque: 'Mudou a cartilha de gestação que você já tinha aprovado. Entraram: tontura, falta de ar já antes de começar, ' +
         'fraqueza ou perda de equilíbrio, dor no peito, dor de cabeça forte e dor ou inchaço na batata da perna ' +
-        '(lista do colégio americano de obstetras, ACOG). O mesmo texto vai no plano para casa e no carrossel.',
+        '(lista do colégio americano de obstetras, ACOG). O mesmo texto vai no plano para casa.',
       onde: [{ rotulo: 'Ver a cartilha de gestação', href: 'impressos/cartilhas.html#c-gestacao' }],
       trechos: function (m) {
         return [{ rotulo: 'Como fica', texto: cartilha(m.A, 'gestacao').blocos.map(function (b) { return b.nota; }).filter(Boolean)[0] }];

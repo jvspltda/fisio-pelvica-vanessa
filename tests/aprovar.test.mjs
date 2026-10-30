@@ -13,7 +13,7 @@ const require = createRequire(import.meta.url);
 const raiz = join(dirname(fileURLToPath(import.meta.url)), '..');
 const AP = require('../js/aprovar.js');
 const M = { A: require('../js/adherence.js'), E: require('../js/exercicios.js'), P: require('../js/plano.js'),
-  C: require('../js/carrossel.js'), R: require('../js/roteiros.js') };
+  R: require('../js/roteiros.js') };
 
 let passou = 0, falhou = 0;
 const falhas = [];
@@ -72,11 +72,17 @@ teste('mensagem: só os itens respondidos, com o comentário e o que falta', () 
 
 teste('página no site: scripts na ordem, atalho no início e publicada', () => {
   const h = readFileSync(join(raiz, 'aprovar.html'), 'utf8');
-  const ordem = ['adherence', 'exercicios', 'plano', 'carrossel', 'roteiros', 'aprovar', 'aprovar-pagina'].map(s => h.indexOf('src="js/' + s + '.js"'));
+  const ordem = ['adherence', 'exercicios', 'plano', 'roteiros', 'aprovar', 'aprovar-pagina'].map(s => h.indexOf('src="js/' + s + '.js"'));
   assert.ok(ordem.every((i, k) => i > 0 && (k === 0 || i > ordem[k - 1])), 'ordem dos scripts');
   assert.ok(readFileSync(join(raiz, 'index.html'), 'utf8').includes('href="aprovar.html"'), 'sem atalho na página inicial');
   assert.ok(/cp [^\n]*aprovar\.html/.test(wf), 'workflow não publica a página');
   assert.ok(wf.includes('node tests/aprovar.test.mjs'), 'workflow não roda este teste');
+});
+
+/* nome de etapa com ": " quebra o YAML e a publicação nem começa (aconteceu em 2026-10-29) */
+teste('workflow: nenhum nome de etapa com ": " sem aspas', () => {
+  for (const l of wf.split(/\r?\n/).filter(l => /^\s*- name: /.test(l)))
+    assert.ok(!/: /.test(l.replace(/^\s*- name: /, '')) || /^\s*- name: (["']).*\1\s*$/.test(l), 'nome de etapa com ": " sem aspas: ' + l.trim());
 });
 
 console.log('\n  aprovar.test.mjs');

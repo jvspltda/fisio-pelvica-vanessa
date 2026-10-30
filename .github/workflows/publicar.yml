@@ -54,13 +54,12 @@ jobs:
           node tests/roteiros.test.mjs
           node tests/exercicios.test.mjs
           node tests/plano.test.mjs
-          node tests/carrossel.test.mjs
           node tests/aprovar.test.mjs
 
       - name: Montar o site
         run: |
           mkdir -p _site/impressos
-          cp index.html avaliacao.html materiais.html prontuario.html roteiros.html carrossel.html aprovar.html 404.html _site/
+          cp index.html avaliacao.html materiais.html prontuario.html roteiros.html aprovar.html 404.html _site/
           cp -r css js assets _site/
           cp build/ficha-studocu.html      _site/impressos/ficha-avaliacao.html
           cp build/ficha-studocu-pb.html   _site/impressos/ficha-avaliacao-pb.html

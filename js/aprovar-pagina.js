@@ -4,7 +4,7 @@
 (function () {
   'use strict';
   var AP = window.Aprovar;
-  var M = { A: window.Adherence, E: window.Exercicios, P: window.Plano, C: window.Carrossel, R: window.Roteiros };
+  var M = { A: window.Adherence, E: window.Exercicios, P: window.Plano, R: window.Roteiros };
   var CHAVE = 'vf-aprovacoes';
   var $ = function (id) { return document.getElementById(id); };
   function el(tag, cls, txt) {
